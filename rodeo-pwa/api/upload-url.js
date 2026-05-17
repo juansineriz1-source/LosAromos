@@ -48,29 +48,35 @@ async function sha256Hex(str) {
  * Genera una URL pre-firmada para PUT (subida directa al bucket).
  * La URL expira en 15 minutos.
  */
-async function generarPresignedPut({ objectKey, contentType, expiresIn = 900 }) {
-  const host       = new URL(ENDPOINT).host;
-  const service    = 's3';
-  const now        = new Date();
+async function generarPresignedPut({ objectKey, expiresIn = 900 }) {
+  const host      = new URL(ENDPOINT).host;
+  const service   = 's3';
+  const now       = new Date();
 
-  const dateStamp  = now.toISOString().slice(0, 10).replace(/-/g, '');   // YYYYMMDD
-  const amzDate    = now.toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z'; // YYYYMMDDTHHmmssZ
+  const dateStamp = now.toISOString().slice(0, 10).replace(/-/g, '');        // YYYYMMDD
+  const amzDate   = now.toISOString().replace(/[-:.]/g, '').slice(0, 15) + 'Z'; // YYYYMMDDTHHmmssZ
 
   const credScope  = `${dateStamp}/${REGION}/${service}/aws4_request`;
   const credential = `${ACCESS_KEY}/${credScope}`;
 
-  // Query string canónica (ordenada alfabéticamente)
-  const queryParams = new URLSearchParams({
-    'X-Amz-Algorithm':     'AWS4-HMAC-SHA256',
-    'X-Amz-Credential':    credential,
-    'X-Amz-Date':          amzDate,
-    'X-Amz-Expires':       String(expiresIn),
-    'X-Amz-SignedHeaders': 'host',
-  });
+  // ─── URI canónica: path-style → /{bucket}/{key} ───────────────────────────
+  // Cada segmento del key se codifica individualmente (las / se preservan).
+  const encodedKey = objectKey.split('/').map(s => encodeURIComponent(s)).join('/');
+  const canonicalUri = `/${BUCKET}/${encodedKey}`;
 
-  // Canonical request
-  const canonicalUri     = `/${encodeURIComponent(objectKey).replace(/%2F/g, '/')}`;
-  const canonicalQuery   = queryParams.toString().split('&').sort().join('&');
+  // ─── Query string canónica (DEBE estar ordenada lexicográficamente) ───────
+  const qp = [
+    ['X-Amz-Algorithm',   'AWS4-HMAC-SHA256'],
+    ['X-Amz-Credential',  credential],
+    ['X-Amz-Date',        amzDate],
+    ['X-Amz-Expires',     String(expiresIn)],
+    ['X-Amz-SignedHeaders', 'host'],
+  ].sort((a, b) => a[0].localeCompare(b[0]));
+
+  const canonicalQuery = qp
+    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+    .join('&');
+
   const canonicalHeaders = `host:${host}\n`;
   const signedHeaders    = 'host';
   const payloadHash      = 'UNSIGNED-PAYLOAD';
@@ -84,7 +90,7 @@ async function generarPresignedPut({ objectKey, contentType, expiresIn = 900 }) 
     payloadHash,
   ].join('\n');
 
-  // String to sign
+  // ─── String to sign ───────────────────────────────────────────────────────
   const stringToSign = [
     'AWS4-HMAC-SHA256',
     amzDate,
@@ -92,7 +98,7 @@ async function generarPresignedPut({ objectKey, contentType, expiresIn = 900 }) 
     await sha256Hex(canonicalRequest),
   ].join('\n');
 
-  // Signing key
+  // ─── Signing key ──────────────────────────────────────────────────────────
   const kDate    = await hmac(`AWS4${SECRET_KEY}`, dateStamp);
   const kRegion  = await hmac(kDate, REGION);
   const kService = await hmac(kRegion, service);
@@ -100,6 +106,7 @@ async function generarPresignedPut({ objectKey, contentType, expiresIn = 900 }) 
 
   const signature = toHex(await hmac(kSigning, stringToSign));
 
+  // ─── URL final ────────────────────────────────────────────────────────────
   const url = `${ENDPOINT}/${BUCKET}/${objectKey}?${canonicalQuery}&X-Amz-Signature=${signature}`;
   return url;
 }
