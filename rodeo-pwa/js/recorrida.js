@@ -123,12 +123,18 @@ async function guardarRecorrida(onToast) {
       audio_blob: blobActual,
       audio_tipo: blobActual.type,
       audio_size: blobActual.size,
+      storage_url: null,   // se rellena tras subir al NAS
+      storage_key: null,
     };
 
-    await db.recorridas.add(recorrida);
+    const id = await db.recorridas.add(recorrida);
     onToast(`✓ Recorrida guardada (${formatearTiempo(segundos)})`, 'exito', 3000);
     descartarRecorrida();
     await cargarListaRecorridas();
+
+    // Subida en background al NAS (MinIO) — no bloquea la UI
+    subirAudioEnBackground(id, blobActual, operador, onToast);
+
   } catch (err) {
     onToast(`✗ Error al guardar: ${err.message}`, 'error');
   } finally {
@@ -136,6 +142,50 @@ async function guardarRecorrida(onToast) {
     btn.textContent = '💾 Guardar recorrida';
   }
 }
+
+// ─── Subida al NAS en background ──────────────────────────────────────────────
+async function subirAudioEnBackground(recorridaId, blob, operador, onToast) {
+  if (!navigator.onLine) return; // Sin red → queda solo local por ahora
+
+  try {
+    // 1. Pedir URL pre-firmada a Vercel
+    const resp = await fetch('/api/upload-url', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tipo: 'recorrida',
+        contentType: blob.type || 'audio/webm',
+        operador,
+      }),
+    });
+
+    if (!resp.ok) throw new Error(`upload-url ${resp.status}`);
+    const { uploadUrl, publicUrl, objectKey } = await resp.json();
+
+    // 2. Subir el binario directamente al MinIO (presigned PUT)
+    const upload = await fetch(uploadUrl, {
+      method: 'PUT',
+      headers: { 'Content-Type': blob.type || 'audio/webm' },
+      body: blob,
+    });
+
+    if (!upload.ok) throw new Error(`Subida MinIO ${upload.status}`);
+
+    // 3. Actualizar el registro local con la URL pública
+    await db.recorridas.update(recorridaId, {
+      storage_url: publicUrl,
+      storage_key: objectKey,
+    });
+
+    onToast('☁ Audio subido al servidor', 'info', 2500);
+    await cargarListaRecorridas();
+
+  } catch (err) {
+    // No fatal — el audio ya está guardado local
+    console.warn('[Recorrida] Subida background fallida:', err.message);
+  }
+}
+
 
 // ─── Descartar ────────────────────────────────────────────────────────────────
 function descartarRecorrida() {

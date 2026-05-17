@@ -1,0 +1,16 @@
+# ═══════════════════════════════════════════════════════════════
+# MinIO CORS config — rodeo-aromos bucket
+# Aplicar con: mc anonymous set-json cors-rodeo.json myminio/rodeo-aromos
+# ═══════════════════════════════════════════════════════════════
+# O desde la consola MinIO: Bucket → rodeo-aromos → Access → CORS Rules
+{
+  "CORSRules": [
+    {
+      "AllowedOrigins": ["*"],
+      "AllowedMethods": ["GET", "PUT", "POST", "DELETE", "HEAD"],
+      "AllowedHeaders": ["*"],
+      "ExposeHeaders": ["ETag", "x-amz-request-id"],
+      "MaxAgeSeconds": 3600
+    }
+  ]
+}
