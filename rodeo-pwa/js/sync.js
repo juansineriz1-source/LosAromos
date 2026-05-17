@@ -1,35 +1,20 @@
 /**
- * sync.js — Módulo de sincronización con Google Sheets y servidor
+ * sync.js — Módulo de sincronización con Google Sheets
  *
- * ESTRATEGIA GOOGLE SHEETS (gratis + visual):
- * Usamos Google Apps Script como backend serverless:
- *   1. Creás un Google Sheet con las columnas necesarias.
- *   2. Publicás un Apps Script como Web App (URL pública).
- *   3. La app POST datos como JSON → el script los escribe en el Sheet.
+ * ESTRATEGIA:
+ * POST a /api/sincronizar (Vercel serverless function).
+ * La función usa la service account de Google para escribir directo en Sheets.
+ * Sheet ID: 1tEncjxGzwE-7AZLnlmShSSM3lCaNFQR9DNn459AWhSg
  *
  * RESOLUCIÓN DE CONFLICTOS:
  * - Cada registro tiene `timestamp_local` y `device_id`.
- * - El servidor (Apps Script) compara el timestamp del registro entrante
- *   con el que ya existe en el Sheet para esa caravana+fecha.
+ * - El servidor compara el timestamp del registro entrante con el existente.
  * - Gana el más reciente ("Last Write Wins" — adecuado para ganado).
- * - Si `timestamp_local` difiere en menos de 60 segundos → conflicto real
- *   → el servidor retorna { conflicto: true } y la app lo muestra al usuario.
- *
- * INSTRUCCIONES PARA CONFIGURAR:
- *   1. Ir a sheets.google.com → Nuevo → Extensiones → Apps Script
- *   2. Pegar el código de apps-script.js (incluido abajo como comentario)
- *   3. Publicar como Web App → "Cualquier usuario" → Copiar URL
- *   4. Pegar la URL en GOOGLE_SCRIPT_URL abajo
+ * - Si la diferencia es < 60 segundos → retorna { conflicto: true }.
  */
 
 // ─── Configuración ─────────────────────────────────────────────────────────
-// 🔧 REEMPLAZAR con la URL de tu Google Apps Script publicado:
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/TU_ID_AQUI/exec';
-
-// URL de simulación local para desarrollo:
-const API_SIMULADA = '/api/sincronizar';
-
-const USAR_GOOGLE_SHEETS = false; // Cambiar a true cuando configures el Script
+const API_URL = '/api/sincronizar';
 
 import db, { obtenerPendientesSync, marcarComoSincronizado } from './db.js';
 
@@ -146,16 +131,13 @@ export async function sincronizarPendientes() {
  * Envía un registro al servidor (Google Sheets vía Apps Script o API propia).
  */
 async function _enviarAlServidor(tabla, payload) {
-  const url = USAR_GOOGLE_SHEETS ? GOOGLE_SCRIPT_URL : API_SIMULADA;
-
-  const response = await fetch(url, {
+  const response = await fetch(API_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       tabla,
       accion: payload.deleted ? 'DELETE' : 'UPSERT',
       datos: payload,
-      // El servidor usa (caravana + fecha) como clave de idempotencia
       clave_idempotencia: payload.uuid,
     }),
   });
