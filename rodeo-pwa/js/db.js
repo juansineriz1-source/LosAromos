@@ -33,9 +33,11 @@ export const DEVICE_ID = (() => {
 })();
 
 // ─── Definición de la base de datos ────────────────────────────────────────
-const db = new Dexie('RodeoDB');
+// Renombrada a RodeoDB_v3 para forzar recreación limpia en todos los clientes
+// que tengan el esquema viejo (v1 sin recorridas/fotos/videos).
+const db = new Dexie('RodeoDB_v3');
 
-// ─── Versión 1: tablas originales ──────────────────────────────────────────
+// ─── Versión 1 (schema completo desde cero) ─────────────────────────────────
 db.version(1).stores({
   animales: [
     '++id', 'uuid', 'caravana', 'categoria', 'raza', 'fecha_nacimiento',
@@ -60,59 +62,19 @@ db.version(1).stores({
     '++id', 'uuid', 'fecha', 'hora', 'texto', 'operador',
     'caravana', 'sincronizado', 'timestamp_local', 'device_id',
   ].join(', '),
-});
 
-// ─── Versión 2: tablas de media (audio, fotos, videos) ──────────────────────
-// Siempre declarar TODAS las tablas existentes en cada versión.
-db.version(2).stores({
-  animales: [
-    '++id', 'uuid', 'caravana', 'categoria', 'raza', 'fecha_nacimiento',
-    'sincronizado', 'timestamp_local', 'device_id', 'deleted',
-  ].join(', '),
-
-  registros_manga: [
-    '++id', 'uuid', 'caravana', 'animal_uuid', 'peso_kg', 'estado_sanitario',
-    'vacuna_aplicada', 'medicamento', 'dosis_ml', 'observaciones',
-    'operador', 'fecha', 'hora', 'sincronizado', 'timestamp_local',
-    'device_id', 'sync_intentos',
-  ].join(', '),
-
-  sync_queue: [
-    '++id', 'tabla', 'registro_uuid', 'operacion', 'payload',
-    'timestamp', 'intentos', 'ultimo_error',
-  ].join(', '),
-
-  config: '&clave, valor',
-
-  novedades: [
-    '++id', 'uuid', 'fecha', 'hora', 'texto', 'operador',
-    'caravana', 'sincronizado', 'timestamp_local', 'device_id',
-  ].join(', '),
-
-  /**
-   * TABLA: recorridas
-   * Grabaciones de audio de las recorridas diarias del campo.
-   */
   recorridas: [
     '++id', 'uuid', 'fecha', 'hora', 'duracion_seg', 'operador',
     'audio_blob', 'audio_tipo', 'audio_size',
     'storage_url', 'storage_key', 'timestamp_local', 'device_id',
   ].join(', '),
 
-  /**
-   * TABLA: fotos
-   * Fotos del día tomadas en el campo (cámara o galería).
-   */
   fotos: [
     '++id', 'uuid', 'fecha', 'hora', 'operador',
     'imagen_blob', 'imagen_tipo', 'imagen_size', 'nombre_original',
     'storage_url', 'storage_key', 'timestamp_local', 'device_id',
   ].join(', '),
 
-  /**
-   * TABLA: videos
-   * Videos del día grabados o subidos desde galería.
-   */
   videos: [
     '++id', 'uuid', 'fecha', 'hora', 'operador',
     'video_blob', 'video_tipo', 'video_size', 'nombre_original',
