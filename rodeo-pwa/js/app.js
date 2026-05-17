@@ -15,6 +15,7 @@ import { inicializarRecorrida, cargarListaRecorridas } from './recorrida.js';
 import { inicializarFotos, cargarListaFotos } from './fotos.js';
 import { inicializarVideos, cargarListaVideos } from './videos.js';
 import { inicializarPush } from './push.js';
+import { inicializarCalendario, cargarFeedHoy } from './calendario.js';
 
 // ─── Estado global ────────────────────────────────────────────────────────────
 const estado = {
@@ -39,6 +40,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   inicializarFotos(mostrarToast);
   inicializarVideos(mostrarToast);
   inicializarPush();
+  await inicializarCalendario();
   await actualizarContadorPendientes();
 
   // Nombre del operador
@@ -149,8 +151,8 @@ async function cargarInicio() {
   $('stat-pendientes').textContent = pendientes;
   $('stat-peso-prom').textContent = pesoProm ? `${pesoProm} kg` : '—';
 
-  // Novedades guardadas
-  await cargarListaNovedades();
+  // Novedades + Feed de hoy
+  await cargarFeedHoy();
 }
 
 async function cargarListaNovedades() {
@@ -561,7 +563,7 @@ function configurarEventos() {
     await guardarNovedad({ texto, operador: estado.operador });
     $('comentario-dia').value = '';
     mostrarToast('✓ Novedad guardada', 'exito');
-    await cargarListaNovedades();
+    await cargarFeedHoy();
   });
 
   // ── MANUAL ──

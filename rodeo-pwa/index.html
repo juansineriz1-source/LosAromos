@@ -74,15 +74,45 @@
           rows="4"
         ></textarea>
         <button class="btn btn-secundario" id="btn-guardar-comentario" style="margin-top: 8px; min-height: 48px; font-size: 16px;">
-          💾 Guardar novedades
+          💾 Guardar novedad
         </button>
       </div>
 
-      <!-- Últimas novedades guardadas -->
+      <!-- Actividad de HOY -->
       <div class="card">
-        <div class="card-titulo">📋 Historial de novedades</div>
-        <div id="lista-novedades">
-          <p class="sin-historial">Sin novedades registradas</p>
+        <div class="card-titulo">⚡ Actividad de hoy</div>
+        <div id="feed-hoy">
+          <p class="sin-historial">Sin actividad registrada hoy</p>
+        </div>
+      </div>
+
+      <!-- Historial con calendario -->
+      <div class="card">
+        <div class="card-titulo">📅 Historial de novedades</div>
+
+        <!-- Navegación del calendario -->
+        <div class="cal-nav">
+          <button class="cal-btn-nav" id="cal-prev">‹</button>
+          <span class="cal-mes-label" id="cal-mes-label">—</span>
+          <button class="cal-btn-nav" id="cal-next">›</button>
+        </div>
+
+        <!-- Grilla del calendario -->
+        <div class="cal-dias-semana">
+          <span>Dom</span><span>Lun</span><span>Mar</span>
+          <span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+
+        <!-- Panel de detalle del día seleccionado -->
+        <div class="cal-detalle oculto" id="cal-detalle">
+          <div class="cal-detalle-header">
+            <span class="cal-detalle-fecha" id="cal-detalle-fecha">—</span>
+            <button class="cal-detalle-cerrar" id="cal-detalle-cerrar">✕</button>
+          </div>
+          <div id="cal-detalle-contenido">
+            <p class="sin-historial">Sin actividad ese día</p>
+          </div>
         </div>
       </div>
 
@@ -96,7 +126,6 @@
         </div>
       </div>
 
-    </section>
 
     <!-- ──────────── TAB: RECORRIDA ──────────── -->
     <section class="tab-panel oculto" id="tab-recorrida">

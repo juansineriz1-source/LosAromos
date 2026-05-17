@@ -1279,6 +1279,233 @@ body {
   #input-peso     { font-size: 24px; }
 }
 
+/* ─── CALENDARIO DE HISTORIAL ──────────────────────────────────── */
+.cal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.cal-mes-label {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--texto);
+  text-transform: capitalize;
+}
+
+.cal-btn-nav {
+  background: var(--gris-claro);
+  border: none;
+  border-radius: 10px;
+  width: 40px;
+  height: 40px;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--texto);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: background 0.1s;
+}
+.cal-btn-nav:active { background: var(--gris-borde); }
+
+.cal-dias-semana {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 4px;
+}
+
+.cal-dias-semana span {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gris);
+  text-transform: uppercase;
+  padding: 4px 0;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.cal-celda {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.1s;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.cal-celda:active      { background: var(--gris-claro); }
+.cal-celda-vacia       { cursor: default; pointer-events: none; }
+.cal-futuro            { opacity: 0.35; cursor: default; pointer-events: none; }
+
+.cal-num {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--texto);
+  line-height: 1;
+}
+
+.cal-hoy {
+  background: var(--verde-oscuro);
+}
+.cal-hoy .cal-num { color: #fff; font-weight: 800; }
+
+.cal-con-act:not(.cal-hoy) {
+  background: var(--verde-suave);
+}
+
+.cal-sel:not(.cal-hoy) {
+  background: var(--gris-claro);
+  outline: 2px solid var(--verde-oscuro);
+}
+
+.cal-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--verde-oscuro);
+}
+.cal-hoy .cal-dot { background: rgba(255,255,255,0.7); }
+
+/* Panel de detalle del día */
+.cal-detalle {
+  background: var(--gris-claro);
+  border-radius: var(--radio);
+  padding: 14px;
+  margin-top: 4px;
+}
+
+.cal-detalle-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.cal-detalle-fecha {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--texto);
+  text-transform: capitalize;
+}
+
+.cal-detalle-cerrar {
+  background: var(--blanco);
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ─── FEED DE ACTIVIDAD ─────────────────────────────────────────── */
+.feed-item {
+  border-left: 3px solid var(--gris-borde);
+  padding: 8px 0 8px 12px;
+  margin-bottom: 10px;
+}
+
+.feed-novedad   { border-color: var(--azul); }
+.feed-registro  { border-color: var(--verde-oscuro); }
+.feed-recorrida { border-color: var(--rojo); }
+.feed-foto      { border-color: var(--tierra); }
+.feed-video     { border-color: #7c3aed; }
+
+.feed-item-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.feed-icono {
+  font-size: 20px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.feed-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.feed-label {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--texto);
+}
+
+.feed-hora {
+  font-size: 12px;
+  color: var(--gris);
+}
+
+.feed-texto {
+  font-size: 14px;
+  color: var(--texto);
+  line-height: 1.5;
+  white-space: pre-line;
+  margin: 0;
+}
+
+.feed-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.feed-tag {
+  background: var(--blanco);
+  border: 1px solid var(--gris-borde);
+  border-radius: 10px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--texto);
+}
+
+.feed-tag-ok {
+  background: var(--verde-suave);
+  border-color: var(--verde-oscuro);
+  color: var(--verde-oscuro);
+}
+
+.feed-audio {
+  width: 100%;
+  border-radius: 8px;
+  margin-top: 6px;
+}
+
+.feed-foto-thumb {
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: var(--radio);
+  margin-top: 4px;
+  display: block;
+}
+
+
 /* ─── DARK MODE ───────────────────────────────────────────────────── */
 @media (prefers-color-scheme: dark) {
   body { background: #161b16; }
