@@ -190,6 +190,55 @@
         </div>
       </div>
 
+      <!-- ── VIDEOS DEL DÍA ── -->
+      <div class="card">
+        <div class="card-titulo">🎥 Videos del día</div>
+
+        <div class="foto-botones">
+          <!-- Galería de videos -->
+          <label class="btn-foto" for="input-video-galeria">
+            <span class="btn-foto-icono">📹</span>
+            <span>Galería</span>
+            <input
+              type="file"
+              id="input-video-galeria"
+              accept="video/*"
+              multiple
+              style="display:none"
+            >
+          </label>
+
+          <!-- Grabar video con cámara -->
+          <label class="btn-foto btn-foto-camara" for="input-video-camara">
+            <span class="btn-foto-icono">🎥</span>
+            <span>Grabar</span>
+            <input
+              type="file"
+              id="input-video-camara"
+              accept="video/*"
+              capture="environment"
+              style="display:none"
+            >
+          </label>
+        </div>
+
+        <!-- Preview de videos antes de guardar -->
+        <div class="rec-preview oculto" id="video-preview">
+          <div id="video-preview-lista"></div>
+          <button class="btn btn-primario" id="btn-video-guardar" style="min-height: 56px; margin-top: 12px;">
+            💾 Guardar videos
+          </button>
+        </div>
+      </div>
+
+      <!-- Historial de videos guardados -->
+      <div class="card">
+        <div class="card-titulo">📂 Videos guardados</div>
+        <div id="lista-videos">
+          <p class="sin-historial">Sin videos guardados</p>
+        </div>
+      </div>
+
     </section>
 
     <!-- ──────────── TAB: BASTÓN ──────────── -->

@@ -13,6 +13,7 @@ import { conectarBaston, desconectarBaston, simularLectura } from './bluetooth.j
 import { inicializarSync, sincronizarPendientes } from './sync.js';
 import { inicializarRecorrida, cargarListaRecorridas } from './recorrida.js';
 import { inicializarFotos, cargarListaFotos } from './fotos.js';
+import { inicializarVideos, cargarListaVideos } from './videos.js';
 
 // ─── Estado global ────────────────────────────────────────────────────────────
 const estado = {
@@ -35,6 +36,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   configurarEventos();
   inicializarRecorrida(mostrarToast);
   inicializarFotos(mostrarToast);
+  inicializarVideos(mostrarToast);
   await actualizarContadorPendientes();
 
   // Nombre del operador
@@ -109,6 +111,7 @@ async function mostrarTab(nombre) {
   if (nombre === 'recorrida') {
     await cargarListaRecorridas();
     await cargarListaFotos();
+    await cargarListaVideos();
   }
 }
 

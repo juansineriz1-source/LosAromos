@@ -19,22 +19,24 @@ const { core, precaching, routing, strategies, backgroundSync, expiration } = wo
 // ─── Configuración base ─────────────────────────────────────────────────────
 core.setCacheNameDetails({
   prefix: 'rodeo-pwa',
-  suffix: 'v2',
+  suffix: 'v3',
 });
 
 core.skipWaiting();
 core.clientsClaim();
 
 // ─── Pre-caché de assets estáticos ─────────────────────────────────────────
-// Revisiones actualizadas — cambiá el número para forzar recarga del SW.
+// Revisión 3 — incluye pestaña Recorrida + módulos audio/fotos/video
 precaching.precacheAndRoute([
-  { url: '/', revision: '2' },
-  { url: '/index.html', revision: '2' },
-  { url: '/css/estilos.css', revision: '2' },
-  { url: '/js/app.js', revision: '2' },
-  { url: '/js/db.js', revision: '2' },
-  { url: '/js/bluetooth.js', revision: '2' },
-  { url: '/js/sync.js', revision: '2' },
+  { url: '/', revision: '3' },
+  { url: '/index.html', revision: '3' },
+  { url: '/css/estilos.css', revision: '3' },
+  { url: '/js/app.js', revision: '3' },
+  { url: '/js/db.js', revision: '3' },
+  { url: '/js/bluetooth.js', revision: '3' },
+  { url: '/js/sync.js', revision: '3' },
+  { url: '/js/recorrida.js', revision: '3' },
+  { url: '/js/fotos.js', revision: '3' },
   { url: '/manifest.json', revision: '1' },
 ]);
 
@@ -42,7 +44,7 @@ precaching.precacheAndRoute([
 routing.registerRoute(
   ({ request }) => ['script', 'style', 'image', 'font'].includes(request.destination),
   new strategies.CacheFirst({
-    cacheName: 'rodeo-assets-v2',
+    cacheName: 'rodeo-assets-v3',
     plugins: [
       new expiration.ExpirationPlugin({
         maxEntries: 100,

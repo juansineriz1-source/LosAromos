@@ -157,19 +157,19 @@ db.version(1).stores({
    * Se comprimen en cliente antes de guardar y se sincronizan con MinIO en background.
    */
   fotos: [
-    '++id',
-    'uuid',
-    'fecha',
-    'hora',
-    'operador',
-    'imagen_blob',
-    'imagen_tipo',
-    'imagen_size',
-    'nombre_original',
-    'storage_url',
-    'storage_key',
-    'timestamp_local',
-    'device_id',
+    '++id', 'uuid', 'fecha', 'hora', 'operador',
+    'imagen_blob', 'imagen_tipo', 'imagen_size', 'nombre_original',
+    'storage_url', 'storage_key', 'timestamp_local', 'device_id',
+  ].join(', '),
+
+  /**
+   * TABLA: videos
+   * Videos del día grabados o subidos desde galería.
+   */
+  videos: [
+    '++id', 'uuid', 'fecha', 'hora', 'operador',
+    'video_blob', 'video_tipo', 'video_size', 'nombre_original',
+    'storage_url', 'storage_key', 'timestamp_local', 'device_id',
   ].join(', '),
 });
 

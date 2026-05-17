@@ -147,14 +147,19 @@ export default async function handler(req, res) {
 
     // Determinar extensión según MIME type
     const EXTENSIONES = {
-      'audio/webm':       'webm',
+      'audio/webm':             'webm',
       'audio/webm;codecs=opus': 'webm',
-      'audio/ogg':        'ogg',
-      'audio/mp4':        'mp4',
-      'audio/mpeg':       'mp3',
-      'image/jpeg':       'jpg',
-      'image/png':        'png',
-      'image/webp':       'webp',
+      'audio/ogg':              'ogg',
+      'audio/mp4':              'mp4',
+      'audio/mpeg':             'mp3',
+      'image/jpeg':             'jpg',
+      'image/png':              'png',
+      'image/webp':             'webp',
+      'video/mp4':              'mp4',
+      'video/webm':             'webm',
+      'video/quicktime':        'mov',
+      'video/3gpp':             '3gp',
+      'video/x-msvideo':        'avi',
     };
     const extension = EXTENSIONES[contentType] || contentType.split('/')[1] || 'bin';
     const objectKey = generarObjectKey(tipo, operador, extension);
