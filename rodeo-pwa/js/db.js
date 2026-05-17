@@ -138,13 +138,36 @@ db.version(1).stores({
   recorridas: [
     '++id',
     'uuid',
-    'fecha',           // 'YYYY-MM-DD'
-    'hora',            // 'HH:MM'
-    'duracion_seg',    // número entero de segundos
+    'fecha',
+    'hora',
+    'duracion_seg',
     'operador',
-    'audio_blob',      // Blob binario del audio
-    'audio_tipo',      // MIME type (audio/webm, audio/mp4, etc.)
-    'audio_size',      // bytes
+    'audio_blob',
+    'audio_tipo',
+    'audio_size',
+    'storage_url',
+    'storage_key',
+    'timestamp_local',
+    'device_id',
+  ].join(', '),
+
+  /**
+   * TABLA: fotos
+   * Fotos del día tomadas en el campo (cámara o galería).
+   * Se comprimen en cliente antes de guardar y se sincronizan con MinIO en background.
+   */
+  fotos: [
+    '++id',
+    'uuid',
+    'fecha',
+    'hora',
+    'operador',
+    'imagen_blob',
+    'imagen_tipo',
+    'imagen_size',
+    'nombre_original',
+    'storage_url',
+    'storage_key',
     'timestamp_local',
     'device_id',
   ].join(', '),

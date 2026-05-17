@@ -12,6 +12,7 @@ import {
 import { conectarBaston, desconectarBaston, simularLectura } from './bluetooth.js';
 import { inicializarSync, sincronizarPendientes } from './sync.js';
 import { inicializarRecorrida, cargarListaRecorridas } from './recorrida.js';
+import { inicializarFotos, cargarListaFotos } from './fotos.js';
 
 // ─── Estado global ────────────────────────────────────────────────────────────
 const estado = {
@@ -33,6 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   configurarNavegacion();
   configurarEventos();
   inicializarRecorrida(mostrarToast);
+  inicializarFotos(mostrarToast);
   await actualizarContadorPendientes();
 
   // Nombre del operador
@@ -104,7 +106,10 @@ async function mostrarTab(nombre) {
   // Cargar datos según pestaña
   if (nombre === 'inicio')    await cargarInicio();
   if (nombre === 'rodeo')     await cargarRodeo();
-  if (nombre === 'recorrida') await cargarListaRecorridas();
+  if (nombre === 'recorrida') {
+    await cargarListaRecorridas();
+    await cargarListaFotos();
+  }
 }
 
 // ─── INICIO ───────────────────────────────────────────────────────────────────

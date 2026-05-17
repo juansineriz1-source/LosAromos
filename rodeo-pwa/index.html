@@ -134,9 +134,59 @@
 
       <!-- Historial de recorridas -->
       <div class="card">
-        <div class="card-titulo">📼 Recorridas guardadas</div>
+        <div class="card-titulo">📼 Recorridas grabadas</div>
         <div id="lista-recorridas">
           <p class="sin-historial">Sin recorridas grabadas</p>
+        </div>
+      </div>
+
+      <!-- ── FOTOS DEL DÍA ── -->
+      <div class="card">
+        <div class="card-titulo">📷 Fotos del día</div>
+
+        <!-- Botones de captura -->
+        <div class="foto-botones">
+          <!-- Abre galería -->
+          <label class="btn-foto" for="input-galeria" id="label-galeria">
+            <span class="btn-foto-icono">🖼</span>
+            <span>Galería</span>
+            <input
+              type="file"
+              id="input-galeria"
+              accept="image/*"
+              multiple
+              style="display:none"
+            >
+          </label>
+
+          <!-- Abre cámara directamente -->
+          <label class="btn-foto btn-foto-camara" for="input-camara" id="label-camara">
+            <span class="btn-foto-icono">📷</span>
+            <span>Cámara</span>
+            <input
+              type="file"
+              id="input-camara"
+              accept="image/*"
+              capture="environment"
+              style="display:none"
+            >
+          </label>
+        </div>
+
+        <!-- Preview de fotos seleccionadas (antes de guardar) -->
+        <div class="foto-preview oculto" id="foto-preview">
+          <div class="foto-grid" id="foto-preview-grid"></div>
+          <button class="btn btn-primario" id="btn-foto-guardar" style="min-height: 56px; margin-top: 12px;">
+            💾 Guardar fotos
+          </button>
+        </div>
+      </div>
+
+      <!-- Historial de fotos guardadas -->
+      <div class="card">
+        <div class="card-titulo">🗂 Fotos guardadas</div>
+        <div class="foto-grid" id="lista-fotos">
+          <p class="sin-historial">Sin fotos guardadas</p>
         </div>
       </div>
 
