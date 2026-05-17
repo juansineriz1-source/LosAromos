@@ -19,33 +19,30 @@ const { core, precaching, routing, strategies, backgroundSync, expiration } = wo
 // ─── Configuración base ─────────────────────────────────────────────────────
 core.setCacheNameDetails({
   prefix: 'rodeo-pwa',
-  suffix: 'v1',
+  suffix: 'v2',
 });
 
 core.skipWaiting();
 core.clientsClaim();
 
 // ─── Pre-caché de assets estáticos ─────────────────────────────────────────
-// En producción, Workbox CLI inyecta aquí el manifest de revisiones.
-// En desarrollo, listamos manualmente:
+// Revisiones actualizadas — cambiá el número para forzar recarga del SW.
 precaching.precacheAndRoute([
-  { url: '/', revision: '1' },
-  { url: '/index.html', revision: '1' },
-  { url: '/css/estilos.css', revision: '1' },
-  { url: '/js/app.js', revision: '1' },
-  { url: '/js/db.js', revision: '1' },
-  { url: '/js/bluetooth.js', revision: '1' },
-  { url: '/js/sync.js', revision: '1' },
+  { url: '/', revision: '2' },
+  { url: '/index.html', revision: '2' },
+  { url: '/css/estilos.css', revision: '2' },
+  { url: '/js/app.js', revision: '2' },
+  { url: '/js/db.js', revision: '2' },
+  { url: '/js/bluetooth.js', revision: '2' },
+  { url: '/js/sync.js', revision: '2' },
   { url: '/manifest.json', revision: '1' },
-  // Dexie desde CDN (se cachea en primera visita)
 ]);
 
 // ─── Estrategia Cache First para assets estáticos ──────────────────────────
-// Cualquier request a JS, CSS, imágenes, fuentes: sirve desde caché primero.
 routing.registerRoute(
   ({ request }) => ['script', 'style', 'image', 'font'].includes(request.destination),
   new strategies.CacheFirst({
-    cacheName: 'rodeo-assets-v1',
+    cacheName: 'rodeo-assets-v2',
     plugins: [
       new expiration.ExpirationPlugin({
         maxEntries: 100,
