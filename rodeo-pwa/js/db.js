@@ -119,12 +119,32 @@ db.version(1).stores({
   novedades: [
     '++id',
     'uuid',
-    'fecha',          // ISO date 'YYYY-MM-DD'
-    'hora',           // 'HH:MM'
-    'texto',          // Cuerpo del comentario
-    'operador',       // Nombre del operador
-    'caravana',       // opcional: asociar a un animal
+    'fecha',
+    'hora',
+    'texto',
+    'operador',
+    'caravana',
     'sincronizado',
+    'timestamp_local',
+    'device_id',
+  ].join(', '),
+
+  /**
+   * TABLA: recorridas
+   * Grabaciones de audio de las recorridas diarias del campo.
+   * El audio se guarda como Blob (IndexedDB soporta binarios nativos).
+   * No se sincroniza con Sheets (demasiado voluminoso); queda local en el dispositivo.
+   */
+  recorridas: [
+    '++id',
+    'uuid',
+    'fecha',           // 'YYYY-MM-DD'
+    'hora',            // 'HH:MM'
+    'duracion_seg',    // número entero de segundos
+    'operador',
+    'audio_blob',      // Blob binario del audio
+    'audio_tipo',      // MIME type (audio/webm, audio/mp4, etc.)
+    'audio_size',      // bytes
     'timestamp_local',
     'device_id',
   ].join(', '),

@@ -11,6 +11,7 @@ import {
 } from './db.js';
 import { conectarBaston, desconectarBaston, simularLectura } from './bluetooth.js';
 import { inicializarSync, sincronizarPendientes } from './sync.js';
+import { inicializarRecorrida, cargarListaRecorridas } from './recorrida.js';
 
 // ─── Estado global ────────────────────────────────────────────────────────────
 const estado = {
@@ -31,6 +32,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   poblarSelects();
   configurarNavegacion();
   configurarEventos();
+  inicializarRecorrida(mostrarToast);
   await actualizarContadorPendientes();
 
   // Nombre del operador
@@ -89,18 +91,20 @@ async function mostrarTab(nombre) {
 
   // Header título por pestaña
   const titulos = {
-    inicio: ['RodeoApp', 'Los Aromos'],
-    baston: ['Bastón Lector', 'Escanear animal'],
-    manual: ['Carga Manual', 'Buscar y editar'],
-    rodeo: ['Rodeo', 'Todos los animales'],
+    inicio:     ['RodeoApp', 'Los Aromos'],
+    baston:     ['Bastón Lector', 'Escanear animal'],
+    manual:     ['Carga Manual', 'Buscar y editar'],
+    rodeo:      ['Rodeo', 'Todos los animales'],
+    recorrida:  ['Recorrida', 'Grabar el campo'],
   };
   const [titulo, sub] = titulos[nombre] || ['RodeoApp', ''];
   $('header-titulo').textContent = titulo;
   $('header-subtitulo').textContent = sub;
 
   // Cargar datos según pestaña
-  if (nombre === 'inicio')  await cargarInicio();
-  if (nombre === 'rodeo')   await cargarRodeo();
+  if (nombre === 'inicio')    await cargarInicio();
+  if (nombre === 'rodeo')     await cargarRodeo();
+  if (nombre === 'recorrida') await cargarListaRecorridas();
 }
 
 // ─── INICIO ───────────────────────────────────────────────────────────────────

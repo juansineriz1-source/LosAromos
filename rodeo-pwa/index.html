@@ -98,6 +98,50 @@
 
     </section>
 
+    <!-- ──────────── TAB: RECORRIDA ──────────── -->
+    <section class="tab-panel oculto" id="tab-recorrida">
+
+      <!-- Grabar -->
+      <div class="card recorrida-card">
+        <div class="card-titulo">🎙 Recorrida del día</div>
+
+        <!-- Estado del micrófono -->
+        <div class="rec-estado" id="rec-estado">Listo para grabar</div>
+        <div class="rec-timer" id="rec-timer">0:00</div>
+
+        <!-- Botón principal de grabación -->
+        <button class="btn-rec" id="btn-rec">
+          <span class="btn-rec-icono" id="btn-rec-icono">🎙</span>
+          <span id="btn-rec-texto">Iniciar recorrida</span>
+        </button>
+
+        <!-- Visualizador de audio (ondas) -->
+        <canvas id="rec-canvas" class="rec-canvas oculto"></canvas>
+
+        <!-- Preview del audio grabado -->
+        <div class="rec-preview oculto" id="rec-preview">
+          <audio id="rec-audio" controls class="rec-audio-player"></audio>
+          <div class="rec-preview-acciones">
+            <button class="btn btn-primario" id="btn-rec-guardar" style="min-height: 56px;">
+              💾 Guardar recorrida
+            </button>
+            <button class="btn btn-secundario" id="btn-rec-descartar" style="min-height: 48px; font-size: 16px;">
+              🗑 Descartar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Historial de recorridas -->
+      <div class="card">
+        <div class="card-titulo">📼 Recorridas guardadas</div>
+        <div id="lista-recorridas">
+          <p class="sin-historial">Sin recorridas grabadas</p>
+        </div>
+      </div>
+
+    </section>
+
     <!-- ──────────── TAB: BASTÓN ──────────── -->
     <section class="tab-panel oculto" id="tab-baston">
 
@@ -335,6 +379,10 @@
     <button class="nav-item" id="nav-rodeo" data-tab="rodeo">
       <span class="nav-icon">🐄</span>
       <span class="nav-label">Rodeo</span>
+    </button>
+    <button class="nav-item" id="nav-recorrida" data-tab="recorrida">
+      <span class="nav-icon">🎙</span>
+      <span class="nav-label">Recorrida</span>
     </button>
   </nav>
 
