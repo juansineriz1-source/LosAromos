@@ -451,42 +451,38 @@
     <!-- ──────────── TAB: RODEO ──────────── -->
     <section class="tab-panel oculto" id="tab-rodeo">
 
-      <!-- Filtros -->
+      <!-- Stats rápidos del rodeo -->
       <div class="card" style="padding: 12px 16px;">
-        <div class="rodeo-filtros">
+        <div class="rodeo-of-stats" id="rodeo-oficial-resumen">
+          <span class="rodeo-stat-total">Cargando rodeo...</span>
+        </div>
+
+        <!-- Buscador -->
+        <div style="margin-top: 10px;">
           <input
             type="text"
-            id="rodeo-filtro"
+            id="rodeo-of-buscar"
             class="campo-input"
-            placeholder="Filtrar por caravana..."
+            placeholder="🔍  Buscar por botón, caravana, tipo, color..."
             style="min-height: 48px; font-size: 16px;"
             autocomplete="off"
           >
-          <select id="rodeo-filtro-estado" class="campo-select" style="min-height: 48px; font-size: 15px;">
-            <option value="">Todos los estados</option>
-          </select>
-        </div>
-        <div class="rodeo-header-info">
-          <span id="rodeo-total-label">0 animales</span>
-          <span id="rodeo-sync-label"></span>
         </div>
       </div>
 
-      <!-- Lista de caravanas -->
-      <div id="rodeo-lista">
-        <p class="sin-historial" style="margin: 24px 0;">Sin registros todavía</p>
+      <!-- Lista oficial (desde Sheets) -->
+      <div id="rodeo-oficial-lista">
+        <p class="sin-historial" style="margin: 24px 0;">Cargando...</p>
       </div>
 
-      <!-- Modal detalle animal -->
+      <!-- Modal antiguo de detalle (mantener para compatibilidad) -->
       <div class="modal-overlay oculto" id="modal-overlay">
         <div class="modal">
           <div class="modal-header">
             <span class="modal-caravana" id="modal-caravana">—</span>
             <button class="modal-cerrar" id="modal-cerrar">✕</button>
           </div>
-          <div class="modal-body" id="modal-body">
-            <!-- contenido dinámico -->
-          </div>
+          <div class="modal-body" id="modal-body"></div>
         </div>
       </div>
 

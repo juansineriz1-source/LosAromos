@@ -16,6 +16,7 @@ import { inicializarFotos, cargarListaFotos } from './fotos.js';
 import { inicializarVideos, cargarListaVideos } from './videos.js';
 import { inicializarPush } from './push.js';
 import { inicializarCalendario, cargarFeedHoy } from './calendario.js';
+import { inicializarRodeoOficial, cargarRodeoOficial, filtrarRodeo } from './rodeo-oficial.js';
 
 // ─── Usuarios y roles ─────────────────────────────────────────────────────────
 const USUARIOS = {
@@ -159,6 +160,9 @@ function aplicarRol(rol) {
   if (badge) {
     badge.dataset.rol = rol;
   }
+
+  // Inicializar módulo del rodeo oficial con el rol actual
+  inicializarRodeoOficial(mostrarToast, rol === 'admin');
 }
 
 
@@ -245,7 +249,7 @@ async function mostrarTab(nombre) {
 
   // Cargar datos según pestaña
   if (nombre === 'inicio')    await cargarInicio();
-  if (nombre === 'rodeo')     await cargarRodeo();
+  if (nombre === 'rodeo')     await cargarRodeoOficial();
   if (nombre === 'recorrida') {
     await cargarListaRecorridas();
     await cargarListaFotos();
@@ -731,9 +735,11 @@ function configurarEventos() {
   });
   $('btn-manual-guardar').addEventListener('click', guardarCambiosManual);
 
-  // ── RODEO filtros ──
-  $('rodeo-filtro').addEventListener('input', aplicarFiltrosRodeo);
-  $('rodeo-filtro-estado').addEventListener('change', aplicarFiltrosRodeo);
+  // ── RODEO filtro de búsqueda (nuevo) ──
+  const buscarRodeo = document.getElementById('rodeo-of-buscar');
+  if (buscarRodeo) {
+    buscarRodeo.addEventListener('input', e => filtrarRodeo(e.target.value));
+  }
 
   // ── MODAL cerrar ──
   $('modal-cerrar').addEventListener('click', () => {
