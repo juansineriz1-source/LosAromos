@@ -1,0 +1,393 @@
+/* ═══════════════════════════════════════════════════════════════════
+   estilos.css — RodeoApp
+   Diseñado para: uso en la manga con guantes, sol directo, pantallas sucias.
+   Principios: botones enormes, contraste alto, tipografía legible a distancia.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── Reset y variables ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --verde: #1a7a3a;
+  --verde-oscuro: #0f5228;
+  --verde-claro: #e8f5e9;
+  --tierra: #8B5E3C;
+  --tierra-claro: #f5efe8;
+  --amarillo: #f59e0b;
+  --rojo: #dc2626;
+  --azul: #1d4ed8;
+  --azul-bt: #1a56db;
+  --gris: #6b7280;
+  --gris-claro: #f3f4f6;
+  --texto: #111827;
+  --blanco: #ffffff;
+
+  --radio: 12px;
+  --radio-grande: 20px;
+  --sombra: 0 4px 12px rgba(0,0,0,0.15);
+
+  /* Tamaños para uso con guantes */
+  --alto-boton: 64px;
+  --alto-input: 60px;
+  --font-grande: 20px;
+  --font-enorme: 28px;
+}
+
+html { font-size: 16px; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  background: #e8ede6;
+  color: var(--texto);
+  min-height: 100vh;
+  max-width: 480px;
+  margin: 0 auto;
+  padding-bottom: 2rem;
+}
+
+/* ─── Header ────────────────────────────────────────────────────── */
+.header {
+  background: var(--verde-oscuro);
+  color: var(--blanco);
+  padding: 12px 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: var(--sombra);
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.app-titulo {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.app-subtitulo {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.header-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* ─── Indicadores de estado ─────────────────────────────────────── */
+.estado-red {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  display: inline-block;
+}
+.estado-red.online { background: #dcfce7; color: #166534; }
+.estado-red.offline { background: #fee2e2; color: #991b1b; }
+.estado-red.sincronizando { background: #fef3c7; color: #92400e; }
+.estado-red.advertencia { background: #fef3c7; color: #92400e; }
+
+.estado-bt {
+  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.15);
+  color: var(--blanco);
+}
+.estado-bt.conectado { background: #22c55e; color: #fff; }
+.estado-bt.buscando { background: var(--amarillo); color: #1a1a1a; }
+.estado-bt.error { background: var(--rojo); color: #fff; }
+
+.operador-badge {
+  font-size: 12px;
+  background: rgba(255,255,255,0.2);
+  padding: 4px 10px;
+  border-radius: 20px;
+  color: var(--blanco);
+}
+
+/* ─── Contenedor principal ──────────────────────────────────────── */
+.main {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ─── Tarjetas / Secciones ──────────────────────────────────────── */
+.card {
+  background: var(--blanco);
+  border-radius: var(--radio-grande);
+  padding: 16px;
+  box-shadow: var(--sombra);
+}
+
+.card-titulo {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--gris);
+  margin-bottom: 12px;
+}
+
+/* ─── Botones (GRANDES para uso con guantes) ────────────────────── */
+.btn {
+  display: block;
+  width: 100%;
+  min-height: var(--alto-boton);
+  padding: 12px 20px;
+  border: none;
+  border-radius: var(--radio);
+  font-size: var(--font-grande);
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  transition: transform 0.1s, opacity 0.1s;
+  -webkit-user-select: none;
+  user-select: none;
+  letter-spacing: 0.3px;
+}
+
+.btn:active { transform: scale(0.97); opacity: 0.9; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-bluetooth {
+  background: var(--azul-bt);
+  color: var(--blanco);
+}
+
+.btn-primario {
+  background: var(--verde);
+  color: var(--blanco);
+  font-size: var(--font-enorme);
+  min-height: 80px;
+  letter-spacing: 0.5px;
+}
+
+.btn-secundario {
+  background: var(--gris-claro);
+  color: var(--texto);
+}
+
+.btn-peligro {
+  background: var(--rojo);
+  color: var(--blanco);
+}
+
+.btn-sync {
+  background: var(--tierra);
+  color: var(--blanco);
+  min-height: 52px;
+  font-size: 16px;
+  position: relative;
+}
+
+.btn-simular {
+  background: transparent;
+  border: 2px dashed var(--gris);
+  color: var(--gris);
+  min-height: 48px;
+  font-size: 15px;
+  margin-top: 8px;
+}
+
+/* ─── Inputs (grandes para dedos/guantes) ───────────────────────── */
+.grupo-campo {
+  margin-bottom: 12px;
+}
+
+.campo-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--gris);
+  margin-bottom: 6px;
+}
+
+.campo-input,
+.campo-select {
+  display: block;
+  width: 100%;
+  min-height: var(--alto-input);
+  padding: 12px 16px;
+  border: 2.5px solid #d1d5db;
+  border-radius: var(--radio);
+  font-size: var(--font-grande);
+  font-weight: 600;
+  color: var(--texto);
+  background: var(--blanco);
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.campo-input:focus,
+.campo-select:focus {
+  outline: none;
+  border-color: var(--verde);
+  box-shadow: 0 0 0 3px rgba(26, 122, 58, 0.2);
+}
+
+.campo-input.flash-lectura {
+  background: #dcfce7;
+  border-color: var(--verde);
+  animation: flash 0.6s ease;
+}
+
+@keyframes flash {
+  0% { background: #fff; }
+  30% { background: #dcfce7; }
+  100% { background: #fff; }
+}
+
+/* Input de caravana — tamaño especial */
+#input-caravana {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--verde-oscuro);
+  min-height: 70px;
+}
+
+/* Input de peso — número grande */
+#input-peso {
+  font-size: 32px;
+  font-weight: 800;
+  text-align: center;
+  color: var(--tierra);
+}
+
+.campo-unidad {
+  text-align: center;
+  font-size: 13px;
+  color: var(--gris);
+  margin-top: -4px;
+  margin-bottom: 4px;
+}
+
+/* ─── Grilla de 2 columnas ──────────────────────────────────────── */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* ─── Historial ─────────────────────────────────────────────────── */
+.historial-titulo {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--gris);
+  margin-bottom: 8px;
+}
+
+.historial-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--gris-claro);
+  border-radius: 8px;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.historial-fecha { color: var(--gris); font-size: 12px; min-width: 70px; }
+.historial-peso { font-weight: 700; color: var(--tierra); }
+.historial-estado { font-size: 12px; flex: 1; text-transform: capitalize; }
+.historial-sync { font-size: 16px; margin-left: auto; }
+
+.estado-sano { color: var(--verde); }
+.estado-vacunado { color: var(--azul); }
+.estado-en_tratamiento { color: var(--amarillo); }
+.estado-cuarentena { color: var(--rojo); }
+.estado-revisar { color: var(--tierra); }
+
+.sin-historial {
+  color: var(--gris);
+  font-size: 13px;
+  font-style: italic;
+  text-align: center;
+  padding: 12px 0;
+}
+
+/* ─── Contador de pendientes ────────────────────────────────────── */
+.barra-sync {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+#contador-pendientes {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--tierra);
+  background: var(--tierra-claro);
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+/* ─── Toast notifications ───────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--texto);
+  color: var(--blanco);
+  padding: 14px 20px;
+  border-radius: var(--radio);
+  font-size: 16px;
+  font-weight: 600;
+  z-index: 1000;
+  opacity: 0;
+  transition: transform 0.3s, opacity 0.3s;
+  max-width: 90vw;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+.toast.toast-visible { transform: translateX(-50%) translateY(0); opacity: 1; }
+.toast-exito { background: var(--verde); }
+.toast-advertencia { background: var(--amarillo); color: var(--texto); }
+.toast-error { background: var(--rojo); }
+.toast-info { background: var(--azul); }
+
+/* ─── Divider ───────────────────────────────────────────────────── */
+.divider {
+  height: 1px;
+  background: var(--gris-claro);
+  margin: 8px 0;
+}
+
+/* ─── Responsive: landscape en campo ───────────────────────────── */
+@media (max-height: 500px) and (orientation: landscape) {
+  .header { padding: 8px 16px; }
+  .btn { min-height: 52px; font-size: 16px; }
+  .campo-input, .campo-select { min-height: 48px; font-size: 16px; }
+  #input-caravana { font-size: 20px; min-height: 52px; }
+  #input-peso { font-size: 24px; }
+}
+
+/* ─── Dark mode básico (para uso nocturno en campo) ─────────────── */
+@media (prefers-color-scheme: dark) {
+  body { background: #1a1f1a; }
+  .card { background: #2a2f2a; }
+  .campo-input, .campo-select { background: #1a1f1a; border-color: #444; color: #f0f0f0; }
+  .historial-item { background: #333; }
+  .campo-label, .card-titulo, .historial-titulo { color: #aaa; }
+  var(--texto) { color: #f0f0f0; }
+}

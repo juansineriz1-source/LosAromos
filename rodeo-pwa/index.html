@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0f5228">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="Registro ganadero offline para manga">
+  <title>RodeoApp</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/css/estilos.css">
+  <!-- Dexie.js desde CDN — se cachea en primera visita -->
+  <script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js"></script>
+</head>
+<body>
+
+  <!-- ═══════════════════════ HEADER ═══════════════════════════════ -->
+  <header class="header">
+    <div class="header-top">
+      <div>
+        <div class="app-titulo">🐄 RodeoApp</div>
+        <div class="app-subtitulo">Registro ganadero offline</div>
+      </div>
+      <span class="estado-red offline" id="estado-red">○ Sin señal</span>
+    </div>
+    <div class="header-info">
+      <span class="estado-bt desconectado" id="estado-bt">Bastón no conectado</span>
+      <span class="operador-badge" id="operador-nombre">—</span>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════ CONTENIDO PRINCIPAL ══════════════════ -->
+  <main class="main">
+
+    <!-- ── 1. BLUETOOTH ── -->
+    <section class="card">
+      <div class="card-titulo">📡 Bastón Lector</div>
+
+      <button class="btn btn-bluetooth" id="btn-bluetooth">
+        📡 Conectar Bastón
+      </button>
+
+      <!-- Solo visible en modo desarrollo -->
+      <button class="btn btn-simular" id="btn-simular">
+        ⌨ Simular lectura de caravana (dev)
+      </button>
+    </section>
+
+    <!-- ── 2. CARAVANA ── -->
+    <section class="card">
+      <div class="card-titulo">🏷 Caravana del Animal</div>
+
+      <div class="grupo-campo">
+        <label class="campo-label" for="input-caravana">Número de Caravana</label>
+        <input
+          type="text"
+          id="input-caravana"
+          class="campo-input"
+          placeholder="Escanear o ingresar"
+          autocomplete="off"
+          autocorrect="off"
+          spellcheck="false"
+          inputmode="text"
+        >
+      </div>
+
+      <!-- Historial del animal identificado -->
+      <div class="historial-titulo">Últimos registros:</div>
+      <div id="historial">
+        <p class="sin-historial">Escaneá una caravana para ver su historial</p>
+      </div>
+    </section>
+
+    <!-- ── 3. DATOS DEL REGISTRO ── -->
+    <section class="card">
+      <div class="card-titulo">⚖ Datos de Manga</div>
+
+      <!-- Peso -->
+      <div class="grupo-campo">
+        <label class="campo-label" for="input-peso">Peso</label>
+        <input
+          type="number"
+          id="input-peso"
+          class="campo-input"
+          placeholder="0"
+          min="1"
+          max="1500"
+          step="0.5"
+          inputmode="decimal"
+        >
+        <div class="campo-unidad">kilogramos</div>
+      </div>
+
+      <!-- Categoría y Raza en grilla -->
+      <div class="grid-2">
+        <div class="grupo-campo">
+          <label class="campo-label" for="select-categoria">Categoría</label>
+          <select id="select-categoria" class="campo-select">
+            <!-- poblado por JS -->
+          </select>
+        </div>
+        <div class="grupo-campo">
+          <label class="campo-label" for="select-raza">Raza</label>
+          <select id="select-raza" class="campo-select">
+            <!-- poblado por JS -->
+          </select>
+        </div>
+      </div>
+
+      <!-- Estado sanitario -->
+      <div class="grupo-campo">
+        <label class="campo-label" for="select-estado">Estado Sanitario</label>
+        <select id="select-estado" class="campo-select">
+          <!-- poblado por JS -->
+        </select>
+      </div>
+
+      <!-- Vacuna aplicada -->
+      <div class="grupo-campo">
+        <label class="campo-label" for="input-vacuna">Vacuna / Medicamento (opcional)</label>
+        <input
+          type="text"
+          id="input-vacuna"
+          class="campo-input"
+          placeholder="Ej: Fiebre Aftosa, Clostridiosis..."
+          autocomplete="off"
+        >
+      </div>
+
+      <!-- Observaciones -->
+      <div class="grupo-campo">
+        <label class="campo-label" for="input-obs">Observaciones</label>
+        <input
+          type="text"
+          id="input-obs"
+          class="campo-input"
+          placeholder="Ej: cojera leve, oreja rota..."
+        >
+      </div>
+    </section>
+
+    <!-- ── 4. ACCIONES ── -->
+    <section class="card">
+      <button class="btn btn-primario" id="btn-guardar">
+        💾 GUARDAR
+      </button>
+
+      <div style="height: 10px;"></div>
+
+      <button class="btn btn-secundario" id="btn-limpiar">
+        🔄 Limpiar / Siguiente animal
+      </button>
+    </section>
+
+    <!-- ── 5. SINCRONIZACIÓN ── -->
+    <section class="card">
+      <div class="card-titulo">☁ Sincronización</div>
+      <div class="barra-sync">
+        <button class="btn btn-sync" id="btn-sync" style="flex: 1;">
+          ↑ Sincronizar ahora
+        </button>
+        <span id="contador-pendientes"></span>
+      </div>
+      <p style="font-size: 12px; color: #6b7280; margin-top: 8px; text-align: center;">
+        Los datos se guardan localmente y se envían automáticamente cuando vuelve la señal.
+      </p>
+    </section>
+
+  </main>
+
+  <!-- ═══════════════════════ SCRIPTS ══════════════════════════════ -->
+  <script type="module" src="/js/app.js"></script>
+
+</body>
+</html>
