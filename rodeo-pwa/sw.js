@@ -19,27 +19,27 @@ const { core, precaching, routing, strategies, backgroundSync, expiration } = wo
 // ─── Configuración base ─────────────────────────────────────────────────────
 core.setCacheNameDetails({
   prefix: 'rodeo-pwa',
-  suffix: 'v4',
+  suffix: 'v5',
 });
 
 core.skipWaiting();
 core.clientsClaim();
 
-// ─── Pre-caché de assets estáticos ─────────────────────────────────────────
-// Revisión 4 — fix crash + migración Dexie v2 + calendario + notificaciones
+// ─── Pre-caché ───────────────────────────────────────────────────────────────
+// Revisión 5 — cross-device feed + /api/actividad
 precaching.precacheAndRoute([
-  { url: '/', revision: '4' },
-  { url: '/index.html', revision: '4' },
-  { url: '/css/estilos.css', revision: '4' },
-  { url: '/js/app.js', revision: '4' },
-  { url: '/js/db.js', revision: '4' },
-  { url: '/js/bluetooth.js', revision: '4' },
-  { url: '/js/sync.js', revision: '4' },
-  { url: '/js/recorrida.js', revision: '4' },
-  { url: '/js/fotos.js', revision: '4' },
-  { url: '/js/videos.js', revision: '4' },
-  { url: '/js/push.js', revision: '4' },
-  { url: '/js/calendario.js', revision: '4' },
+  { url: '/', revision: '5' },
+  { url: '/index.html', revision: '5' },
+  { url: '/css/estilos.css', revision: '5' },
+  { url: '/js/app.js', revision: '5' },
+  { url: '/js/db.js', revision: '5' },
+  { url: '/js/bluetooth.js', revision: '5' },
+  { url: '/js/sync.js', revision: '5' },
+  { url: '/js/recorrida.js', revision: '5' },
+  { url: '/js/fotos.js', revision: '5' },
+  { url: '/js/videos.js', revision: '5' },
+  { url: '/js/push.js', revision: '5' },
+  { url: '/js/calendario.js', revision: '5' },
   { url: '/manifest.json', revision: '1' },
 ]);
 

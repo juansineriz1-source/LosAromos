@@ -37,13 +37,17 @@ export async function cargarFeedHoy() {
   const contenedor = document.getElementById('feed-hoy');
   if (!contenedor) return;
 
-  const [novedades, registros, recorridas, fotos, videos] = await Promise.all([
-    db.novedades.where('fecha').equals(hoy).toArray().catch(() => []),
-    db.registros_manga.where('fecha').equals(hoy).toArray().catch(() => []),
-    db.recorridas.where('fecha').equals(hoy).toArray().catch(() => []),
-    db.fotos.where('fecha').equals(hoy).toArray().catch(() => []),
-    db.videos.where('fecha').equals(hoy).toArray().catch(() => []),
+  // Cargar local + remoto en paralelo
+  const [local, remoto] = await Promise.all([
+    cargarActividadLocal(hoy),
+    fetchActividadRemota(hoy),
   ]);
+
+  // Mezclar y deduplicar por UUID
+  const { registros, novedades } = mezclarDatos(local, remoto);
+  const recorridas = local.recorridas; // solo local (media no va a Sheets)
+  const fotos      = local.fotos;
+  const videos     = local.videos;
 
   const items = construirFeedItems(novedades, registros, recorridas, fotos, videos);
 
@@ -52,9 +56,46 @@ export async function cargarFeedHoy() {
     return;
   }
 
-  // Crear object URLs para blobs antes de renderizar
   const blobURLs = await crearBlobURLs(items);
   contenedor.innerHTML = items.map(item => renderFeedItem(item, blobURLs)).join('');
+}
+
+// ─── Cargar actividad local (IndexedDB) ───────────────────────────────────
+async function cargarActividadLocal(fecha) {
+  const [novedades, registros, recorridas, fotos, videos] = await Promise.all([
+    db.novedades.where('fecha').equals(fecha).toArray().catch(() => []),
+    db.registros_manga.where('fecha').equals(fecha).toArray().catch(() => []),
+    db.recorridas.where('fecha').equals(fecha).toArray().catch(() => []),
+    db.fotos.where('fecha').equals(fecha).toArray().catch(() => []),
+    db.videos.where('fecha').equals(fecha).toArray().catch(() => []),
+  ]);
+  return { novedades, registros, recorridas, fotos, videos };
+}
+
+// ─── Fetch actividad remota (Vercel → Sheets) ───────────────────────────
+async function fetchActividadRemota(fecha) {
+  try {
+    const resp = await fetch(`/api/actividad?fecha=${fecha}`);
+    if (!resp.ok) return { registros: [], novedades: [] };
+    return await resp.json();
+  } catch {
+    return { registros: [], novedades: [] };
+  }
+}
+
+// ─── Mezclar local + remoto, deduplicar por UUID ─────────────────────────
+function mezclarDatos(local, remoto) {
+  const dedup = (arr1, arr2) => {
+    const vistos = new Set(arr1.map(x => x.uuid).filter(Boolean));
+    const extras  = arr2.filter(x => x.uuid && !vistos.has(x.uuid));
+    // Marcar remotos para diferenciar en UI
+    extras.forEach(x => { x._remoto = true; });
+    return [...arr1, ...extras];
+  };
+  return {
+    registros: dedup(local.registros, remoto.registros || []),
+    novedades: dedup(local.novedades, remoto.novedades || []),
+  };
 }
 
 // ─── Navegación de meses ──────────────────────────────────────────────────────
@@ -151,15 +192,15 @@ window.abrirDiaCalendario = async function(fechaStr) {
   label.textContent = `${parseInt(d)} de ${MESES[parseInt(m)-1]} ${a}`;
   contenido.innerHTML = '<p class="sin-historial">Cargando...</p>';
 
-  const [novedades, registros, recorridas, fotos, videos] = await Promise.all([
-    db.novedades.where('fecha').equals(fechaStr).toArray().catch(() => []),
-    db.registros_manga.where('fecha').equals(fechaStr).toArray().catch(() => []),
-    db.recorridas.where('fecha').equals(fechaStr).toArray().catch(() => []),
-    db.fotos.where('fecha').equals(fechaStr).toArray().catch(() => []),
-    db.videos.where('fecha').equals(fechaStr).toArray().catch(() => []),
+  const [local, remoto] = await Promise.all([
+    cargarActividadLocal(fechaStr),
+    fetchActividadRemota(fechaStr),
   ]);
 
-  const items = construirFeedItems(novedades, registros, recorridas, fotos, videos);
+  const { registros, novedades } = mezclarDatos(local, remoto);
+  const items = construirFeedItems(
+    novedades, registros, local.recorridas, local.fotos, local.videos
+  );
 
   if (!items.length) {
     contenido.innerHTML = '<p class="sin-historial">Sin actividad ese día</p>';
@@ -169,7 +210,6 @@ window.abrirDiaCalendario = async function(fechaStr) {
   const blobURLs = await crearBlobURLs(items);
   contenido.innerHTML = items.map(item => renderFeedItem(item, blobURLs)).join('');
 
-  // Scroll al panel
   detalle.scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
 
@@ -279,7 +319,7 @@ function renderFeedItem(item, blobURLs = {}) {
       <div class="feed-item-header">
         <span class="feed-icono">${ICONOS[item.tipo]}</span>
         <div class="feed-meta">
-          <span class="feed-label">${LABELS[item.tipo]}</span>
+          <span class="feed-label">${LABELS[item.tipo]}${item._remoto ? ' <span class="feed-remoto">📡</span>' : ''}</span>
           <span class="feed-hora">${hora} · ${op}</span>
         </div>
       </div>
