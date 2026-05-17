@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Actualizar App — Los Aromos</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f5228;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 24px;
+      padding: 36px 28px;
+      max-width: 380px;
+      width: 100%;
+      text-align: center;
+      backdrop-filter: blur(12px);
+    }
+    .emoji { font-size: 64px; line-height: 1; margin-bottom: 16px; }
+    h1 { color: #fff; font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+    p  { color: rgba(255,255,255,0.7); font-size: 15px; margin-bottom: 24px; line-height: 1.5; }
+    .log {
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+      padding: 14px;
+      text-align: left;
+      font-size: 13px;
+      color: #a8e6a3;
+      font-family: monospace;
+      margin-bottom: 20px;
+      min-height: 80px;
+      max-height: 160px;
+      overflow-y: auto;
+    }
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      border-radius: 14px;
+      border: none;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: transform 0.1s, opacity 0.1s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-limpiar { background: #fff; color: #0f5228; margin-bottom: 10px; }
+    .btn-abrir   { background: rgba(255,255,255,0.2); color: #fff; }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .tick { color: #4caf50; }
+    .spin { animation: spin 1s linear infinite; display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="emoji">🔄</div>
+    <h1>Actualizar App</h1>
+    <p>Esta página limpia el caché y el Service Worker para que la app se actualice correctamente.</p>
+
+    <div class="log" id="log">Esperando...</div>
+
+    <button class="btn btn-limpiar" id="btn-limpiar" onclick="limpiarTodo()">
+      🧹 Limpiar caché y actualizar
+    </button>
+    <button class="btn btn-abrir" id="btn-abrir" onclick="irAApp()" disabled>
+      🐄 Abrir Los Aromos
+    </button>
+  </div>
+
+  <script>
+    const log = document.getElementById('log');
+
+    function escribir(msg, ok = true) {
+      const linea = document.createElement('div');
+      linea.textContent = (ok ? '✓ ' : '⏳ ') + msg;
+      linea.style.color = ok ? '#a8e6a3' : '#ffd54f';
+      log.appendChild(linea);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    async function limpiarTodo() {
+      const btn = document.getElementById('btn-limpiar');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spin">⏳</span> Limpiando...';
+      log.innerHTML = '';
+
+      try {
+        // 1. Desregistrar TODOS los Service Workers
+        if ('serviceWorker' in navigator) {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          for (const reg of regs) {
+            await reg.unregister();
+            escribir(`SW desregistrado: ${reg.scope}`);
+          }
+          if (!regs.length) escribir('Sin Service Workers activos');
+        } else {
+          escribir('Service Workers no soportados', false);
+        }
+
+        // 2. Limpiar TODOS los caches
+        if ('caches' in window) {
+          const nombres = await caches.keys();
+          for (const nombre of nombres) {
+            await caches.delete(nombre);
+            escribir(`Caché eliminado: ${nombre}`);
+          }
+          if (!nombres.length) escribir('Sin cachés encontrados');
+        }
+
+        // 3. Limpiar IndexedDB de la app (opcional — NO borra datos de animales/registros)
+        // Solo borra si el usuario lo quiere (por ahora no lo hacemos automático)
+
+        escribir('¡Listo! Podés abrir la app ahora.');
+
+        document.getElementById('btn-abrir').disabled = false;
+        btn.textContent = '✓ Caché limpiado';
+
+      } catch (err) {
+        escribir('Error: ' + err.message, false);
+        btn.disabled = false;
+        btn.textContent = '🧹 Intentar de nuevo';
+      }
+    }
+
+    function irAApp() {
+      // Redirigir con parámetro para forzar recarga desde servidor
+      window.location.href = '/?nocache=' + Date.now();
+    }
+
+    // Auto-detectar si ya hay SW instalado
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        if (regs.length > 0) {
+          log.innerHTML = '';
+          escribir(`${regs.length} Service Worker(s) activo(s) detectado(s)`, false);
+        } else {
+          log.innerHTML = '';
+          escribir('No hay Service Workers activos actualmente');
+          document.getElementById('btn-abrir').disabled = false;
+        }
+      });
+    }
+  </script>
+</body>
+</html>

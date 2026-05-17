@@ -19,27 +19,29 @@ const { core, precaching, routing, strategies, backgroundSync, expiration } = wo
 // ─── Configuración base ─────────────────────────────────────────────────────
 core.setCacheNameDetails({
   prefix: 'rodeo-pwa',
-  suffix: 'v5',
+  suffix: 'v6',
 });
 
 core.skipWaiting();
 core.clientsClaim();
 
 // ─── Pre-caché ───────────────────────────────────────────────────────────────
-// Revisión 5 — cross-device feed + /api/actividad
+// Revisión 6 — rodeo oficial desde Sheets + media cross-device
 precaching.precacheAndRoute([
-  { url: '/', revision: '5' },
-  { url: '/index.html', revision: '5' },
-  { url: '/css/estilos.css', revision: '5' },
-  { url: '/js/app.js', revision: '5' },
-  { url: '/js/db.js', revision: '5' },
-  { url: '/js/bluetooth.js', revision: '5' },
-  { url: '/js/sync.js', revision: '5' },
-  { url: '/js/recorrida.js', revision: '5' },
-  { url: '/js/fotos.js', revision: '5' },
-  { url: '/js/videos.js', revision: '5' },
-  { url: '/js/push.js', revision: '5' },
-  { url: '/js/calendario.js', revision: '5' },
+  { url: '/', revision: '6' },
+  { url: '/index.html', revision: '6' },
+  { url: '/css/estilos.css', revision: '6' },
+  { url: '/js/app.js', revision: '6' },
+  { url: '/js/db.js', revision: '6' },
+  { url: '/js/bluetooth.js', revision: '6' },
+  { url: '/js/sync.js', revision: '6' },
+  { url: '/js/recorrida.js', revision: '6' },
+  { url: '/js/fotos.js', revision: '6' },
+  { url: '/js/videos.js', revision: '6' },
+  { url: '/js/push.js', revision: '6' },
+  { url: '/js/calendario.js', revision: '6' },
+  { url: '/js/rodeo-oficial.js', revision: '6' },
+  { url: '/clear-cache.html', revision: '1' },
   { url: '/manifest.json', revision: '1' },
 ]);
 
