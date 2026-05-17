@@ -17,13 +17,32 @@ import { inicializarVideos, cargarListaVideos } from './videos.js';
 import { inicializarPush } from './push.js';
 import { inicializarCalendario, cargarFeedHoy } from './calendario.js';
 
+// ─── Usuarios y roles ─────────────────────────────────────────────────────────
+const USUARIOS = {
+  'juan':    { display: 'Juan',    rol: 'admin' },
+  'ana':     { display: 'Ana',     rol: 'admin' },
+  'juan f':  { display: 'Juan F',  rol: 'admin' },
+  'juanf':   { display: 'Juan F',  rol: 'admin' },
+  'manuela': { display: 'Manuela', rol: 'admin' },
+  'domingo': { display: 'Domingo', rol: 'operario' },
+};
+
+const TABS_ADMIN    = ['inicio', 'baston', 'manual', 'rodeo', 'recorrida'];
+const TABS_OPERARIO = ['recorrida', 'rodeo', 'manual'];
+
+function detectarRol(nombre) {
+  const clave = (nombre || '').toLowerCase().trim();
+  return USUARIOS[clave] || { display: nombre || 'Operario', rol: 'operario' };
+}
+
 // ─── Estado global ────────────────────────────────────────────────────────────
 const estado = {
-  tabActual: 'inicio',
+  tabActual:          'recorrida', // default para operario
   bluetoothConectado: false,
-  operador: localStorage.getItem('rodeo_operador') || '',
-  animalManual: null,       // animal buscado en pestaña Manual
-  animalModal: null,        // animal abierto en modal de Rodeo
+  operador:           localStorage.getItem('rodeo_operador') || '',
+  rol:                localStorage.getItem('rodeo_rol')      || '',
+  animalManual:       null,
+  animalModal:        null,
 };
 
 // ─── Selector rápido ──────────────────────────────────────────────────────────
@@ -43,17 +62,105 @@ document.addEventListener('DOMContentLoaded', async () => {
   await inicializarCalendario();
   await actualizarContadorPendientes();
 
-  // Nombre del operador
+  // Login: mostrar pantalla de selección si no hay operador guardado
   if (!estado.operador) {
-    const nombre = prompt('¿Nombre del operador?') || 'Operador';
-    estado.operador = nombre;
-    localStorage.setItem('rodeo_operador', nombre);
+    await mostrarPantallaLogin();
+  } else {
+    // Restaurar rol desde localStorage
+    aplicarRol(estado.rol || 'operario');
+    $('operador-nombre').textContent = estado.operador;
+    const tabInicial = estado.rol === 'admin' ? 'inicio' : 'recorrida';
+    mostrarTab(tabInicial);
   }
-  $('operador-nombre').textContent = estado.operador;
-
-  // Cargar pestaña inicial
-  mostrarTab('inicio');
 });
+
+// ─── Pantalla de login ─────────────────────────────────────────────────────────
+function mostrarPantallaLogin() {
+  return new Promise(resolve => {
+    const overlay = document.createElement('div');
+    overlay.id = 'login-overlay';
+    overlay.innerHTML = `
+      <div class="login-card">
+        <div class="login-logo">🐄</div>
+        <div class="login-titulo">Los Aromos</div>
+        <div class="login-sub">¿Quién sos?</div>
+
+        <div class="login-nombres">
+          ${['Juan','Ana','Juan F','Manuela','Domingo'].map(n => `
+            <button class="login-btn-nombre" data-nombre="${n}">${n}</button>
+          `).join('')}
+        </div>
+
+        <div class="login-divider">o escribí tu nombre</div>
+
+        <div class="login-input-row">
+          <input type="text" id="login-input" class="login-input"
+            placeholder="Nombre..." autocomplete="off" autocorrect="off" spellcheck="false">
+          <button class="login-btn-entrar" id="login-btn-entrar">Entrar →</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    const entrar = nombre => {
+      const usuario = detectarRol(nombre);
+      estado.operador = usuario.display;
+      estado.rol      = usuario.rol;
+      localStorage.setItem('rodeo_operador', usuario.display);
+      localStorage.setItem('rodeo_rol',      usuario.rol);
+      overlay.classList.add('login-saliendo');
+      setTimeout(() => {
+        overlay.remove();
+        aplicarRol(usuario.rol);
+        $('operador-nombre').textContent = usuario.display;
+        const tabInicial = usuario.rol === 'admin' ? 'inicio' : 'recorrida';
+        mostrarTab(tabInicial);
+        resolve();
+      }, 350);
+    };
+
+    // Botones de nombres predefinidos
+    overlay.querySelectorAll('.login-btn-nombre').forEach(btn => {
+      btn.addEventListener('click', () => entrar(btn.dataset.nombre));
+    });
+
+    // Input + botón entrar
+    const input  = overlay.querySelector('#login-input');
+    const btnEnt = overlay.querySelector('#login-btn-entrar');
+    btnEnt.addEventListener('click', () => {
+      entrar(input.value.trim() || 'Operario');
+    });
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') entrar(input.value.trim() || 'Operario');
+    });
+    // Focus automático
+    setTimeout(() => input.focus(), 100);
+  });
+}
+
+// ─── Aplicar rol: muestra/oculta tabs según permisos ─────────────────────────
+function aplicarRol(rol) {
+  const tabsVisibles = rol === 'admin' ? TABS_ADMIN : TABS_OPERARIO;
+  const tabsOcultas  = TABS_ADMIN.filter(t => !tabsVisibles.includes(t));
+
+  // Nav items
+  TABS_ADMIN.forEach(tab => {
+    const navBtn = $(`nav-${tab}`);
+    if (!navBtn) return;
+    if (tabsVisibles.includes(tab)) {
+      navBtn.style.display = '';
+    } else {
+      navBtn.style.display = 'none';
+    }
+  });
+
+  // Badge de rol en el header
+  const badge = $('operador-nombre');
+  if (badge) {
+    badge.dataset.rol = rol;
+  }
+}
+
 
 // ─── Service Worker ───────────────────────────────────────────────────────────
 async function registrarServiceWorker() {

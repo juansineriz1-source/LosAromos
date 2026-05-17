@@ -822,6 +822,140 @@ body {
 .toast-error      { background: var(--rojo); }
 .toast-info       { background: var(--azul); }
 
+/* ─── PANTALLA DE LOGIN ───────────────────────────────────────────── */
+#login-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--verde-oscuro);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: login-entrada 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#login-overlay.login-saliendo {
+  animation: login-salida 0.35s ease forwards;
+}
+
+@keyframes login-entrada {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes login-salida {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(1.04); }
+}
+
+.login-card {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 24px;
+  padding: 32px 24px;
+  width: 100%;
+  max-width: 380px;
+  backdrop-filter: blur(12px);
+  text-align: center;
+}
+
+.login-logo {
+  font-size: 56px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.login-titulo {
+  font-size: 28px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.5px;
+  margin-bottom: 4px;
+}
+
+.login-sub {
+  font-size: 16px;
+  color: rgba(255,255,255,0.65);
+  font-weight: 500;
+  margin-bottom: 24px;
+}
+
+.login-nombres {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.login-btn-nombre {
+  background: rgba(255,255,255,0.15);
+  border: 1.5px solid rgba(255,255,255,0.25);
+  border-radius: 14px;
+  color: #fff;
+  font-size: 17px;
+  font-weight: 700;
+  padding: 14px 8px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  font-family: inherit;
+}
+
+.login-btn-nombre:active {
+  background: rgba(255,255,255,0.30);
+  transform: scale(0.96);
+}
+
+.login-divider {
+  font-size: 12px;
+  color: rgba(255,255,255,0.45);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+.login-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.login-input {
+  flex: 1;
+  background: rgba(255,255,255,0.12);
+  border: 1.5px solid rgba(255,255,255,0.25);
+  border-radius: 12px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 12px 14px;
+  font-family: inherit;
+}
+
+.login-input::placeholder { color: rgba(255,255,255,0.4); }
+.login-input:focus        { outline: none; border-color: rgba(255,255,255,0.6); }
+
+.login-btn-entrar {
+  background: #fff;
+  color: var(--verde-oscuro);
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 800;
+  padding: 12px 16px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  transition: transform 0.1s;
+}
+.login-btn-entrar:active { transform: scale(0.95); }
+
+/* Badge de rol en el header */
+.operador-badge[data-rol="admin"]    { background: rgba(255,255,255,0.25); }
+.operador-badge[data-rol="operario"] { background: rgba(255,193,7,0.3); }
+.operador-badge[data-rol="admin"]::after    { content: ' ★'; font-size: 10px; }
+.operador-badge[data-rol="operario"]::after { content: ' ✦'; font-size: 10px; }
+
 /* ─── RECORRIDA — GRABACIÓN DE AUDIO ──────────────────────────────── */
 .recorrida-card {
   text-align: center;
