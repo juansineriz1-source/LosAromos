@@ -7,6 +7,7 @@
  */
 
 import db, { crearMetadatos, DEVICE_ID } from './db.js';
+import { sincronizarMedia } from './sync.js';
 
 // ─── Estado interno ───────────────────────────────────────────────────────────
 let mediaRecorder = null;
@@ -172,10 +173,16 @@ async function subirAudioEnBackground(recorridaId, blob, operador, onToast) {
     if (!upload.ok) throw new Error(`Subida MinIO ${upload.status}`);
 
     // 3. Actualizar el registro local con la URL pública
+    const recorridaActualizada = await db.recorridas.get(recorridaId);
     await db.recorridas.update(recorridaId, {
       storage_url: publicUrl,
       storage_key: objectKey,
     });
+
+    // 4. Sincronizar metadata a Sheets para visibilidad cross-device
+    if (recorridaActualizada) {
+      await sincronizarMedia('recorrida', { ...recorridaActualizada, storage_url: publicUrl, storage_key: objectKey });
+    }
 
     onToast('☁ Audio subido al servidor', 'info', 2500);
     await cargarListaRecorridas();

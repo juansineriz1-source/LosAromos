@@ -12,6 +12,7 @@
  */
 
 import db, { crearMetadatos } from './db.js';
+import { sincronizarMedia } from './sync.js';
 
 // ─── Estado interno ───────────────────────────────────────────────────────────
 let fotosEnCola = []; // Array de { file, objectUrl, id }
@@ -188,12 +189,18 @@ async function subirFotoEnBackground(fotoId, blob, operador, onToast) {
 
     if (!upload.ok) throw new Error(`MinIO PUT ${upload.status}`);
 
+    const fotoActualizada = await db.fotos.get(fotoId);
     await db.fotos.update(fotoId, {
       storage_url: publicUrl,
       storage_key: objectKey,
     });
 
-    await cargarListaFotos(); // refrescar badge de sync
+    // Sincronizar metadata para visibilidad cross-device
+    if (fotoActualizada) {
+      await sincronizarMedia('foto', { ...fotoActualizada, storage_url: publicUrl, storage_key: objectKey });
+    }
+
+    await cargarListaFotos();
 
   } catch (err) {
     console.warn('[Fotos] Subida background fallida:', err.message);

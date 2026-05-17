@@ -150,14 +150,39 @@ async function _enviarAlServidor(tabla, payload) {
 }
 
 /**
- * Solicita sincronización inmediata al Service Worker.
- * Esto activa Background Sync si está registrado.
+ * Sincroniza la metadata de un archivo media (audio/foto/video) ya subido a MinIO.
+ * Llama a /api/sincronizar con la tabla correspondiente (_meta) y solo campos
+ * textuales (sin blob) para que otros dispositivos puedan acceder al archivo.
+ *
+ * @param {'recorrida'|'foto'|'video'} tipo
+ * @param {Object} registro — el objeto de IndexedDB con storage_url ya seteado
  */
+export async function sincronizarMedia(tipo, registro) {
+  if (!registro.storage_url) return; // Solo si ya está en MinIO
+  if (!estaOnline)           return;
+
+  const tablaMap = { recorrida: 'recorridas_meta', foto: 'fotos_meta', video: 'videos_meta' };
+  const tabla = tablaMap[tipo];
+  if (!tabla) return;
+
+  // Construir payload sin el blob (puede pesar cientos de MB)
+  const { audio_blob, imagen_blob, video_blob, ...meta } = registro;
+  try {
+    const resp = await fetch('/api/sincronizar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tabla, accion: 'UPSERT', datos: meta, clave_idempotencia: meta.uuid }),
+    });
+    if (resp.ok) console.log(`[Sync] Metadata ${tipo} sincronizada →`, registro.storage_url);
+  } catch (e) {
+    console.warn('[Sync] No se pudo sincronizar metadata media:', e.message);
+  }
+}
+
 export async function solicitarSyncManual() {
   if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
     navigator.serviceWorker.controller.postMessage({ tipo: 'SYNC_MANUAL' });
   }
-  // También intentamos sync directo
   return sincronizarPendientes();
 }
 

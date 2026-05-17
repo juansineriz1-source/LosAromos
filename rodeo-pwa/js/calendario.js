@@ -44,12 +44,12 @@ export async function cargarFeedHoy() {
   ]);
 
   // Mezclar y deduplicar por UUID
-  const { registros, novedades } = mezclarDatos(local, remoto);
-  const recorridas = local.recorridas; // solo local (media no va a Sheets)
-  const fotos      = local.fotos;
-  const videos     = local.videos;
+  const merged = mezclarDatos(local, remoto);
 
-  const items = construirFeedItems(novedades, registros, recorridas, fotos, videos);
+  const items = construirFeedItems(
+    merged.novedades, merged.registros,
+    merged.recorridas, merged.fotos, merged.videos
+  );
 
   if (!items.length) {
     contenedor.innerHTML = '<p class="sin-historial">Sin actividad registrada hoy</p>';
@@ -83,18 +83,21 @@ async function fetchActividadRemota(fecha) {
   }
 }
 
-// ─── Mezclar local + remoto, deduplicar por UUID ─────────────────────────
+// ─── Mezclar local + remoto, deduplicar por UUID ─────────────────────────────
 function mezclarDatos(local, remoto) {
   const dedup = (arr1, arr2) => {
     const vistos = new Set(arr1.map(x => x.uuid).filter(Boolean));
-    const extras  = arr2.filter(x => x.uuid && !vistos.has(x.uuid));
-    // Marcar remotos para diferenciar en UI
+    const extras  = (arr2 || []).filter(x => x.uuid && !vistos.has(x.uuid));
     extras.forEach(x => { x._remoto = true; });
     return [...arr1, ...extras];
   };
   return {
-    registros: dedup(local.registros, remoto.registros || []),
-    novedades: dedup(local.novedades, remoto.novedades || []),
+    registros:  dedup(local.registros,  remoto.registros  || []),
+    novedades:  dedup(local.novedades,  remoto.novedades  || []),
+    // Media remota: solo tienen storage_url (sin blob local)
+    recorridas: dedup(local.recorridas, remoto.recorridas || []),
+    fotos:      dedup(local.fotos,      remoto.fotos      || []),
+    videos:     dedup(local.videos,     remoto.videos     || []),
   };
 }
 
@@ -197,9 +200,10 @@ window.abrirDiaCalendario = async function(fechaStr) {
     fetchActividadRemota(fechaStr),
   ]);
 
-  const { registros, novedades } = mezclarDatos(local, remoto);
+  const merged = mezclarDatos(local, remoto);
   const items = construirFeedItems(
-    novedades, registros, local.recorridas, local.fotos, local.videos
+    merged.novedades, merged.registros,
+    merged.recorridas, merged.fotos, merged.videos
   );
 
   if (!items.length) {

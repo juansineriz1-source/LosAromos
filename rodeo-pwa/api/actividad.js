@@ -100,21 +100,29 @@ export default async function handler(req, res) {
   try {
     const token = await obtenerAccessToken();
 
-    const [filasRegistros, filasNovedades] = await Promise.all([
+    const COLS_NOVEDAD       = ['uuid', 'fecha', 'hora', 'texto', 'operador', 'caravana', 'device_id'];
+    const COLS_RECORRIDA_META = ['uuid', 'fecha', 'hora', 'operador', 'duracion_seg', 'storage_url', 'storage_key', 'audio_tipo', 'audio_size', 'timestamp_local', 'device_id'];
+    const COLS_FOTO_META      = ['uuid', 'fecha', 'hora', 'operador', 'nombre_original', 'storage_url', 'storage_key', 'imagen_tipo', 'imagen_size', 'timestamp_local', 'device_id'];
+    const COLS_VIDEO_META     = ['uuid', 'fecha', 'hora', 'operador', 'nombre_original', 'storage_url', 'storage_key', 'video_tipo', 'video_size', 'timestamp_local', 'device_id'];
+
+    const [filasRegistros, filasNovedades, filasRecorridas, filasFootos, filasVideos] = await Promise.all([
       leerHoja(token, 'registros_manga'),
       leerHoja(token, 'novedades').catch(() => []),
+      leerHoja(token, 'recorridas_meta').catch(() => []),
+      leerHoja(token, 'fotos_meta').catch(() => []),
+      leerHoja(token, 'videos_meta').catch(() => []),
     ]);
 
-    const COLS_NOVEDAD = ['uuid', 'fecha', 'hora', 'texto', 'operador', 'caravana', 'device_id'];
+    const registros  = parsearFilas(filasRegistros,  COLUMNAS_REGISTROS,    fecha);
+    const novedades  = parsearFilas(filasNovedades,  COLS_NOVEDAD,          fecha);
+    const recorridas = parsearFilas(filasRecorridas, COLS_RECORRIDA_META,   fecha);
+    const fotos      = parsearFilas(filasFootos,     COLS_FOTO_META,        fecha);
+    const videos     = parsearFilas(filasVideos,     COLS_VIDEO_META,       fecha);
 
-    const registros = parsearFilas(filasRegistros, COLUMNAS_REGISTROS, fecha);
-    const novedades = parsearFilas(filasNovedades, COLS_NOVEDAD, fecha);
-
-    return res.status(200).json({ fecha, registros, novedades });
+    return res.status(200).json({ fecha, registros, novedades, recorridas, fotos, videos });
 
   } catch (err) {
     console.error('[actividad]', err.message);
-    // Si falla (ej: Sheets no disponible) devolver vacío para no romper la app
-    return res.status(200).json({ fecha, registros: [], novedades: [], error: err.message });
+    return res.status(200).json({ fecha, registros: [], novedades: [], recorridas: [], fotos: [], videos: [], error: err.message });
   }
 }

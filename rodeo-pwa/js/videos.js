@@ -7,6 +7,7 @@
  */
 
 import db, { crearMetadatos } from './db.js';
+import { sincronizarMedia } from './sync.js';
 
 let videosEnCola = []; // Array de { file, objectUrl }
 
@@ -150,7 +151,14 @@ async function subirVideoEnBackground(videoId, file, operador, onToast) {
 
     if (!upload.ok) throw new Error(`MinIO PUT ${upload.status}`);
 
+    const videoActualizado = await db.videos.get(videoId);
     await db.videos.update(videoId, { storage_url: publicUrl, storage_key: objectKey });
+
+    // Sincronizar metadata para visibilidad cross-device
+    if (videoActualizado) {
+      await sincronizarMedia('video', { ...videoActualizado, storage_url: publicUrl, storage_key: objectKey });
+    }
+
     onToast('☁ Video subido al servidor', 'exito', 2500);
     await cargarListaVideos();
 

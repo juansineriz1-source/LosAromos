@@ -14,7 +14,6 @@
 const SHEET_ID = process.env.GOOGLE_SHEET_ID || '1tEncjxGzwE-7AZLnlmShSSM3lCaNFQR9DNn459AWhSg';
 const SERVICE_ACCOUNT_EMAIL = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || 'bot-n8n@custom-unison-403623.iam.gserviceaccount.com';
 
-// Columnas por tabla — orden de las columnas en el Sheet
 const COLUMNAS = {
   animales: [
     'uuid', 'caravana', 'categoria', 'raza', 'fecha_nacimiento',
@@ -25,6 +24,26 @@ const COLUMNAS = {
     'vacuna_aplicada', 'medicamento', 'dosis_ml', 'observaciones',
     'operador', 'fecha', 'hora', 'sincronizado', 'timestamp_local',
     'device_id', 'sync_intentos',
+  ],
+  novedades: [
+    'uuid', 'fecha', 'hora', 'texto', 'operador', 'caravana',
+    'sincronizado', 'timestamp_local', 'device_id',
+  ],
+  // ─ Metadata de media (sin blobs — solo URL del NAS) ────────────────────
+  recorridas_meta: [
+    'uuid', 'fecha', 'hora', 'operador', 'duracion_seg',
+    'storage_url', 'storage_key', 'audio_tipo', 'audio_size',
+    'timestamp_local', 'device_id',
+  ],
+  fotos_meta: [
+    'uuid', 'fecha', 'hora', 'operador', 'nombre_original',
+    'storage_url', 'storage_key', 'imagen_tipo', 'imagen_size',
+    'timestamp_local', 'device_id',
+  ],
+  videos_meta: [
+    'uuid', 'fecha', 'hora', 'operador', 'nombre_original',
+    'storage_url', 'storage_key', 'video_tipo', 'video_size',
+    'timestamp_local', 'device_id',
   ],
 };
 
