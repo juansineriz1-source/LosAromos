@@ -52,7 +52,9 @@ export async function cargarFeedHoy() {
     return;
   }
 
-  contenedor.innerHTML = items.map(renderFeedItem).join('');
+  // Crear object URLs para blobs antes de renderizar
+  const blobURLs = await crearBlobURLs(items);
+  contenedor.innerHTML = items.map(item => renderFeedItem(item, blobURLs)).join('');
 }
 
 // ─── Navegación de meses ──────────────────────────────────────────────────────
@@ -164,9 +166,10 @@ window.abrirDiaCalendario = async function(fechaStr) {
     return;
   }
 
-  contenido.innerHTML = items.map(renderFeedItem).join('');
+  const blobURLs = await crearBlobURLs(items);
+  contenido.innerHTML = items.map(item => renderFeedItem(item, blobURLs)).join('');
 
-  // Hacer scroll al panel
+  // Scroll al panel
   detalle.scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
 
@@ -206,8 +209,22 @@ function construirFeedItems(novedades, registros, recorridas, fotos, videos) {
   return items.sort((a, b) => (a.hora || '').localeCompare(b.hora || ''));
 }
 
+// ─── Crear object URLs para blobs (audio + fotos) ───────────────────────────
+async function crearBlobURLs(items) {
+  const urls = {}; // key: `tipo-id`
+  await Promise.all(items.map(async item => {
+    if (item.tipo === 'recorrida' && item.audio_blob) {
+      try { urls[`recorrida-${item.id}`] = URL.createObjectURL(item.audio_blob); } catch {}
+    }
+    if (item.tipo === 'foto' && item.imagen_blob) {
+      try { urls[`foto-${item.id}`] = URL.createObjectURL(item.imagen_blob); } catch {}
+    }
+  }));
+  return urls;
+}
+
 // ─── Render de cada item del feed ────────────────────────────────────────────
-function renderFeedItem(item) {
+function renderFeedItem(item, blobURLs = {}) {
   const hora = item.hora || '--:--';
   const op   = item.operador || 'Operador';
 
@@ -231,16 +248,23 @@ function renderFeedItem(item) {
         ${item.vacuna  ? `<span class="feed-tag">💉 ${item.vacuna}</span>` : ''}
       </div>`;
   } else if (item.tipo === 'recorrida') {
-    const dur = item.duracion ? formatearSeg(item.duracion) : '';
+    const dur    = item.duracion ? formatearSeg(item.duracion) : '';
+    const audioSrc = blobURLs[`recorrida-${item.id}`] || item.storage_url || '';
     detalle = `
       <div class="feed-tags">
         ${dur ? `<span class="feed-tag">⏱ ${dur}</span>` : ''}
         ${item.storage_url ? `<span class="feed-tag feed-tag-ok">☁ Subida</span>` : `<span class="feed-tag">○ Local</span>`}
       </div>
-      ${item.audio_blob ? `<audio controls class="feed-audio" data-recorrida-id="${item.id}" preload="none"></audio>` : ''}
+      ${audioSrc
+        ? `<audio controls class="feed-audio" src="${audioSrc}" preload="metadata"></audio>`
+        : '<p class="sin-historial" style="font-size:12px">Audio no disponible</p>'
+      }
     `;
   } else if (item.tipo === 'foto') {
-    detalle = `<img class="feed-foto-thumb" data-foto-id="${item.id}" src="" alt="Foto">`;
+    const fotoSrc = blobURLs[`foto-${item.id}`] || item.storage_url || '';
+    detalle = fotoSrc
+      ? `<img class="feed-foto-thumb" src="${fotoSrc}" alt="Foto">`
+      : '<p class="sin-historial" style="font-size:12px">Foto no disponible</p>';
   } else if (item.tipo === 'video') {
     detalle = `
       <div class="feed-tags">
