@@ -14,6 +14,7 @@ import { inicializarSync, sincronizarPendientes } from './sync.js';
 import { inicializarRecorrida, cargarListaRecorridas } from './recorrida.js';
 import { inicializarFotos, cargarListaFotos } from './fotos.js';
 import { inicializarVideos, cargarListaVideos } from './videos.js';
+import { inicializarPush } from './push.js';
 
 // ─── Estado global ────────────────────────────────────────────────────────────
 const estado = {
@@ -37,6 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   inicializarRecorrida(mostrarToast);
   inicializarFotos(mostrarToast);
   inicializarVideos(mostrarToast);
+  inicializarPush();
   await actualizarContadorPendientes();
 
   // Nombre del operador

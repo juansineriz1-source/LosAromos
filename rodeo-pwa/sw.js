@@ -174,18 +174,39 @@ self.addEventListener('sync', (event) => {
   }
 });
 
-// ─── Notificaciones push (preparado para futuro) ────────────────────────────
+// ─── Push notifications ─────────────────────────────────────────────────────
 self.addEventListener('push', (event) => {
   if (!event.data) return;
-  const data = event.data.json();
+
+  let payload = {};
+  try { payload = event.data.json(); } catch { return; }
+
+  const options = {
+    body:    payload.cuerpo  || payload.body || '',
+    icon:    payload.icon    || '/icons/icon-192.png',
+    badge:   payload.badge   || '/icons/icon-72.png',
+    tag:     'rodeo-notif',
+    renotify: true,
+    vibrate: [200, 100, 200],
+    data:    payload.data    || { url: '/' },
+  };
 
   event.waitUntil(
-    self.registration.showNotification(data.titulo || 'RodeoApp', {
-      body: data.mensaje,
-      icon: '/icons/icon-192.png',
-      badge: '/icons/badge-72.png',
-      tag: 'rodeo-notif',
-      data: data.url,
+    self.registration.showNotification(payload.titulo || 'RodeoApp 🐄', options)
+  );
+});
+
+// Al tocar la notificación → abrir/enfocar la app
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = event.notification.data?.url || '/';
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(cs => {
+      const existing = cs.find(c => c.url.includes(self.location.origin));
+      if (existing) return existing.focus();
+      return clients.openWindow(url);
     })
   );
+});
+
 });

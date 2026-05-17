@@ -1,0 +1,9 @@
+{
+  "name": "rodeo-pwa",
+  "version": "1.0.0",
+  "description": "RodeoApp — Registro ganadero offline-first",
+  "private": true,
+  "dependencies": {
+    "web-push": "^3.6.7"
+  }
+}

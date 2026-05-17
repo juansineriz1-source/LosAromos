@@ -254,6 +254,29 @@ export default async function handler(req, res) {
     const token = await obtenerAccessToken();
     const resultado = await upsertRegistro(token, tabla, datos);
 
+    // ── Notificación push en background (no bloquea la respuesta) ──────────
+    if (resultado.ok) {
+      const titulo = tabla === 'registros_manga'
+        ? `🐄 ${datos.operador || 'Operador'} registró un pesaje`
+        : `📋 ${datos.operador || 'Operador'} actualizó un animal`;
+
+      const cuerpo = tabla === 'registros_manga'
+        ? `Caravana ${datos.caravana} · ${datos.peso_kg ? datos.peso_kg + ' kg' : ''} · ${datos.estado_sanitario || ''}`
+        : `Caravana ${datos.caravana}`;
+
+      // Fire & forget — no esperamos la respuesta del push
+      fetch(`${req.headers['x-forwarded-proto'] || 'https'}://${req.headers['host']}/api/push-notify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sender_device_id: datos.device_id || '',
+          titulo,
+          cuerpo,
+          data: { tabla, caravana: datos.caravana },
+        }),
+      }).catch(e => console.warn('[push trigger]', e.message));
+    }
+
     return res.status(200).json(resultado);
 
   } catch (error) {
