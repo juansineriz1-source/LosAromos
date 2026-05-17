@@ -35,126 +35,73 @@ export const DEVICE_ID = (() => {
 // ─── Definición de la base de datos ────────────────────────────────────────
 const db = new Dexie('RodeoDB');
 
+// ─── Versión 1: tablas originales ──────────────────────────────────────────
 db.version(1).stores({
-  /**
-   * TABLA: animales
-   * Registro maestro de cada animal identificado por su caravana.
-   *
-   * Índices:
-   *   caravana     — ID único del animal (número de caravana física)
-   *   categoria    — para filtrar por tipo de animal
-   *   sincronizado — para encontrar rápido los pendientes de sync
-   */
   animales: [
-    '++id',          // PK autoincremental local
-    'uuid',          // UUID generado en cliente (para idempotencia en el servidor)
-    'caravana',      // ID único de la caravana (ej: "AR-1234-5678")
-    'categoria',     // vaca | vaquillona | toro | ternero | etc.
-    'raza',
-    'fecha_nacimiento',
-    'sincronizado',  // 0 = pendiente | 1 = sincronizado | 2 = conflicto
-    'timestamp_local',
-    'device_id',
-    'deleted',       // soft delete: 0 | 1
+    '++id', 'uuid', 'caravana', 'categoria', 'raza', 'fecha_nacimiento',
+    'sincronizado', 'timestamp_local', 'device_id', 'deleted',
   ].join(', '),
 
-  /**
-   * TABLA: registros_manga
-   * Cada evento de pesaje/sanidad registrado en la manga.
-   * Un animal puede tener MÚLTIPLES registros (historial).
-   *
-   * Índices:
-   *   caravana     — para obtener el historial de un animal
-   *   fecha        — para filtrar por jornada
-   *   sincronizado — para cola de sync
-   */
   registros_manga: [
-    '++id',
-    'uuid',          // UUID v4 — clave de idempotencia en el servidor
-    'caravana',      // FK → animales.caravana
-    'animal_uuid',   // FK → animales.uuid
-    'peso_kg',       // número decimal
-    'estado_sanitario',
-    'vacuna_aplicada',
-    'medicamento',
-    'dosis_ml',
-    'observaciones',
-    'operador',      // nombre del peón/veterinario que cargó el dato
-    'fecha',         // ISO date string: "2024-06-15"
-    'hora',          // "HH:MM"
-    'sincronizado',  // 0 | 1 | 2
-    'timestamp_local',
-    'device_id',
-    'sync_intentos', // contador de reintentos fallidos
+    '++id', 'uuid', 'caravana', 'animal_uuid', 'peso_kg', 'estado_sanitario',
+    'vacuna_aplicada', 'medicamento', 'dosis_ml', 'observaciones',
+    'operador', 'fecha', 'hora', 'sincronizado', 'timestamp_local',
+    'device_id', 'sync_intentos',
   ].join(', '),
 
-  /**
-   * TABLA: sync_queue
-   * Cola de operaciones pendientes de enviar al servidor.
-   * Workbox Background Sync la complementa, pero esta tabla
-   * permite visibilidad y reintento manual desde la UI.
-   */
   sync_queue: [
-    '++id',
-    'tabla',         // 'animales' | 'registros_manga'
-    'registro_uuid', // UUID del registro a sincronizar
-    'operacion',     // 'INSERT' | 'UPDATE' | 'DELETE'
-    'payload',       // JSON stringificado
-    'timestamp',
-    'intentos',
-    'ultimo_error',
+    '++id', 'tabla', 'registro_uuid', 'operacion', 'payload',
+    'timestamp', 'intentos', 'ultimo_error',
   ].join(', '),
 
-  /**
-   * TABLA: config
-   * Configuración local del dispositivo/operador.
-   */
   config: '&clave, valor',
 
-  /**
-   * TABLA: novedades
-   * Comentarios y novedades del día registradas por el operador.
-   * Se muestran en la pestaña Inicio y se asocian opcionalmente a una caravana.
-   */
   novedades: [
-    '++id',
-    'uuid',
-    'fecha',
-    'hora',
-    'texto',
-    'operador',
-    'caravana',
-    'sincronizado',
-    'timestamp_local',
-    'device_id',
+    '++id', 'uuid', 'fecha', 'hora', 'texto', 'operador',
+    'caravana', 'sincronizado', 'timestamp_local', 'device_id',
+  ].join(', '),
+});
+
+// ─── Versión 2: tablas de media (audio, fotos, videos) ──────────────────────
+// Siempre declarar TODAS las tablas existentes en cada versión.
+db.version(2).stores({
+  animales: [
+    '++id', 'uuid', 'caravana', 'categoria', 'raza', 'fecha_nacimiento',
+    'sincronizado', 'timestamp_local', 'device_id', 'deleted',
+  ].join(', '),
+
+  registros_manga: [
+    '++id', 'uuid', 'caravana', 'animal_uuid', 'peso_kg', 'estado_sanitario',
+    'vacuna_aplicada', 'medicamento', 'dosis_ml', 'observaciones',
+    'operador', 'fecha', 'hora', 'sincronizado', 'timestamp_local',
+    'device_id', 'sync_intentos',
+  ].join(', '),
+
+  sync_queue: [
+    '++id', 'tabla', 'registro_uuid', 'operacion', 'payload',
+    'timestamp', 'intentos', 'ultimo_error',
+  ].join(', '),
+
+  config: '&clave, valor',
+
+  novedades: [
+    '++id', 'uuid', 'fecha', 'hora', 'texto', 'operador',
+    'caravana', 'sincronizado', 'timestamp_local', 'device_id',
   ].join(', '),
 
   /**
    * TABLA: recorridas
    * Grabaciones de audio de las recorridas diarias del campo.
-   * El audio se guarda como Blob (IndexedDB soporta binarios nativos).
-   * No se sincroniza con Sheets (demasiado voluminoso); queda local en el dispositivo.
    */
   recorridas: [
-    '++id',
-    'uuid',
-    'fecha',
-    'hora',
-    'duracion_seg',
-    'operador',
-    'audio_blob',
-    'audio_tipo',
-    'audio_size',
-    'storage_url',
-    'storage_key',
-    'timestamp_local',
-    'device_id',
+    '++id', 'uuid', 'fecha', 'hora', 'duracion_seg', 'operador',
+    'audio_blob', 'audio_tipo', 'audio_size',
+    'storage_url', 'storage_key', 'timestamp_local', 'device_id',
   ].join(', '),
 
   /**
    * TABLA: fotos
    * Fotos del día tomadas en el campo (cámara o galería).
-   * Se comprimen en cliente antes de guardar y se sincronizan con MinIO en background.
    */
   fotos: [
     '++id', 'uuid', 'fecha', 'hora', 'operador',
