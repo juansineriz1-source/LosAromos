@@ -19,24 +19,27 @@ const { core, precaching, routing, strategies, backgroundSync, expiration } = wo
 // ─── Configuración base ─────────────────────────────────────────────────────
 core.setCacheNameDetails({
   prefix: 'rodeo-pwa',
-  suffix: 'v3',
+  suffix: 'v4',
 });
 
 core.skipWaiting();
 core.clientsClaim();
 
 // ─── Pre-caché de assets estáticos ─────────────────────────────────────────
-// Revisión 3 — incluye pestaña Recorrida + módulos audio/fotos/video
+// Revisión 4 — fix crash + migración Dexie v2 + calendario + notificaciones
 precaching.precacheAndRoute([
-  { url: '/', revision: '3' },
-  { url: '/index.html', revision: '3' },
-  { url: '/css/estilos.css', revision: '3' },
-  { url: '/js/app.js', revision: '3' },
-  { url: '/js/db.js', revision: '3' },
-  { url: '/js/bluetooth.js', revision: '3' },
-  { url: '/js/sync.js', revision: '3' },
-  { url: '/js/recorrida.js', revision: '3' },
-  { url: '/js/fotos.js', revision: '3' },
+  { url: '/', revision: '4' },
+  { url: '/index.html', revision: '4' },
+  { url: '/css/estilos.css', revision: '4' },
+  { url: '/js/app.js', revision: '4' },
+  { url: '/js/db.js', revision: '4' },
+  { url: '/js/bluetooth.js', revision: '4' },
+  { url: '/js/sync.js', revision: '4' },
+  { url: '/js/recorrida.js', revision: '4' },
+  { url: '/js/fotos.js', revision: '4' },
+  { url: '/js/videos.js', revision: '4' },
+  { url: '/js/push.js', revision: '4' },
+  { url: '/js/calendario.js', revision: '4' },
   { url: '/manifest.json', revision: '1' },
 ]);
 
@@ -44,7 +47,7 @@ precaching.precacheAndRoute([
 routing.registerRoute(
   ({ request }) => ['script', 'style', 'image', 'font'].includes(request.destination),
   new strategies.CacheFirst({
-    cacheName: 'rodeo-assets-v3',
+    cacheName: 'rodeo-assets-v4',
     plugins: [
       new expiration.ExpirationPlugin({
         maxEntries: 100,
@@ -147,20 +150,18 @@ routing.registerRoute(
   })
 );
 
-// ─── Manejo de mensajes desde la app ───────────────────────────────────────
-self.addEventListener('message', async (event) => {
-  if (event.data?.tipo === 'SKIP_WAITING') {
+// ─── Mensajes desde el cliente ───────────────────────────────────────────────
+self.addEventListener('message', (event) => {
+  // Forzar update del SW desde la app
+  if (event.data === 'SKIP_WAITING') {
     self.skipWaiting();
-    return;
   }
-
-  if (event.data?.tipo === 'SYNC_MANUAL') {
-    // La app puede triggerear sync manual cuando detecta que volvió la red
+  // Sync manual
+  if (event.data === 'SYNC_NOW') {
     try {
-      await self.registration.sync.register(SYNC_QUEUE_NAME);
+      self.registration.sync.register('sync-manga');
       event.source.postMessage({ tipo: 'SYNC_REGISTRADA' });
     } catch (e) {
-      // Background Sync no disponible — la app manejará el retry
       event.source.postMessage({ tipo: 'SYNC_NO_DISPONIBLE', error: e.message });
     }
   }

@@ -61,14 +61,41 @@ async function registrarServiceWorker() {
   try {
     const reg = await navigator.serviceWorker.register('/sw.js');
     console.log('[App] SW registrado:', reg.scope);
+
+    const mostrarBotonUpdate = () => {
+      const btn = $('btn-update-sw');
+      if (btn) btn.classList.remove('oculto');
+    };
+
     reg.addEventListener('updatefound', () => {
       const nuevo = reg.installing;
       nuevo.addEventListener('statechange', () => {
         if (nuevo.state === 'installed' && navigator.serviceWorker.controller) {
-          mostrarToast('Nueva versión disponible. Recargá la página.', 'info', 0);
+          // Nueva versión instalada — mostrar botón en lugar de toast
+          mostrarBotonUpdate();
         }
       });
     });
+
+    // Botón de actualización forzada
+    const btnUpdate = $('btn-update-sw');
+    if (btnUpdate) {
+      btnUpdate.addEventListener('click', async () => {
+        btnUpdate.textContent = '⏳ Actualizando...';
+        const sw = reg.waiting || reg.installing;
+        if (sw) sw.postMessage('SKIP_WAITING');
+        // Esperar que el nuevo SW tome control y recargar
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          window.location.reload();
+        });
+        // Fallback: recargar de todas formas a los 2 segundos
+        setTimeout(() => window.location.reload(), 2000);
+      });
+    }
+
+    // Si hay un SW waiting al cargar (update previo pendiente), mostrar botón
+    if (reg.waiting) mostrarBotonUpdate();
+
   } catch (e) {
     console.error('[App] Error registrando SW:', e);
   }
@@ -369,6 +396,30 @@ async function guardarCambiosManual() {
     btn.disabled = false;
     btn.textContent = '💾 Guardar cambios';
   }
+}
+
+// ─── SERVICE WORKER UPDATE ────────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    window.location.reload();
+  });
+
+  navigator.serviceWorker.ready.then(reg => {
+    reg.addEventListener('updatefound', () => {
+      const sw = reg.installing;
+      sw.addEventListener('statechange', () => {
+        if (sw.state === 'installed' && navigator.serviceWorker.controller) {
+          const btn = document.createElement('button');
+          btn.className = 'btn-update-sw';
+          btn.textContent = '🔄 Nueva versión disponible - Actualizar';
+          btn.onclick = () => {
+            reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+          };
+          document.body.appendChild(btn);
+        }
+      });
+    });
+  });
 }
 
 // ─── RODEO ────────────────────────────────────────────────────────────────────
