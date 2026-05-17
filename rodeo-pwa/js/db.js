@@ -110,6 +110,24 @@ db.version(1).stores({
    * Configuración local del dispositivo/operador.
    */
   config: '&clave, valor',
+
+  /**
+   * TABLA: novedades
+   * Comentarios y novedades del día registradas por el operador.
+   * Se muestran en la pestaña Inicio y se asocian opcionalmente a una caravana.
+   */
+  novedades: [
+    '++id',
+    'uuid',
+    'fecha',          // ISO date 'YYYY-MM-DD'
+    'hora',           // 'HH:MM'
+    'texto',          // Cuerpo del comentario
+    'operador',       // Nombre del operador
+    'caravana',       // opcional: asociar a un animal
+    'sincronizado',
+    'timestamp_local',
+    'device_id',
+  ].join(', '),
 });
 
 // ─── Funciones auxiliares ───────────────────────────────────────────────────
@@ -219,6 +237,43 @@ export async function historialAnimal(caravana) {
     .where('caravana').equals(caravana)
     .reverse()
     .sortBy('timestamp_local');
+}
+
+/**
+ * Retorna todos los animales registrados (sin filtro).
+ */
+export async function obtenerTodosLosAnimales() {
+  return db.animales.where('deleted').equals(0).toArray().catch(() => db.animales.toArray());
+}
+
+/**
+ * Retorna todos los registros de manga.
+ */
+export async function obtenerTodosLosRegistros() {
+  return db.registros_manga.toArray();
+}
+
+/**
+ * Guarda una novedad / comentario del día.
+ */
+export async function guardarNovedad(datos) {
+  const novedad = {
+    ...crearMetadatos(),
+    fecha: new Date().toISOString().split('T')[0],
+    hora: new Date().toTimeString().slice(0, 5),
+    caravana: datos.caravana || null,
+    texto: datos.texto,
+    operador: datos.operador || '',
+  };
+  await db.novedades.add(novedad);
+  return novedad;
+}
+
+/**
+ * Retorna todas las novedades ordenadas por más recientes primero.
+ */
+export async function obtenerNovedades() {
+  return db.novedades.orderBy('timestamp_local').reverse().toArray();
 }
 
 export default db;

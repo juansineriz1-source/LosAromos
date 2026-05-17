@@ -6,11 +6,10 @@
   <meta name="theme-color" content="#0f5228">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="description" content="Registro ganadero offline para manga">
+  <meta name="description" content="Registro ganadero offline para manga — Los Aromos">
   <title>RodeoApp</title>
   <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="/css/estilos.css">
-  <!-- Dexie.js desde CDN — se cachea en primera visita -->
   <script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js"></script>
 </head>
 <body>
@@ -18,11 +17,13 @@
   <!-- ═══════════════════════ HEADER ═══════════════════════════════ -->
   <header class="header">
     <div class="header-top">
-      <div>
-        <div class="app-titulo">🐄 RodeoApp</div>
-        <div class="app-subtitulo">Registro ganadero offline</div>
+      <div class="header-left">
+        <span class="app-titulo" id="header-titulo">RodeoApp</span>
+        <span class="app-subtitulo" id="header-subtitulo">Los Aromos</span>
       </div>
-      <span class="estado-red offline" id="estado-red">○ Sin señal</span>
+      <div class="header-right">
+        <span class="estado-red offline" id="estado-red">○ Sin señal</span>
+      </div>
     </div>
     <div class="header-info">
       <span class="estado-bt desconectado" id="estado-bt">Bastón no conectado</span>
@@ -30,144 +31,312 @@
     </div>
   </header>
 
-  <!-- ═══════════════════════ CONTENIDO PRINCIPAL ══════════════════ -->
+  <!-- ═══════════════════════ CONTENIDO TABS ═══════════════════════ -->
   <main class="main">
 
-    <!-- ── 1. BLUETOOTH ── -->
-    <section class="card">
-      <div class="card-titulo">📡 Bastón Lector</div>
+    <!-- ──────────── TAB: INICIO ──────────── -->
+    <section class="tab-panel" id="tab-inicio">
 
-      <button class="btn btn-bluetooth" id="btn-bluetooth">
-        📡 Conectar Bastón
-      </button>
-
-      <!-- Solo visible en modo desarrollo -->
-      <button class="btn btn-simular" id="btn-simular">
-        ⌨ Simular lectura de caravana (dev)
-      </button>
-    </section>
-
-    <!-- ── 2. CARAVANA ── -->
-    <section class="card">
-      <div class="card-titulo">🏷 Caravana del Animal</div>
-
-      <div class="grupo-campo">
-        <label class="campo-label" for="input-caravana">Número de Caravana</label>
-        <input
-          type="text"
-          id="input-caravana"
-          class="campo-input"
-          placeholder="Escanear o ingresar"
-          autocomplete="off"
-          autocorrect="off"
-          spellcheck="false"
-          inputmode="text"
-        >
+      <!-- Saludo del día -->
+      <div class="inicio-hero">
+        <div class="inicio-fecha" id="inicio-fecha">—</div>
+        <div class="inicio-saludo" id="inicio-saludo">Buenos días</div>
+        <div class="inicio-operador-name" id="inicio-op-nombre">Operador</div>
       </div>
 
-      <!-- Historial del animal identificado -->
-      <div class="historial-titulo">Últimos registros:</div>
-      <div id="historial">
-        <p class="sin-historial">Escaneá una caravana para ver su historial</p>
-      </div>
-    </section>
-
-    <!-- ── 3. DATOS DEL REGISTRO ── -->
-    <section class="card">
-      <div class="card-titulo">⚖ Datos de Manga</div>
-
-      <!-- Peso -->
-      <div class="grupo-campo">
-        <label class="campo-label" for="input-peso">Peso</label>
-        <input
-          type="number"
-          id="input-peso"
-          class="campo-input"
-          placeholder="0"
-          min="1"
-          max="1500"
-          step="0.5"
-          inputmode="decimal"
-        >
-        <div class="campo-unidad">kilogramos</div>
-      </div>
-
-      <!-- Categoría y Raza en grilla -->
-      <div class="grid-2">
-        <div class="grupo-campo">
-          <label class="campo-label" for="select-categoria">Categoría</label>
-          <select id="select-categoria" class="campo-select">
-            <!-- poblado por JS -->
-          </select>
+      <!-- Stats del día -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-numero" id="stat-registros">0</div>
+          <div class="stat-label">Registros hoy</div>
         </div>
-        <div class="grupo-campo">
-          <label class="campo-label" for="select-raza">Raza</label>
-          <select id="select-raza" class="campo-select">
-            <!-- poblado por JS -->
-          </select>
+        <div class="stat-card">
+          <div class="stat-numero" id="stat-animales">0</div>
+          <div class="stat-label">Animales distintos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-numero" id="stat-pendientes">0</div>
+          <div class="stat-label">Por sincronizar</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-numero" id="stat-peso-prom">—</div>
+          <div class="stat-label">Peso promedio</div>
         </div>
       </div>
 
-      <!-- Estado sanitario -->
-      <div class="grupo-campo">
-        <label class="campo-label" for="select-estado">Estado Sanitario</label>
-        <select id="select-estado" class="campo-select">
-          <!-- poblado por JS -->
-        </select>
-      </div>
-
-      <!-- Vacuna aplicada -->
-      <div class="grupo-campo">
-        <label class="campo-label" for="input-vacuna">Vacuna / Medicamento (opcional)</label>
-        <input
-          type="text"
-          id="input-vacuna"
-          class="campo-input"
-          placeholder="Ej: Fiebre Aftosa, Clostridiosis..."
-          autocomplete="off"
-        >
-      </div>
-
-      <!-- Observaciones -->
-      <div class="grupo-campo">
-        <label class="campo-label" for="input-obs">Observaciones</label>
-        <input
-          type="text"
-          id="input-obs"
-          class="campo-input"
-          placeholder="Ej: cojera leve, oreja rota..."
-        >
-      </div>
-    </section>
-
-    <!-- ── 4. ACCIONES ── -->
-    <section class="card">
-      <button class="btn btn-primario" id="btn-guardar">
-        💾 GUARDAR
-      </button>
-
-      <div style="height: 10px;"></div>
-
-      <button class="btn btn-secundario" id="btn-limpiar">
-        🔄 Limpiar / Siguiente animal
-      </button>
-    </section>
-
-    <!-- ── 5. SINCRONIZACIÓN ── -->
-    <section class="card">
-      <div class="card-titulo">☁ Sincronización</div>
-      <div class="barra-sync">
-        <button class="btn btn-sync" id="btn-sync" style="flex: 1;">
-          ↑ Sincronizar ahora
+      <!-- Comentario del día -->
+      <div class="card">
+        <div class="card-titulo">📝 Novedades del día</div>
+        <textarea
+          id="comentario-dia"
+          class="campo-textarea"
+          placeholder="Ej: Se peló el potrero norte. Animal 3421 con cojera. Llegó el veterinario a las 10hs..."
+          rows="4"
+        ></textarea>
+        <button class="btn btn-secundario" id="btn-guardar-comentario" style="margin-top: 8px; min-height: 48px; font-size: 16px;">
+          💾 Guardar novedades
         </button>
-        <span id="contador-pendientes"></span>
       </div>
-      <p style="font-size: 12px; color: #6b7280; margin-top: 8px; text-align: center;">
-        Los datos se guardan localmente y se envían automáticamente cuando vuelve la señal.
-      </p>
+
+      <!-- Últimas novedades guardadas -->
+      <div class="card">
+        <div class="card-titulo">📋 Historial de novedades</div>
+        <div id="lista-novedades">
+          <p class="sin-historial">Sin novedades registradas</p>
+        </div>
+      </div>
+
+      <!-- Sync -->
+      <div class="card">
+        <div class="barra-sync">
+          <button class="btn btn-sync" id="btn-sync" style="flex: 1;">
+            ☁ Sincronizar ahora
+          </button>
+          <span id="contador-pendientes"></span>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ──────────── TAB: BASTÓN ──────────── -->
+    <section class="tab-panel oculto" id="tab-baston">
+
+      <!-- Bluetooth -->
+      <div class="card">
+        <div class="card-titulo">📡 Bastón Lector BLE</div>
+        <button class="btn btn-bluetooth" id="btn-bluetooth">
+          📡 Conectar Bastón
+        </button>
+        <button class="btn btn-simular" id="btn-simular">
+          ⌨ Simular lectura de caravana (dev)
+        </button>
+      </div>
+
+      <!-- Caravana leída -->
+      <div class="card">
+        <div class="card-titulo">🏷 Caravana del Animal</div>
+        <div class="grupo-campo">
+          <label class="campo-label" for="input-caravana">Número de Caravana</label>
+          <input
+            type="text"
+            id="input-caravana"
+            class="campo-input"
+            placeholder="ESCANEAR O INGRESAR"
+            autocomplete="off"
+            autocorrect="off"
+            spellcheck="false"
+            inputmode="text"
+          >
+        </div>
+        <div class="historial-titulo">Últimos registros:</div>
+        <div id="historial">
+          <p class="sin-historial">Escaneá una caravana para ver su historial</p>
+        </div>
+      </div>
+
+      <!-- Datos de manga -->
+      <div class="card">
+        <div class="card-titulo">⚖ Datos de Manga</div>
+
+        <div class="grupo-campo">
+          <label class="campo-label" for="input-peso">Peso</label>
+          <input
+            type="number"
+            id="input-peso"
+            class="campo-input"
+            placeholder="0"
+            min="1" max="1500" step="0.5"
+            inputmode="decimal"
+          >
+          <div class="campo-unidad">kilogramos</div>
+        </div>
+
+        <div class="grid-2">
+          <div class="grupo-campo">
+            <label class="campo-label" for="select-categoria">Categoría</label>
+            <select id="select-categoria" class="campo-select"></select>
+          </div>
+          <div class="grupo-campo">
+            <label class="campo-label" for="select-raza">Raza</label>
+            <select id="select-raza" class="campo-select"></select>
+          </div>
+        </div>
+
+        <div class="grupo-campo">
+          <label class="campo-label" for="select-estado">Estado Sanitario</label>
+          <select id="select-estado" class="campo-select"></select>
+        </div>
+
+        <div class="grupo-campo">
+          <label class="campo-label" for="input-vacuna">Vacuna / Medicamento (opcional)</label>
+          <input type="text" id="input-vacuna" class="campo-input" placeholder="Ej: Fiebre Aftosa, Clostridiosis..." autocomplete="off">
+        </div>
+
+        <div class="grupo-campo">
+          <label class="campo-label" for="input-obs">Observaciones</label>
+          <input type="text" id="input-obs" class="campo-input" placeholder="Ej: cojera leve, oreja rota...">
+        </div>
+      </div>
+
+      <!-- Acciones -->
+      <div class="card">
+        <button class="btn btn-primario" id="btn-guardar">
+          💾 GUARDAR
+        </button>
+        <div style="height: 10px;"></div>
+        <button class="btn btn-secundario" id="btn-limpiar">
+          🔄 Limpiar / Siguiente animal
+        </button>
+      </div>
+
+    </section>
+
+    <!-- ──────────── TAB: CARGA MANUAL ──────────── -->
+    <section class="tab-panel oculto" id="tab-manual">
+
+      <!-- Búsqueda -->
+      <div class="card">
+        <div class="card-titulo">🔍 Buscar Caravana</div>
+        <div class="grupo-campo">
+          <input
+            type="text"
+            id="manual-buscar"
+            class="campo-input"
+            placeholder="Número de caravana..."
+            autocomplete="off"
+            autocorrect="off"
+            spellcheck="false"
+            inputmode="text"
+          >
+        </div>
+        <button class="btn btn-secundario" id="btn-manual-buscar" style="min-height: 52px; font-size: 17px;">
+          🔍 Buscar
+        </button>
+      </div>
+
+      <!-- Resultado: animal encontrado -->
+      <div class="card oculto" id="manual-resultado">
+        <div class="card-titulo">🏷 Animal encontrado</div>
+        <div class="animal-detalle" id="manual-animal-info"></div>
+        <div class="divider"></div>
+
+        <!-- Agregar comentario rápido -->
+        <div class="grupo-campo" style="margin-top: 12px;">
+          <label class="campo-label">Agregar comentario</label>
+          <textarea
+            id="manual-comentario"
+            class="campo-textarea"
+            placeholder="Ej: Se revisó la oreja. Mejora visible..."
+            rows="3"
+          ></textarea>
+        </div>
+
+        <!-- Editar características -->
+        <details class="accordion">
+          <summary class="accordion-titulo">✏ Editar características</summary>
+          <div class="accordion-body">
+            <div class="grid-2">
+              <div class="grupo-campo">
+                <label class="campo-label">Categoría</label>
+                <select id="manual-categoria" class="campo-select"></select>
+              </div>
+              <div class="grupo-campo">
+                <label class="campo-label">Raza</label>
+                <select id="manual-raza" class="campo-select"></select>
+              </div>
+            </div>
+            <div class="grupo-campo">
+              <label class="campo-label">Estado Sanitario</label>
+              <select id="manual-estado" class="campo-select"></select>
+            </div>
+            <div class="grupo-campo">
+              <label class="campo-label">Vacuna / Medicamento</label>
+              <input type="text" id="manual-vacuna" class="campo-input" placeholder="Vacuna aplicada...">
+            </div>
+          </div>
+        </details>
+
+        <button class="btn btn-primario" id="btn-manual-guardar" style="margin-top: 12px; min-height: 60px;">
+          💾 Guardar cambios
+        </button>
+      </div>
+
+      <!-- Estado: no encontrado -->
+      <div class="card oculto" id="manual-no-encontrado">
+        <div style="text-align: center; padding: 20px 0;">
+          <div style="font-size: 48px; margin-bottom: 12px;">🔍</div>
+          <div style="font-weight: 700; font-size: 18px; margin-bottom: 6px;">Animal no encontrado</div>
+          <p class="sin-historial">Esta caravana no tiene registros locales.<br>Usá el bastón para registrarla primero.</p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ──────────── TAB: RODEO ──────────── -->
+    <section class="tab-panel oculto" id="tab-rodeo">
+
+      <!-- Filtros -->
+      <div class="card" style="padding: 12px 16px;">
+        <div class="rodeo-filtros">
+          <input
+            type="text"
+            id="rodeo-filtro"
+            class="campo-input"
+            placeholder="Filtrar por caravana..."
+            style="min-height: 48px; font-size: 16px;"
+            autocomplete="off"
+          >
+          <select id="rodeo-filtro-estado" class="campo-select" style="min-height: 48px; font-size: 15px;">
+            <option value="">Todos los estados</option>
+          </select>
+        </div>
+        <div class="rodeo-header-info">
+          <span id="rodeo-total-label">0 animales</span>
+          <span id="rodeo-sync-label"></span>
+        </div>
+      </div>
+
+      <!-- Lista de caravanas -->
+      <div id="rodeo-lista">
+        <p class="sin-historial" style="margin: 24px 0;">Sin registros todavía</p>
+      </div>
+
+      <!-- Modal detalle animal -->
+      <div class="modal-overlay oculto" id="modal-overlay">
+        <div class="modal">
+          <div class="modal-header">
+            <span class="modal-caravana" id="modal-caravana">—</span>
+            <button class="modal-cerrar" id="modal-cerrar">✕</button>
+          </div>
+          <div class="modal-body" id="modal-body">
+            <!-- contenido dinámico -->
+          </div>
+        </div>
+      </div>
+
     </section>
 
   </main>
+
+  <!-- ═══════════════════════ BOTTOM NAV ═══════════════════════════ -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" id="nav-inicio" data-tab="inicio">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">Inicio</span>
+    </button>
+    <button class="nav-item" id="nav-baston" data-tab="baston">
+      <span class="nav-icon">📡</span>
+      <span class="nav-label">Bastón</span>
+    </button>
+    <button class="nav-item" id="nav-manual" data-tab="manual">
+      <span class="nav-icon">✏</span>
+      <span class="nav-label">Manual</span>
+    </button>
+    <button class="nav-item" id="nav-rodeo" data-tab="rodeo">
+      <span class="nav-icon">🐄</span>
+      <span class="nav-label">Rodeo</span>
+    </button>
+  </nav>
 
   <!-- ═══════════════════════ SCRIPTS ══════════════════════════════ -->
   <script type="module" src="/js/app.js"></script>

@@ -76,10 +76,15 @@ Servicio Genérico BLE fallback:  0000ffe0-0000-1000-8000-00805f9b34fb   ← int
 
 ## HISTORIAL DE CAMBIOS
 
-### 2026-05-17 — Inicio del documento vivo
+### 2026-05-17 — Inicio del documento vivo + migración a Vercel + Google Sheets API
 - Proyecto tomado como contexto por primera vez
-- Se verifica la estructura real de archivos: existe carpeta raíz con archivos de dev + subcarpeta `rodeo-pwa/` con estructura organizada
-- Se actualiza `contexto.md` para funcionar como documento vivo mantenido en cada sesión
+- Se verifica estructura real: carpeta raíz (dev) + `rodeo-pwa/` (producción organizada)
+- **Deploy:** Se sube el repo a `https://github.com/juansineriz1-source/LosAromos.git`
+- **Backend reemplazado:** Se elimina Google Apps Script como backend. En su lugar se crea `rodeo-pwa/api/sincronizar.js` (función Vercel serverless)
+- **Autenticación:** Service account `bot-n8n@custom-unison-403623.iam.gserviceaccount.com` con JWT RS256 generado en runtime (sin librerías externas)
+- **Sheet:** `1tEncjxGzwE-7AZLnlmShSSM3lCaNFQR9DNn459AWhSg` — hoja `LosAromos`
+- **sync.js:** Actualizado para apuntar siempre a `/api/sincronizar` (eliminado el flag `USAR_GOOGLE_SHEETS`)
+- **Variables de entorno pendientes en Vercel:** `GOOGLE_PRIVATE_KEY`, `GOOGLE_SERVICE_ACCOUNT_EMAIL`, `GOOGLE_SHEET_ID`
 
 ---
 
