@@ -163,37 +163,37 @@ function comprimirImagen(file, maxPx = 1200, calidad = 0.82) {
   });
 }
 
-// ─── Subida a MinIO en background ─────────────────────────────────────────────
+// ─── Subida a MinIO via proxy Vercel (evita CORS) ────────────────────────────
 async function subirFotoEnBackground(fotoId, blob, operador, onToast) {
-  if (!navigator.onLine) return;
+  if (!navigator.onLine || !blob) return;
 
   try {
-    const resp = await fetch('/api/upload-url', {
-      method: 'POST',
+    // Convertir blob → base64 para enviar como JSON
+    const base64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload  = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+
+    // Subir via proxy Vercel → MinIO (sin CORS)
+    const resp = await fetch('/api/subir-media', {
+      method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        tipo: 'foto',
-        contentType: blob.type || 'image/jpeg',
+        tipo:     'foto',
+        base64,
+        mimeType: blob.type || 'image/jpeg',
         operador,
       }),
     });
 
-    if (!resp.ok) throw new Error(`upload-url ${resp.status}`);
-    const { uploadUrl, publicUrl, objectKey } = await resp.json();
-
-    const upload = await fetch(uploadUrl, {
-      method: 'PUT',
-      headers: { 'Content-Type': blob.type || 'image/jpeg' },
-      body: blob,
-    });
-
-    if (!upload.ok) throw new Error(`MinIO PUT ${upload.status}`);
+    if (!resp.ok) { const t = await resp.text(); throw new Error(`subir-media ${resp.status}: ${t}`); }
+    const { ok, publicUrl, objectKey, error } = await resp.json();
+    if (!ok) throw new Error(error || 'Error en subir-media');
 
     const fotoActualizada = await db.fotos.get(fotoId);
-    await db.fotos.update(fotoId, {
-      storage_url: publicUrl,
-      storage_key: objectKey,
-    });
+    await db.fotos.update(fotoId, { storage_url: publicUrl, storage_key: objectKey });
 
     // Sincronizar metadata para visibilidad cross-device
     if (fotoActualizada) {
@@ -203,7 +203,7 @@ async function subirFotoEnBackground(fotoId, blob, operador, onToast) {
     await cargarListaFotos();
 
   } catch (err) {
-    console.warn('[Fotos] Subida background fallida:', err.message);
+    console.warn('[Fotos] Subida fallida:', err.message);
   }
 }
 

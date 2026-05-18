@@ -168,14 +168,15 @@ async function subirAudioEnBackground(recorridaId, blob, operador, onToast) {
       reader.readAsDataURL(blob);
     });
 
-    // Subir via Vercel (server-side → sin CORS con MinIO)
-    const resp = await fetch('/api/subir-audio', {
+    // Subir via proxy Vercel → MinIO (server-side, sin CORS)
+    const resp = await fetch('/api/subir-media', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        audioBase64: base64,
-        mimeType:    blob.type || 'audio/webm',
-        operador:    operador,
+        tipo:     'audio',
+        base64:   base64,
+        mimeType: blob.type || 'audio/webm',
+        operador: operador,
       }),
     });
 
