@@ -313,7 +313,7 @@ function renderFeedItem(item, blobURLs = {}, puedeAdmin = false) {
   const btnBorrar = puedesBorrar
     ? `<button
         class="feed-btn-borrar"
-        onclick="borrarMediaFeed('${item.storage_key}','${tablaMap[item.tipo]}','${item.uuid || ''}','${item.id || ''}','${item.tipo}')"
+        onclick="borrarMediaFeed(event,'${item.storage_key}','${tablaMap[item.tipo]}','${item.uuid || ''}','${item.id || ''}','${item.tipo}')"
         title="Borrar para todos"
        >🗑️</button>`
     : '';
@@ -402,8 +402,17 @@ export async function hidratarFeed(contenedor) {
 }
 
 // ─── Borrar media (solo admins) ──────────────────────────────────────────────
-window.borrarMediaFeed = async function(storageKey, tabla, uuid, localId, tipo) {
+window.borrarMediaFeed = async function(event, storageKey, tabla, uuid, localId, tipo) {
   if (!confirm('¿Borrar este archivo para todos? Esta acción no se puede deshacer.')) return;
+
+  // Remover la card del DOM inmediatamente — feedback visual instantáneo
+  const card = event.target.closest('.feed-item');
+  if (card) {
+    card.style.transition = 'opacity 0.2s, transform 0.2s';
+    card.style.opacity    = '0';
+    card.style.transform  = 'translateX(40px)';
+    setTimeout(() => card.remove(), 220);
+  }
 
   try {
     const resp = await fetch('/api/borrar-media', {
@@ -420,20 +429,11 @@ window.borrarMediaFeed = async function(storageKey, tabla, uuid, localId, tipo) 
       await db[tablaLocal].delete(parseInt(localId)).catch(() => {});
     }
 
-    // Refrescar el feed
-    const feedHoy = document.getElementById('feed-hoy');
-    if (feedHoy) await cargarFeedHoy();
-
-    // Si hay un panel de detalle de calendario abierto, refrescarlo también
-    const detalle = document.getElementById('cal-detalle');
-    if (detalle && !detalle.classList.contains('oculto')) {
-      const fechaLabel = document.getElementById('cal-detalle-fecha');
-      // No podemos re-lanzar fácilmente sin la fecha; simplemente cerramos el panel
-      detalle.classList.add('oculto');
-    }
-
   } catch (err) {
+    // Si falló en el servidor, la card ya fue quitada — recargar el feed para restaurar
+    console.error('[Borrar]', err.message);
     alert(`Error al borrar: ${err.message}`);
+    await cargarFeedHoy().catch(() => {});
   }
 };
 
