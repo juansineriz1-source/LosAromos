@@ -307,8 +307,10 @@ function renderFeedItem(item, blobURLs = {}) {
         ${item.vacuna  ? `<span class="feed-tag">💉 ${item.vacuna}</span>` : ''}
       </div>`;
   } else if (item.tipo === 'recorrida') {
-    const dur    = item.duracion ? formatearSeg(item.duracion) : '';
-    const audioSrc = blobURLs[`recorrida-${item.id}`] || item.storage_url || '';
+    const dur      = item.duracion ? formatearSeg(item.duracion) : '';
+    // Audios locales → blob URL; audios remotos → proxy Vercel para evitar CORS con MinIO
+    const proxyUrl = item.storage_key ? `/api/audio?key=${encodeURIComponent(item.storage_key)}` : '';
+    const audioSrc = blobURLs[`recorrida-${item.id}`] || proxyUrl || item.storage_url || '';
     detalle = `
       <div class="feed-tags">
         ${dur ? `<span class="feed-tag">⏱ ${dur}</span>` : ''}
