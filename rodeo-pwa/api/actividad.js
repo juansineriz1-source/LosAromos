@@ -65,6 +65,7 @@ async function obtenerAccessToken() {
 async function leerHoja(token, hoja) {
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(hoja + '!A:Z')}`;
   const resp = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  if (resp.status === 400 || resp.status === 404) return []; // pestaña aún no existe
   if (!resp.ok) return [];
   return (await resp.json()).values || [];
 }

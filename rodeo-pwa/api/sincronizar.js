@@ -117,15 +117,39 @@ async function obtenerAccessToken() {
 
 /**
  * Lee todos los valores de un rango en el Sheet.
+ * Devuelve [] si la hoja no existe (status 400) — se crea luego en asegurarHoja.
  */
 async function leerHoja(token, nombreHoja, rango = 'A:Z') {
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(nombreHoja + '!' + rango)}`;
-  const resp = await fetch(url, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const resp = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  if (resp.status === 400 || resp.status === 404) return []; // hoja no existe aún
   if (!resp.ok) throw new Error(`Error leyendo hoja: ${resp.status}`);
   const data = await resp.json();
   return data.values || [];
+}
+
+/**
+ * Crea una nueva pestaña (hoja) en el Spreadsheet.
+ */
+async function crearPestana(token, nombreHoja) {
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}:batchUpdate`;
+  const body = {
+    requests: [{
+      addSheet: {
+        properties: { title: nombreHoja },
+      },
+    }],
+  };
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  // 400 puede significar que la hoja ya existe (race condition) — ignorar
+  if (!resp.ok && resp.status !== 400) {
+    const txt = await resp.text();
+    throw new Error(`Error creando pestaña ${nombreHoja}: ${resp.status} ${txt}`);
+  }
 }
 
 /**
@@ -164,13 +188,15 @@ async function actualizarFila(token, nombreHoja, numeroFila, fila) {
 }
 
 /**
- * Asegura que el Sheet tenga una hoja con el nombre dado y cabeceras.
+ * Asegura que el Sheet tenga una pestaña con el nombre dado y sus cabeceras.
+ * Si no existe, la crea automáticamente.
  */
 async function asegurarHoja(token, nombreHoja, columnas) {
-  // Intentar leer — si tiene datos, ya existe
+  // Intentar leer la primera fila — devuelve [] si la hoja no existe (no lanza)
   const valores = await leerHoja(token, nombreHoja, 'A1:Z1');
   if (valores.length === 0) {
-    // Insertar cabeceras
+    // La hoja no existe o está vacía: crearla y agregar cabeceras
+    await crearPestana(token, nombreHoja);
     await agregarFila(token, nombreHoja, columnas);
   }
 }
