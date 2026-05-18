@@ -77,14 +77,24 @@ async function cargarActividadLocal(fecha) {
   return { novedades, registros, recorridas, fotos, videos };
 }
 
-// ─── Fetch actividad remota (Vercel → Sheets) ───────────────────────────
+// ─── Fetch actividad remota (Vercel → Sheets) ───────────────────────────────────
+const VACIO_REMOTO = { registros: [], novedades: [], recorridas: [], fotos: [], videos: [] };
+
 async function fetchActividadRemota(fecha) {
   try {
     const resp = await fetch(`/api/actividad?fecha=${fecha}`);
-    if (!resp.ok) return { registros: [], novedades: [] };
-    return await resp.json();
+    if (!resp.ok) return VACIO_REMOTO;
+    const data = await resp.json();
+    // Garantizar que todos los arrays existan aunque el servidor devuelva versiones viejas
+    return {
+      registros:  data.registros  || [],
+      novedades:  data.novedades  || [],
+      recorridas: data.recorridas || [],
+      fotos:      data.fotos      || [],
+      videos:     data.videos     || [],
+    };
   } catch {
-    return { registros: [], novedades: [] };
+    return VACIO_REMOTO;
   }
 }
 

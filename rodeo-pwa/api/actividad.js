@@ -95,7 +95,9 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'GET')     return res.status(405).json({ error: 'Method not allowed' });
 
-  const fecha = req.query.fecha || new Date().toISOString().split('T')[0];
+  // Fecha por defecto: hoy en Argentina (UTC-3, sin DST)
+  const fechaDefault = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' });
+  const fecha = req.query.fecha || fechaDefault;
 
   try {
     const token = await obtenerAccessToken();

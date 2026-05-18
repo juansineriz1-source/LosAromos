@@ -224,11 +224,12 @@ export async function marcarComoSincronizado(tabla, uuid, queueId) {
  * Cuenta los registros pendientes — para mostrar en UI.
  */
 export async function contarPendientes() {
-  const [animales, registros] = await Promise.all([
+  const [animales, registros, novedades] = await Promise.all([
     db.animales.where('sincronizado').equals(0).count(),
     db.registros_manga.where('sincronizado').equals(0).count(),
+    db.novedades.where('sincronizado').equals(0).count().catch(() => 0),
   ]);
-  return { animales, registros, total: animales + registros };
+  return { animales, registros, novedades, total: animales + registros + novedades };
 }
 
 /**
@@ -259,15 +260,19 @@ export async function obtenerTodosLosRegistros() {
  * Guarda una novedad / comentario del día.
  */
 export async function guardarNovedad(datos) {
+  const TZ = 'America/Argentina/Buenos_Aires';
   const novedad = {
     ...crearMetadatos(),
-    fecha: new Date().toISOString().split('T')[0],
-    hora: new Date().toTimeString().slice(0, 5),
+    fecha:    new Date().toLocaleDateString('en-CA', { timeZone: TZ }),
+    hora:     new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: TZ }),
     caravana: datos.caravana || null,
-    texto: datos.texto,
+    texto:    datos.texto,
     operador: datos.operador || '',
+    sincronizado: 0,
   };
   await db.novedades.add(novedad);
+  // Encolar para sincronizar a Google Sheets (cross-device)
+  await encolarSync('novedades', novedad.uuid, 'INSERT', novedad);
   return novedad;
 }
 
