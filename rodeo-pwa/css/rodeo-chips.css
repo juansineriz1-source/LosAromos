@@ -1,0 +1,192 @@
+/* ================================================================
+   RODEO OFICIAL — estilos de listado y chips de edición
+   ================================================================ */
+
+/* ── Stats bar ─────────────────────────────────────────────────── */
+.rodeo-of-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.rodeo-stat-total {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--texto);
+  margin-right: 4px;
+}
+.rodeo-stat-chip {
+  background: var(--verde-claro);
+  color: var(--verde-oscuro);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ── Item de la lista ───────────────────────────────────────────── */
+.rodeo-of-item {
+  background: var(--blanco);
+  border-radius: var(--radio);
+  padding: 12px 14px;
+  margin: 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+}
+
+/* Columna de IDs */
+.rodeo-of-ids { flex: 1; min-width: 0; }
+
+.rodeo-of-ids-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.rodeo-of-boton {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--texto);
+  letter-spacing: 0.01em;
+}
+
+.rodeo-of-caravana {
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  background: #f0f4f0;
+  padding: 2px 8px;
+  border-radius: 8px;
+}
+
+.rodeo-of-badges-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+/* Badges en lista */
+.rodeo-of-tipo,
+.rodeo-of-estado {
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  background: #f5f5f5;
+  color: #555;
+}
+
+.rodeo-of-color {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--gris);
+  background: #f5f5f5;
+  padding: 2px 7px;
+  border-radius: 12px;
+}
+
+/* Estado colores en lista */
+.rodeo-estado-p { background: #e8f5e9; color: #1b5e20; }
+.rodeo-estado-v { background: #fff9c4; color: #f57f17; }
+.rodeo-estado-i { background: #e3f2fd; color: #0d47a1; }
+
+/* Tipo colores en lista */
+.rodeo-tipo-v   { background: #e3f2fd; color: #0d47a1; }
+.rodeo-tipo-vq  { background: #fff3e0; color: #e65100; }
+.rodeo-tipo-v1  { background: #fff3e0; color: #bf360c; }
+.rodeo-tipo-v2  { background: #fff3e0; color: #bf360c; }
+.rodeo-tipo-v3  { background: #fff3e0; color: #bf360c; }
+.rodeo-tipo-v4  { background: #fff3e0; color: #bf360c; }
+.rodeo-tipo-v5  { background: #fff3e0; color: #bf360c; }
+.rodeo-tipo-v6  { background: #fff3e0; color: #bf360c; }
+.rodeo-tipo-v-cut { background: #fce4ec; color: #880e4f; }
+.rodeo-tipo-th  { background: #f3e5f5; color: #4a148c; }
+.rodeo-tipo-tm  { background: #f3e5f5; color: #4a148c; }
+.rodeo-tipo-t   { background: #fce4ec; color: #880e4f; }
+
+/* Botón editar */
+.rodeo-of-btn-editar {
+  background: none;
+  border: 1.5px solid var(--verde);
+  border-radius: 10px;
+  color: var(--verde);
+  font-size: 16px;
+  padding: 5px 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+.rodeo-of-btn-editar:active { background: var(--verde-claro); }
+
+/* ── Modal de edición — chips ───────────────────────────────────── */
+.rodeo-edit-seccion { margin-bottom: 14px; }
+
+.rodeo-edit-opciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.rodeo-edit-chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1.5px solid #ddd;
+  background: #f9f9f9;
+  color: var(--texto);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+  line-height: 1.3;
+}
+.rodeo-edit-chip.activo {
+  background: var(--verde);
+  border-color: var(--verde);
+  color: #fff;
+}
+.rodeo-edit-chip .chip-codigo { font-weight: 800; }
+.rodeo-edit-chip .chip-label  { font-size: 11px; font-weight: 500; margin-left: 3px; opacity: 0.8; }
+
+/* Estado chips — colores específicos */
+.rodeo-chip-estado-p { border-color: #a5d6a7; }
+.rodeo-chip-estado-p.activo { background: #2e7d32 !important; border-color: #2e7d32 !important; color: #fff !important; }
+
+.rodeo-chip-estado-v { border-color: #ffcc80; }
+.rodeo-chip-estado-v.activo { background: #e65100 !important; border-color: #e65100 !important; color: #fff !important; }
+
+.rodeo-chip-estado-i { border-color: #90caf9; }
+.rodeo-chip-estado-i.activo { background: #1565c0 !important; border-color: #1565c0 !important; color: #fff !important; }
+
+/* Color chips */
+.rodeo-chip-color-negra { border-color: #424242; }
+.rodeo-chip-color-negra.activo { background: #212121 !important; border-color: #212121 !important; color: #fff !important; }
+
+.rodeo-chip-color-colorada { border-color: #ff8a65; }
+.rodeo-chip-color-colorada.activo { background: #bf360c !important; border-color: #bf360c !important; color: #fff !important; }
+
+/* ── Dark mode ──────────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  .rodeo-of-item       { background: #222922; }
+  .rodeo-of-caravana   { background: #2a2f2a; color: #c8d8c8; }
+  .rodeo-of-boton      { color: #e8f0e8; }
+  .rodeo-edit-chip     { background: #2a2f2a; color: #c8d8c8; border-color: #3a403a; }
+  .rodeo-edit-chip.activo { background: var(--verde); border-color: var(--verde); color: #fff; }
+}
+
+/* ── Responsive móvil ───────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .rodeo-of-boton      { font-size: 14px; }
+  .rodeo-of-caravana   { font-size: 12px; }
+  .rodeo-of-tipo,
+  .rodeo-of-estado     { font-size: 11px; padding: 2px 6px; }
+  .rodeo-of-item       { padding: 10px 12px; margin: 5px 10px; }
+  .rodeo-edit-chip     { padding: 5px 11px; font-size: 13px; }
+}

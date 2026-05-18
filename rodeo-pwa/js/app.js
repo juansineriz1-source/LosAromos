@@ -259,19 +259,21 @@ async function mostrarTab(nombre) {
 
 // ─── INICIO ───────────────────────────────────────────────────────────────────
 async function cargarInicio() {
+  // Fecha y hora en zona horaria Argentina (UTC-3, sin DST)
+  const TZ = 'America/Argentina/Buenos_Aires';
   const hoy = new Date();
   const fechaStr = hoy.toLocaleDateString('es-AR', {
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: TZ,
   });
-  const hora = hoy.getHours();
+  const hora   = parseInt(hoy.toLocaleTimeString('es-AR', { hour: '2-digit', hour12: false, timeZone: TZ }));
   const saludo = hora < 12 ? 'Buenos días,' : hora < 19 ? 'Buenas tardes,' : 'Buenas noches,';
 
   $('inicio-fecha').textContent = fechaStr;
   $('inicio-saludo').textContent = saludo;
   $('inicio-op-nombre').textContent = estado.operador;
 
-  // Stats del día
-  const fechaHoy = hoy.toISOString().split('T')[0];
+  // Stats del día — fecha en formato YYYY-MM-DD para Argentina
+  const fechaHoy = hoy.toLocaleDateString('en-CA', { timeZone: TZ });
   const [todosRegistros, { total: pendientes }] = await Promise.all([
     obtenerTodosLosRegistros(),
     contarPendientes(),

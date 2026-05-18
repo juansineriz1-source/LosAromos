@@ -12,7 +12,12 @@
 import db from './db.js';
 
 // ─── Estado del calendario ────────────────────────────────────────────────────
-let mesActual = new Date();
+// Fecha en zona horaria de Argentina (UTC-3, sin DST)
+function ahoraArgentina() {
+  return new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
+}
+
+let mesActual = ahoraArgentina();
 mesActual.setDate(1); // primer día del mes
 
 const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
@@ -354,7 +359,10 @@ export async function hidratarFeed(contenedor) {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function fechaISO(date) {
-  return date.toISOString().split('T')[0];
+  // Usa zona horaria Argentina (UTC-3, sin DST) para que el día no cambie
+  // a medianoche UTC mientras en Argentina todavía es el día anterior.
+  return date.toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' });
+  // en-CA devuelve YYYY-MM-DD que es el formato ISO esperado
 }
 
 function formatearSeg(seg) {

@@ -12,18 +12,15 @@ let _animales = [];
 let _onToast  = null;
 let _esAdmin  = false;
 
-// Opciones de estado y tipo del campo
-const ESTADOS = ['P', 'V', 'D', 'B', 'S', 'G', 'AG'];
+// ─── Opciones de campo (actualizadas) ────────────────────────────────────────
+const ESTADOS = ['P', 'V', 'I'];
 const ETIQUETAS_ESTADO = {
-  P: 'P — Preñada', V: 'V — Vacía', D: 'D — Dudosa',
-  B: 'B — Baja', S: 'S — Sin dato', G: 'G — Gestando', AG: 'AG — A gestación',
+  P: 'Preñada', V: 'Vacía', I: 'Inseminada',
 };
-const TIPOS = ['V', 'V1', 'VA', 'VQ', 'VV', 'T', 'TN', 'VN'];
-const ETIQUETAS_TIPO = {
-  V: 'V — Vaca', V1: 'V1 — 1.ª parición', VA: 'VA — Vaca adulta',
-  VQ: 'VQ — Vaquillona', VV: 'VV — Vaca vieja', T: 'T — Toro',
-  TN: 'TN — Ternero/a', VN: 'VN — Vientre no id.',
-};
+
+const TIPOS = ['V', 'VQ', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'V CUT', 'TH', 'TM', 'T'];
+
+const COLORES = ['Negra', 'Colorada'];
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 export function inicializarRodeoOficial(onToast, esAdmin) {
@@ -34,7 +31,6 @@ export function inicializarRodeoOficial(onToast, esAdmin) {
 // ─── Cargar desde Sheets ──────────────────────────────────────────────────────
 export async function cargarRodeoOficial() {
   const contenedor = document.getElementById('rodeo-oficial-lista');
-  const resumen    = document.getElementById('rodeo-oficial-resumen');
   if (!contenedor) return;
 
   contenedor.innerHTML = '<p class="sin-historial">Cargando rodeo...</p>';
@@ -57,7 +53,7 @@ function renderizarRodeo(animales, total) {
   const resumen    = document.getElementById('rodeo-oficial-resumen');
   if (!contenedor) return;
 
-  // Stats rápidos
+  // Stats rápidos por tipo
   const tipos = {};
   animales.forEach(a => { tipos[a.tipo] = (tipos[a.tipo] || 0) + 1; });
   const statsHtml = Object.entries(tipos)
@@ -77,22 +73,29 @@ function renderizarRodeo(animales, total) {
     return;
   }
 
-  contenedor.innerHTML = animales.map((a, i) => `
-    <div class="rodeo-of-item" data-idx="${i}">
-      <div class="rodeo-of-ids">
-        <span class="rodeo-of-boton">${a.boton || '—'}</span>
-        <span class="rodeo-of-caravana">${a.caravana ? `🏷 ${a.caravana}` : ''}</span>
+  contenedor.innerHTML = animales.map((a, i) => {
+    const estadoClass = (a.estado || '').toLowerCase().replace(' ', '-');
+    const tipoClass   = (a.tipo   || '').toLowerCase().replace(' ', '-');
+    const colorDot    = a.color === 'Negra' ? '⚫' : a.color === 'Colorada' ? '🟠' : '';
+
+    return `
+      <div class="rodeo-of-item" data-idx="${i}">
+        <!-- IDs: Botón y Caravana visibles en móvil -->
+        <div class="rodeo-of-ids">
+          <div class="rodeo-of-ids-row">
+            ${a.boton    ? `<span class="rodeo-of-boton">🔖 ${a.boton}</span>`    : ''}
+            ${a.caravana ? `<span class="rodeo-of-caravana">🏷 ${a.caravana}</span>` : ''}
+          </div>
+          <div class="rodeo-of-badges-row">
+            <span class="rodeo-of-tipo  rodeo-tipo-${tipoClass}">${a.tipo   || '—'}</span>
+            <span class="rodeo-of-estado rodeo-estado-${estadoClass}">${a.estado || '—'}${a.estado ? ` · ${ETIQUETAS_ESTADO[a.estado] || ''}` : ''}</span>
+            ${colorDot ? `<span class="rodeo-of-color">${colorDot} ${a.color}</span>` : ''}
+          </div>
+        </div>
+        ${_esAdmin ? `<button class="rodeo-of-btn-editar" onclick="abrirEditorAnimal(${i})">✏️</button>` : ''}
       </div>
-      <div class="rodeo-of-info">
-        <span class="rodeo-of-tipo rodeo-tipo-${(a.tipo || '').toLowerCase()}">${a.tipo || '—'}</span>
-        <span class="rodeo-of-estado rodeo-estado-${(a.estado || '').toLowerCase()}">${a.estado || '—'}</span>
-        ${a.tiene_caravana === 'SI' ? '<span class="rodeo-of-badge">🏷 Car</span>' : '<span class="rodeo-of-badge rodeo-badge-no">Sin car</span>'}
-        ${a.tiene_boton   === 'SI' ? '<span class="rodeo-of-badge">📟 Bot</span>' : '<span class="rodeo-of-badge rodeo-badge-no">Sin bot</span>'}
-      </div>
-      <div class="rodeo-of-fecha">${a.fecha ? formatearFecha(a.fecha) : ''}</div>
-      ${_esAdmin ? `<button class="rodeo-of-btn-editar" onclick="abrirEditorAnimal(${i})">✏️</button>` : ''}
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 // ─── Abrir modal de edición ───────────────────────────────────────────────────
@@ -100,7 +103,6 @@ window.abrirEditorAnimal = function(idx) {
   const a = _animales[idx];
   if (!a || !_esAdmin) return;
 
-  // Limpiar modal anterior
   const existente = document.getElementById('modal-editor-animal');
   if (existente) existente.remove();
 
@@ -109,11 +111,13 @@ window.abrirEditorAnimal = function(idx) {
   modal.className = 'modal-overlay';
 
   modal.innerHTML = `
-    <div class="modal" style="border-radius:24px 24px 0 0; padding: 0 0 32px;">
-      <div class="modal-header">
+    <div class="modal" style="border-radius:24px 24px 0 0; padding: 0 0 40px; max-height:92vh; overflow-y:auto;">
+      <div class="modal-header" style="position:sticky;top:0;z-index:2;background:var(--verde-oscuro);">
         <div>
-          <div class="modal-caravana">${a.boton || a.caravana}</div>
-          <div style="font-size:12px;color:var(--gris);margin-top:2px">Editar animal</div>
+          <div class="modal-caravana" style="font-size:18px;">
+            ${a.boton ? `🔖 ${a.boton}` : ''} ${a.caravana ? `🏷 ${a.caravana}` : ''}
+          </div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.7);margin-top:2px">Editar animal</div>
         </div>
         <button class="modal-cerrar" id="modal-animal-cerrar">✕</button>
       </div>
@@ -123,26 +127,26 @@ window.abrirEditorAnimal = function(idx) {
         <!-- IDs -->
         <div class="rodeo-edit-seccion">
           <div class="campo-label">🔖 Botón</div>
-          <input class="campo-input" id="edit-boton" value="${a.boton}" placeholder="Ej: DG687 E627">
+          <input class="campo-input" id="edit-boton" value="${a.boton || ''}" placeholder="Ej: DG687">
         </div>
         <div class="rodeo-edit-seccion">
           <div class="campo-label">🏷 Caravana</div>
-          <input class="campo-input" id="edit-caravana" value="${a.caravana}" placeholder="Ej: E627">
+          <input class="campo-input" id="edit-caravana" value="${a.caravana || ''}" placeholder="Ej: E627">
         </div>
 
-        <!-- Estado -->
+        <!-- Estado: P / V / I -->
         <div class="rodeo-edit-seccion">
           <div class="campo-label">Estado</div>
           <div class="rodeo-edit-opciones">
             ${ESTADOS.map(e => `
-              <button class="rodeo-edit-chip ${a.estado === e ? 'activo' : ''}"
-                onclick="seleccionarEstado('${e}', this)"
-                data-valor="${e}">
-                ${e}
+              <button class="rodeo-edit-chip rodeo-chip-estado-${e.toLowerCase()} ${a.estado === e ? 'activo' : ''}"
+                onclick="seleccionarEstado('${e}', this)" data-valor="${e}">
+                <span class="chip-codigo">${e}</span>
+                <span class="chip-label">${ETIQUETAS_ESTADO[e]}</span>
               </button>
             `).join('')}
           </div>
-          <input type="hidden" id="edit-estado" value="${a.estado}">
+          <input type="hidden" id="edit-estado" value="${a.estado || ''}">
         </div>
 
         <!-- TIPO -->
@@ -151,13 +155,26 @@ window.abrirEditorAnimal = function(idx) {
           <div class="rodeo-edit-opciones">
             ${TIPOS.map(t => `
               <button class="rodeo-edit-chip ${a.tipo === t ? 'activo' : ''}"
-                onclick="seleccionarTipo('${t}', this)"
-                data-valor="${t}">
+                onclick="seleccionarTipo('${t}', this)" data-valor="${t}">
                 ${t}
               </button>
             `).join('')}
           </div>
-          <input type="hidden" id="edit-tipo" value="${a.tipo}">
+          <input type="hidden" id="edit-tipo" value="${a.tipo || ''}">
+        </div>
+
+        <!-- Color: Negra / Colorada -->
+        <div class="rodeo-edit-seccion">
+          <div class="campo-label">Color</div>
+          <div class="rodeo-edit-opciones">
+            ${COLORES.map(c => `
+              <button class="rodeo-edit-chip rodeo-chip-color-${c.toLowerCase()} ${a.color === c ? 'activo' : ''}"
+                onclick="seleccionarColor('${c}', this)" data-valor="${c}">
+                ${c === 'Negra' ? '⚫' : '🟠'} ${c}
+              </button>
+            `).join('')}
+          </div>
+          <input type="hidden" id="edit-color" value="${a.color || ''}">
         </div>
 
         <!-- Tiene caravana / botón -->
@@ -180,12 +197,6 @@ window.abrirEditorAnimal = function(idx) {
           </div>
         </div>
 
-        <!-- Color -->
-        <div class="rodeo-edit-seccion">
-          <div class="campo-label">Color</div>
-          <input class="campo-input" id="edit-color" value="${a.color}" placeholder="Ej: Negro, Colorado...">
-        </div>
-
         <!-- Comentario -->
         <div class="rodeo-edit-seccion">
           <div class="campo-label">Comentario</div>
@@ -198,28 +209,26 @@ window.abrirEditorAnimal = function(idx) {
         </button>
 
         <!-- Historial compacto -->
-        ${a.boton_viejo ? `
-          <div style="margin-top:12px;padding:10px 12px;background:var(--gris-claro);border-radius:var(--radio);font-size:12px;color:var(--gris)">
-            <b>Cambio anterior:</b> ${a.boton_viejo} / ${a.caravana_vieja} — ${a.estado_viejo} / ${a.tipo_viejo}
+        ${a.boton_viejo || a.estado_viejo ? `
+          <div style="margin-top:14px;padding:10px 12px;background:var(--gris-claro);border-radius:var(--radio);font-size:12px;color:var(--gris)">
+            <b>Estado anterior:</b> ${a.boton_viejo || '—'} / ${a.caravana_vieja || '—'} — ${a.estado_viejo || '—'} / ${a.tipo_viejo || '—'}
           </div>` : ''}
+
       </div>
     </div>
   `;
 
   document.body.appendChild(modal);
 
-  // Cerrar
   const cerrar = () => modal.remove();
   document.getElementById('modal-animal-cerrar').addEventListener('click', cerrar);
   modal.addEventListener('click', e => { if (e.target === modal) cerrar(); });
-
-  // Guardar
   document.getElementById('btn-guardar-animal').addEventListener('click', async () => {
     await guardarEdicionAnimal(a, cerrar);
   });
 };
 
-// ─── Helpers de selección en el modal ────────────────────────────────────────
+// ─── Helpers de selección ────────────────────────────────────────────────────
 window.seleccionarEstado = function(val, btn) {
   btn.closest('.rodeo-edit-opciones').querySelectorAll('.rodeo-edit-chip').forEach(b => b.classList.remove('activo'));
   btn.classList.add('activo');
@@ -232,6 +241,12 @@ window.seleccionarTipo = function(val, btn) {
   document.getElementById('edit-tipo').value = val;
 };
 
+window.seleccionarColor = function(val, btn) {
+  btn.closest('.rodeo-edit-opciones').querySelectorAll('.rodeo-edit-chip').forEach(b => b.classList.remove('activo'));
+  btn.classList.add('activo');
+  document.getElementById('edit-color').value = val;
+};
+
 window.toggleSiNo = function(inputId, btn) {
   btn.closest('.rodeo-edit-opciones').querySelectorAll('.rodeo-edit-chip').forEach(b => b.classList.remove('activo'));
   btn.classList.add('activo');
@@ -241,21 +256,20 @@ window.toggleSiNo = function(inputId, btn) {
 // ─── Enviar edición al servidor ───────────────────────────────────────────────
 async function guardarEdicionAnimal(animal_viejo, cerrarModal) {
   const btn = document.getElementById('btn-guardar-animal');
-  btn.disabled     = true;
-  btn.textContent  = '⏳ Guardando...';
+  btn.disabled    = true;
+  btn.textContent = '⏳ Guardando...';
 
   const payload = {
-    // Nuevos valores
     boton:          document.getElementById('edit-boton').value.trim(),
     caravana:       document.getElementById('edit-caravana').value.trim(),
     estado:         document.getElementById('edit-estado').value,
     tiene_caravana: document.getElementById('edit-tiene-caravana').value,
     tiene_boton:    document.getElementById('edit-tiene-boton').value,
     tipo:           document.getElementById('edit-tipo').value,
-    color:          document.getElementById('edit-color').value.trim(),
+    color:          document.getElementById('edit-color').value,
     comentario:     document.getElementById('edit-comentario').value.trim(),
     usuario:        localStorage.getItem('rodeo_operador') || 'Admin',
-    // Valores anteriores para columnas L-O
+    // Historial columnas L-O
     boton_viejo:    animal_viejo.boton,
     caravana_vieja: animal_viejo.caravana,
     estado_viejo:   animal_viejo.estado,
@@ -275,18 +289,14 @@ async function guardarEdicionAnimal(animal_viejo, cerrarModal) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-
     if (!resp.ok) throw new Error(`Error ${resp.status}`);
-    const result = await resp.json();
 
     if (_onToast) _onToast(`✓ ${payload.boton || payload.caravana} actualizado`, 'exito', 3000);
     cerrarModal();
-
-    // Recargar lista
     await cargarRodeoOficial();
 
   } catch (err) {
-    if (_onToast) _onToast(`✗ Error al guardar: ${err.message}`, 'error', 4000);
+    if (_onToast) _onToast(`✗ Error: ${err.message}`, 'error', 4000);
     btn.disabled = false;
     btn.textContent = '💾 Guardar cambios';
   }
@@ -312,6 +322,5 @@ export function filtrarRodeo(texto) {
 
 // ─── Helper ───────────────────────────────────────────────────────────────────
 function formatearFecha(str) {
-  // str puede ser "27/03/2026" o "2026-03-27"
   return str.replace(/(\d{4})-(\d{2})-(\d{2})/, '$3/$2/$1');
 }
