@@ -686,7 +686,8 @@ window.abrirModalAnimal = async function(caravana) {
 function configurarEventos() {
 
   // ── BASTÓN ──
-  $('btn-bluetooth').addEventListener('click', async () => {
+  const btnBluetooth = $('btn-bluetooth');
+  if (btnBluetooth) btnBluetooth.addEventListener('click', async () => {
     if (estado.bluetoothConectado) {
       await desconectarBaston();
       estado.bluetoothConectado = false;
@@ -696,14 +697,17 @@ function configurarEventos() {
     }
   });
 
-  $('btn-simular').addEventListener('click', () => simularLectura());
-  $('btn-guardar').addEventListener('click', guardarRegistro);
-  $('btn-limpiar').addEventListener('click', limpiarFormulario);
+  if ($('btn-simular'))    $('btn-simular').addEventListener('click', () => simularLectura());
+  if ($('btn-guardar'))    $('btn-guardar').addEventListener('click', guardarRegistro);
+  if ($('btn-limpiar'))   $('btn-limpiar').addEventListener('click', limpiarFormulario);
 
-  $('input-caravana').addEventListener('change', e => {
-    const val = e.target.value.trim().toUpperCase();
-    if (val) caravanaRecibida(val);
-  });
+  const inputCaravana = $('input-caravana');
+  if (inputCaravana) {
+    inputCaravana.addEventListener('change', e => {
+      const val = e.target.value.trim().toUpperCase();
+      if (val) caravanaRecibida(val);
+    });
+  }
 
   // ── SYNC ──
   $('btn-sync').addEventListener('click', async () => {
@@ -729,11 +733,11 @@ function configurarEventos() {
   });
 
   // ── MANUAL ──
-  $('btn-manual-buscar').addEventListener('click', buscarAnimalManual);
-  $('manual-buscar').addEventListener('keydown', e => {
+  if ($('btn-manual-buscar')) $('btn-manual-buscar').addEventListener('click', buscarAnimalManual);
+  if ($('manual-buscar')) $('manual-buscar').addEventListener('keydown', e => {
     if (e.key === 'Enter') buscarAnimalManual();
   });
-  $('btn-manual-guardar').addEventListener('click', guardarCambiosManual);
+  if ($('btn-manual-guardar')) $('btn-manual-guardar').addEventListener('click', guardarCambiosManual);
 
   // ── RODEO filtro de búsqueda (nuevo) ──
   const buscarRodeo = document.getElementById('rodeo-of-buscar');
@@ -742,16 +746,20 @@ function configurarEventos() {
   }
 
   // ── MODAL cerrar ──
-  $('modal-cerrar').addEventListener('click', () => {
-    $('modal-overlay').classList.add('oculto');
-    estado.animalModal = null;
-  });
-  $('modal-overlay').addEventListener('click', e => {
-    if (e.target === $('modal-overlay')) {
+  if ($('modal-cerrar')) {
+    $('modal-cerrar').addEventListener('click', () => {
       $('modal-overlay').classList.add('oculto');
       estado.animalModal = null;
-    }
-  });
+    });
+  }
+  if ($('modal-overlay')) {
+    $('modal-overlay').addEventListener('click', e => {
+      if (e.target === $('modal-overlay')) {
+        $('modal-overlay').classList.add('oculto');
+        estado.animalModal = null;
+      }
+    });
+  }
 }
 
 // ─── CONECTIVIDAD ─────────────────────────────────────────────────────────────
@@ -789,14 +797,16 @@ function poblarSelects() {
   agregar('manual-raza', RAZAS);
   agregar('manual-estado', ESTADOS_SANITARIOS);
 
-  // Filtro de estado en Rodeo
+  // Filtro de estado en Rodeo (elemento ya no existe, omitir sin crash)
   const selFiltro = $('rodeo-filtro-estado');
-  ESTADOS_SANITARIOS.forEach(e => {
-    selFiltro.appendChild(Object.assign(document.createElement('option'), {
-      value: e,
-      textContent: e.replace('_', ' '),
-    }));
-  });
+  if (selFiltro) {
+    ESTADOS_SANITARIOS.forEach(e => {
+      selFiltro.appendChild(Object.assign(document.createElement('option'), {
+        value: e,
+        textContent: e.replace('_', ' '),
+      }));
+    });
+  }
 }
 
 async function actualizarContadorPendientes() {
