@@ -33,9 +33,8 @@ export const DEVICE_ID = (() => {
 })();
 
 // ─── Definición de la base de datos ────────────────────────────────────────
-// Renombrada a RodeoDB_v3 para forzar recreación limpia en todos los clientes
-// que tengan el esquema viejo (v1 sin recorridas/fotos/videos).
-const db = new Dexie('RodeoDB_v3');
+// Renombrada a RodeoDB_v4 para forzar recreación limpia en todos los clientes
+const db = new Dexie('RodeoDB_v4');
 
 // ─── Versión 1 (schema completo desde cero) ─────────────────────────────────
 db.version(1).stores({
@@ -79,6 +78,57 @@ db.version(1).stores({
     '++id', 'uuid', 'fecha', 'hora', 'operador',
     'video_blob', 'video_tipo', 'video_size', 'nombre_original',
     'storage_url', 'storage_key', 'timestamp_local', 'device_id',
+  ].join(', '),
+});
+
+// Versión 2: agrega fotos por animal (vinculadas por animal_uuid estable)
+db.version(2).stores({
+  animales: [
+    '++id', 'uuid', 'caravana', 'categoria', 'raza', 'fecha_nacimiento',
+    'sincronizado', 'timestamp_local', 'device_id', 'deleted',
+  ].join(', '),
+  registros_manga: [
+    '++id', 'uuid', 'caravana', 'animal_uuid', 'peso_kg', 'estado_sanitario',
+    'vacuna_aplicada', 'medicamento', 'dosis_ml', 'observaciones',
+    'operador', 'fecha', 'hora', 'sincronizado', 'timestamp_local',
+    'device_id', 'sync_intentos',
+  ].join(', '),
+  sync_queue: [
+    '++id', 'tabla', 'registro_uuid', 'operacion', 'payload',
+    'timestamp', 'intentos', 'ultimo_error',
+  ].join(', '),
+  config: '&clave, valor',
+  novedades: [
+    '++id', 'uuid', 'fecha', 'hora', 'texto', 'operador',
+    'caravana', 'sincronizado', 'timestamp_local', 'device_id',
+  ].join(', '),
+  recorridas: [
+    '++id', 'uuid', 'fecha', 'hora', 'duracion_seg', 'operador',
+    'audio_blob', 'audio_tipo', 'audio_size',
+    'storage_url', 'storage_key', 'timestamp_local', 'device_id',
+  ].join(', '),
+  fotos: [
+    '++id', 'uuid', 'fecha', 'hora', 'operador',
+    'imagen_blob', 'imagen_tipo', 'imagen_size', 'nombre_original',
+    'storage_url', 'storage_key', 'timestamp_local', 'device_id',
+  ].join(', '),
+  videos: [
+    '++id', 'uuid', 'fecha', 'hora', 'operador',
+    'video_blob', 'video_tipo', 'video_size', 'nombre_original',
+    'storage_url', 'storage_key', 'timestamp_local', 'device_id',
+  ].join(', '),
+  /**
+   * TABLA: fotos_animal
+   * Fotos vinculadas a un animal por su animal_uuid (UUID estable).
+   * Persiste aunque cambie el botón o la caravana.
+   */
+  fotos_animal: [
+    '++id', 'uuid', 'animal_uuid',
+    'boton_al_guardar', 'caravana_al_guardar',
+    'fecha', 'hora', 'operador',
+    'imagen_blob', 'imagen_tipo', 'imagen_size',
+    'storage_url', 'storage_key',
+    'timestamp_local', 'device_id', 'sincronizado',
   ].join(', '),
 });
 

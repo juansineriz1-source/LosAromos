@@ -6,6 +6,7 @@
  *
  * Para OPERARIOS: solo lectura.
  */
+import { obtenerOCrearAnimalUuid, renderizarGaleriaAnimal } from './fotos-animal.js';
 
 // ─── Estado ───────────────────────────────────────────────────────────────────
 let _animales = [];
@@ -208,11 +209,11 @@ window.abrirEditorAnimal = function(idx) {
           💾 Guardar cambios
         </button>
 
-        <!-- Historial compacto -->
-        ${a.boton_viejo || a.estado_viejo ? `
-          <div style="margin-top:14px;padding:10px 12px;background:var(--gris-claro);border-radius:var(--radio);font-size:12px;color:var(--gris)">
-            <b>Estado anterior:</b> ${a.boton_viejo || '—'} / ${a.caravana_vieja || '—'} — ${a.estado_viejo || '—'} / ${a.tipo_viejo || '—'}
-          </div>` : ''}
+        <!-- Galeria de fotos del animal -->
+        <div class="rodeo-edit-seccion" style="border-top:1px solid #eee;padding-top:14px;margin-top:4px">
+          <div class="campo-label">📷 Fotos del animal</div>
+          <div id="galeria-animal-modal"></div>
+        </div>
 
       </div>
     </div>
@@ -226,6 +227,10 @@ window.abrirEditorAnimal = function(idx) {
   document.getElementById('btn-guardar-animal').addEventListener('click', async () => {
     await guardarEdicionAnimal(a, cerrar);
   });
+
+  // Cargar galería de fotos del animal
+  const animal_uuid = obtenerOCrearAnimalUuid(a.boton, a.caravana);
+  renderizarGaleriaAnimal('galeria-animal-modal', animal_uuid, a.boton, a.caravana, _esAdmin);
 };
 
 // ─── Helpers de selección ────────────────────────────────────────────────────

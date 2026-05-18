@@ -89,8 +89,8 @@ async function guardarVideos(onToast) {
     for (const { file, objectUrl } of videosEnCola) {
       const video = {
         ...crearMetadatos(),
-        fecha:           new Date().toISOString().split('T')[0],
-        hora:            new Date().toTimeString().slice(0, 5),
+        fecha:           new Date().toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }),
+        hora:            new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/Argentina/Buenos_Aires' }),
         operador,
         video_blob:      file,  // guardamos el File directamente (Dexie soporta Blob/File)
         video_tipo:      file.type,

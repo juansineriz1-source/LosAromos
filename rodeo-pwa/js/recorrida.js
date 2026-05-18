@@ -117,8 +117,8 @@ async function guardarRecorrida(onToast) {
     const operador = localStorage.getItem('rodeo_operador') || 'Operador';
     const recorrida = {
       ...crearMetadatos(),
-      fecha: new Date().toISOString().split('T')[0],
-      hora:  new Date().toTimeString().slice(0, 5),
+      fecha: new Date().toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }),
+      hora:  new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/Argentina/Buenos_Aires' }),
       duracion_seg: segundos,
       operador,
       audio_blob: blobActual,
