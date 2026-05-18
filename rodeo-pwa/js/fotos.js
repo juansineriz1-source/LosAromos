@@ -188,9 +188,10 @@ async function subirFotoEnBackground(fotoId, blob, operador, onToast) {
       }),
     });
 
-    if (!resp.ok) { const t = await resp.text(); throw new Error(`subir-media ${resp.status}: ${t}`); }
-    const { ok, publicUrl, objectKey, error } = await resp.json();
-    if (!ok) throw new Error(error || 'Error en subir-media');
+    if (!resp.ok) { const t = await resp.text(); throw new Error(`subir-media HTTP ${resp.status}: ${t.slice(0,200)}`); }
+    const result = await resp.json();
+    if (!result.ok) throw new Error(result.error || 'Error en subir-media');
+    const { publicUrl, objectKey } = result;
 
     const fotoActualizada = await db.fotos.get(fotoId);
     await db.fotos.update(fotoId, { storage_url: publicUrl, storage_key: objectKey });
@@ -203,7 +204,8 @@ async function subirFotoEnBackground(fotoId, blob, operador, onToast) {
     await cargarListaFotos();
 
   } catch (err) {
-    console.warn('[Fotos] Subida fallida:', err.message);
+    console.error('[Fotos] Subida fallida:', err.message);
+    if (onToast) onToast(`✗ Error al subir foto: ${err.message}`, 'error');
   }
 }
 

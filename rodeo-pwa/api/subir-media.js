@@ -1,17 +1,8 @@
 /**
  * api/subir-media.js — Proxy server-side para subir audio/fotos/videos a MinIO
  *
- * El browser NO puede hacer PUT directo a MinIO porque MinIO bloquea CORS.
- * Este endpoint recibe el archivo en base64, lo sube a MinIO desde Vercel
- * (server-side, sin restricciones CORS) y devuelve publicUrl + objectKey.
- *
  * POST /api/subir-media
- * Body JSON: {
- *   tipo:        "audio" | "foto" | "video"
- *   base64:      "<base64 del binario>"
- *   mimeType:    "audio/webm" | "image/jpeg" | "video/mp4" | ...
- *   operador:    "Juan"
- * }
+ * Body JSON: { tipo, base64, mimeType, operador }
  * Respuesta: { ok: true, publicUrl, objectKey }
  */
 
@@ -21,12 +12,6 @@ export const config = {
     responseLimit: false,
   },
 };
-
-const ENDPOINT   = process.env.S3_ENDPOINT          || '';
-const BUCKET     = process.env.S3_BUCKET            || 'rodeo-aromos';
-const ACCESS_KEY = process.env.S3_ACCESS_KEY_ID     || '';
-const SECRET_KEY = process.env.S3_SECRET_ACCESS_KEY || '';
-const REGION     = process.env.S3_REGION            || 'us-east-1';
 
 // ─── AWS Signature v4 ─────────────────────────────────────────────────────────
 async function hmac(key, data) {
@@ -42,56 +27,68 @@ async function sha256Buf(buf) {
   return toHex(new Uint8Array(await crypto.subtle.digest('SHA-256', buf)));
 }
 
-async function putAMinIO(objectKey, mimeType, bodyBuffer) {
-  const host      = new URL(ENDPOINT).host;
+async function putAMinIO(endpoint, bucket, accessKey, secretKey, region, objectKey, mimeType, bodyBuffer) {
+  const host      = new URL(endpoint).host;                               // storage.losaromos.online
   const now       = new Date();
-  const dateStamp = now.toISOString().slice(0, 10).replace(/-/g, '');
-  const amzDate   = now.toISOString().replace(/[-:.]/g, '').slice(0, 15) + 'Z';
-  const credScope = `${dateStamp}/${REGION}/s3/aws4_request`;
+  const dateStamp = now.toISOString().slice(0, 10).replace(/-/g, '');    // YYYYMMDD
+  const amzDate   = now.toISOString().replace(/[-:.]/g, '').slice(0, 15) + 'Z'; // YYYYMMDDTHHmmssZ
+  const credScope = `${dateStamp}/${region}/s3/aws4_request`;
 
-  const payloadHash = await sha256Buf(bodyBuffer);
-  const encodedKey  = objectKey.split('/').map(encodeURIComponent).join('/');
+  // Limpiar mimeType — quitar ";codecs=opus" etc. que rompen la firma
+  const cleanMime = mimeType.split(';')[0].trim();
 
-  const canonHeaders = `content-type:${mimeType}\nhost:${host}\nx-amz-content-sha256:${payloadHash}\nx-amz-date:${amzDate}\n`;
-  const signedHdrs   = 'content-type;host;x-amz-content-sha256;x-amz-date';
-  const canonReq     = `PUT\n/${BUCKET}/${encodedKey}\n\n${canonHeaders}\n${signedHdrs}\n${payloadHash}`;
+  // Codificar cada segmento del key (preservar /)
+  const encodedKey = objectKey.split('/').map(encodeURIComponent).join('/');
 
-  const sts  = `AWS4-HMAC-SHA256\n${amzDate}\n${credScope}\n${await sha256Hex(canonReq)}`;
-  const kD   = await hmac('AWS4' + SECRET_KEY, dateStamp);
-  const kR   = await hmac(kD, REGION);
-  const kS   = await hmac(kR, 's3');
-  const kSig = await hmac(kS, 'aws4_request');
-  const sig  = toHex(await hmac(kSig, sts));
+  // URL canónica: path-style para MinIO (bucket en el path, NO en el hostname)
+  const canonicalUri = `/${bucket}/${encodedKey}`;
 
-  const uploadResp = await fetch(`${ENDPOINT}/${BUCKET}/${encodedKey}`, {
+  const payloadHash    = await sha256Buf(bodyBuffer);
+  const canonHeaders   = `content-type:${cleanMime}\nhost:${host}\nx-amz-content-sha256:${payloadHash}\nx-amz-date:${amzDate}\n`;
+  const signedHdrs     = 'content-type;host;x-amz-content-sha256;x-amz-date';
+  const canonReq       = `PUT\n${canonicalUri}\n\n${canonHeaders}\n${signedHdrs}\n${payloadHash}`;
+
+  const sts    = `AWS4-HMAC-SHA256\n${amzDate}\n${credScope}\n${await sha256Hex(canonReq)}`;
+  const kDate  = await hmac('AWS4' + secretKey, dateStamp);
+  const kReg   = await hmac(kDate,  region);
+  const kSvc   = await hmac(kReg,   's3');
+  const kSign  = await hmac(kSvc,   'aws4_request');
+  const sig    = toHex(await hmac(kSign, sts));
+
+  const putUrl = `${endpoint}/${bucket}/${encodedKey}`;
+
+  console.log('[subir-media] PUT →', putUrl, '| mimeType:', cleanMime, '| size:', bodyBuffer.length);
+
+  const uploadResp = await fetch(putUrl, {
     method: 'PUT',
     headers: {
-      'Content-Type':           mimeType,
-      'x-amz-date':             amzDate,
-      'x-amz-content-sha256':   payloadHash,
-      'Authorization': `AWS4-HMAC-SHA256 Credential=${ACCESS_KEY}/${credScope},SignedHeaders=${signedHdrs},Signature=${sig}`,
+      'Content-Type':          cleanMime,
+      'x-amz-date':            amzDate,
+      'x-amz-content-sha256':  payloadHash,
+      'Authorization': `AWS4-HMAC-SHA256 Credential=${accessKey}/${credScope},SignedHeaders=${signedHdrs},Signature=${sig}`,
     },
     body: bodyBuffer,
   });
 
   if (!uploadResp.ok) {
     const txt = await uploadResp.text();
-    throw new Error(`MinIO PUT ${uploadResp.status}: ${txt.slice(0, 300)}`);
+    console.error('[subir-media] MinIO error:', uploadResp.status, txt.slice(0, 500));
+    throw new Error(`MinIO ${uploadResp.status}: ${txt.slice(0, 200)}`);
   }
-}
 
-// ─── Generar object key según tipo ────────────────────────────────────────────
-const EXTENSIONES = {
-  'audio/webm': 'webm', 'audio/webm;codecs=opus': 'webm',
-  'audio/ogg': 'ogg',   'audio/mp4': 'm4a',  'audio/mpeg': 'mp3',
-  'image/jpeg': 'jpg',  'image/png': 'png',  'image/webp': 'webp', 'image/heic': 'heic',
-  'video/mp4': 'mp4',   'video/webm': 'webm','video/quicktime': 'mov', 'video/3gpp': '3gp',
-};
+  console.log('[subir-media] MinIO OK:', uploadResp.status);
+}
 
 function generarKey(tipo, operador, mimeType) {
   const fecha = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' });
   const op    = (operador || 'op').toLowerCase().replace(/[^a-z0-9]/g, '');
-  const ext   = EXTENSIONES[mimeType] || mimeType.split('/')[1] || 'bin';
+  const EXTS  = {
+    'audio/webm': 'webm', 'audio/ogg': 'ogg', 'audio/mp4': 'm4a', 'audio/mpeg': 'mp3',
+    'image/jpeg': 'jpg',  'image/png': 'png',  'image/webp': 'webp', 'image/heic': 'heic',
+    'video/mp4': 'mp4',   'video/webm': 'webm','video/quicktime': 'mov', 'video/3gpp': '3gp',
+  };
+  const cleanMime = mimeType.split(';')[0].trim();
+  const ext   = EXTS[cleanMime] || cleanMime.split('/')[1] || 'bin';
   return `${tipo}/${fecha}/${op}_${Date.now()}.${ext}`;
 }
 
@@ -103,29 +100,44 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST')   return res.status(405).json({ ok: false, error: 'Solo POST' });
 
-  if (!ENDPOINT || !ACCESS_KEY || !SECRET_KEY)
-    return res.status(500).json({ ok: false, error: 'S3 no configurado — faltan env vars (S3_ENDPOINT, S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY)' });
+  // Leer env vars DENTRO del handler (no en top-level)
+  const ENDPOINT   = process.env.S3_ENDPOINT          || '';
+  const BUCKET     = process.env.S3_BUCKET            || 'rodeo-aromos';
+  const ACCESS_KEY = process.env.S3_ACCESS_KEY_ID     || '';
+  const SECRET_KEY = process.env.S3_SECRET_ACCESS_KEY || '';
+  const REGION     = process.env.S3_REGION            || 'us-east-1';
+
+  // Diagnóstico de env vars en cada request (aparece en Vercel Logs)
+  const envOK = { ENDPOINT: !!ENDPOINT, BUCKET: !!BUCKET, ACCESS_KEY: !!ACCESS_KEY, SECRET_KEY: !!SECRET_KEY, REGION: !!REGION };
+  console.log('[subir-media] Env vars:', JSON.stringify(envOK));
+
+  const faltantes = Object.entries(envOK).filter(([, v]) => !v).map(([k]) => k);
+  if (faltantes.length > 0) {
+    const msg = `S3 no configurado. Faltan: ${faltantes.join(', ')}`;
+    console.error('[subir-media]', msg);
+    return res.status(500).json({ ok: false, error: msg });
+  }
 
   const { tipo = 'media', base64, mimeType = 'application/octet-stream', operador = 'op' } = req.body || {};
 
   if (!base64) return res.status(400).json({ ok: false, error: 'Falta campo "base64"' });
 
   try {
-    // Decodificar base64 → Uint8Array
-    const binaryStr = atob(base64);
-    const bytes = new Uint8Array(binaryStr.length);
-    for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
+    // Decodificar base64 → Buffer (Node.js nativo, sin atob())
+    const bodyBuffer = Buffer.from(base64, 'base64');
+    console.log('[subir-media] Buffer size:', bodyBuffer.length, 'bytes | tipo:', tipo, '| mime:', mimeType);
 
     const objectKey = generarKey(tipo, operador, mimeType);
-    await putAMinIO(objectKey, mimeType, bytes);
+
+    await putAMinIO(ENDPOINT, BUCKET, ACCESS_KEY, SECRET_KEY, REGION, objectKey, mimeType, bodyBuffer);
 
     const publicUrl = `${ENDPOINT}/${BUCKET}/${objectKey}`;
-    console.log(`[subir-media] ${tipo} OK → ${publicUrl}`);
+    console.log('[subir-media] Éxito →', publicUrl);
 
     return res.status(200).json({ ok: true, publicUrl, objectKey });
 
   } catch (err) {
-    console.error('[subir-media]', err.message);
+    console.error('[subir-media] Error final:', err.message);
     return res.status(500).json({ ok: false, error: err.message });
   }
 }

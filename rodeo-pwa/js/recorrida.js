@@ -182,11 +182,12 @@ async function subirAudioEnBackground(recorridaId, blob, operador, onToast) {
 
     if (!resp.ok) {
       const txt = await resp.text();
-      throw new Error(`subir-audio ${resp.status}: ${txt}`);
+      throw new Error(`subir-media HTTP ${resp.status}: ${txt.slice(0,200)}`);
     }
 
-    const { ok, publicUrl, objectKey, error } = await resp.json();
-    if (!ok) throw new Error(error || 'Error desconocido en subir-audio');
+    const result = await resp.json();
+    if (!result.ok) throw new Error(result.error || 'Error desconocido en subir-media');
+    const { publicUrl, objectKey } = result;
 
     // Actualizar registro local con la URL
     const recorridaActualizada = await db.recorridas.get(recorridaId);
@@ -208,8 +209,8 @@ async function subirAudioEnBackground(recorridaId, blob, operador, onToast) {
     await cargarListaRecorridas();
 
   } catch (err) {
-    console.warn('[Recorrida] Subida fallida:', err.message);
-    // No fatal — el audio ya está guardado local y se puede reintentar
+    console.error('[Recorrida] Subida fallida:', err.message);
+    onToast(`✗ Error al subir audio: ${err.message}`, 'error');
   }
 }
 
