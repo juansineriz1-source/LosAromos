@@ -308,8 +308,8 @@ function renderFeedItem(item, blobURLs = {}) {
       </div>`;
   } else if (item.tipo === 'recorrida') {
     const dur      = item.duracion ? formatearSeg(item.duracion) : '';
-    // Audios locales → blob URL; audios remotos → proxy Vercel para evitar CORS con MinIO
-    const proxyUrl = item.storage_key ? `/api/audio?key=${encodeURIComponent(item.storage_key)}` : '';
+    // Audios locales → blob URL; audios remotos → proxy unificado /api/media-proxy
+    const proxyUrl = item.storage_key ? `/api/media-proxy?key=${encodeURIComponent(item.storage_key)}` : '';
     const audioSrc = blobURLs[`recorrida-${item.id}`] || proxyUrl || item.storage_url || '';
     detalle = `
       <div class="feed-tags">
@@ -327,12 +327,21 @@ function renderFeedItem(item, blobURLs = {}) {
       ? `<img class="feed-foto-thumb" src="${fotoSrc}" alt="Foto" onclick="abrirLightbox('${fotoSrc}')">`
       : '<p class="sin-historial" style="font-size:12px">Foto no disponible</p>';
   } else if (item.tipo === 'video') {
+    const videoKey = item.storage_key || '';
+    const videoSrc = videoKey ? `/api/media-proxy?key=${encodeURIComponent(videoKey)}` : (item.storage_url || '');
+    const sizeMB   = item.size ? `${(item.size/(1024*1024)).toFixed(1)} MB` : '';
     detalle = `
       <div class="feed-tags">
-        ${item.nombre ? `<span class="feed-tag">${escHtml(item.nombre)}</span>` : ''}
-        ${item.size   ? `<span class="feed-tag">${(item.size/(1024*1024)).toFixed(1)} MB</span>` : ''}
+        ${sizeMB   ? `<span class="feed-tag">${sizeMB}</span>` : ''}
         ${item.storage_url ? `<span class="feed-tag feed-tag-ok">☁ Subido</span>` : `<span class="feed-tag">○ Local</span>`}
-      </div>`;
+      </div>
+      ${videoSrc
+        ? `<video controls class="feed-video" preload="metadata" playsinline>
+             <source src="${videoSrc}">
+             Tu navegador no soporta la reproducción de video.
+           </video>`
+        : '<p class="sin-historial" style="font-size:12px">Video no disponible aún</p>'
+      }`;
   }
 
   return `

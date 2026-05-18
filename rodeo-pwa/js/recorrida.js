@@ -69,7 +69,10 @@ async function iniciarGrabacion(onToast) {
     'audio/mp4',
   ].find(t => MediaRecorder.isTypeSupported(t)) || '';
 
-  mediaRecorder = new MediaRecorder(streamActual, mimeType ? { mimeType } : {});
+  mediaRecorder = new MediaRecorder(streamActual, {
+    ...(mimeType ? { mimeType } : {}),
+    audioBitsPerSecond: 32_000,  // 32 kbps — voz de campo perfectamente inteligible, 75% más liviano
+  });
 
   mediaRecorder.ondataavailable = e => {
     if (e.data.size > 0) audioChunks.push(e.data);
