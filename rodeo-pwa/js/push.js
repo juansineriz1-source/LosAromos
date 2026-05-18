@@ -34,6 +34,10 @@ export async function inicializarPush() {
   // Si está bloqueado, no hacer nada
   if (Notification.permission === 'denied') return;
 
+  // Si el usuario postponed hace menos de 7 días, no molestar
+  const postponed = localStorage.getItem('push_postponed');
+  if (postponed && Date.now() < parseInt(postponed, 10)) return;
+
   // Si es 'default' → mostrar banner de invitación (no el popup del browser todavía)
   mostrarBannerNotificaciones();
 }

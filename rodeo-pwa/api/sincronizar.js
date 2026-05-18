@@ -299,15 +299,32 @@ export default async function handler(req, res) {
     const token = await obtenerAccessToken();
     const resultado = await upsertRegistro(token, tabla, datos);
 
-    // ── Notificación push en background (no bloquea la respuesta) ──────────
+    // ── Notificación push en background (no bloquea la respuesta) ────────────
     if (resultado.ok) {
-      const titulo = tabla === 'registros_manga'
-        ? `🐄 ${datos.operador || 'Operador'} registró un pesaje`
-        : `📋 ${datos.operador || 'Operador'} actualizó un animal`;
+      let titulo, cuerpo;
+      const op = datos.operador || 'Operador';
 
-      const cuerpo = tabla === 'registros_manga'
-        ? `Caravana ${datos.caravana} · ${datos.peso_kg ? datos.peso_kg + ' kg' : ''} · ${datos.estado_sanitario || ''}`
-        : `Caravana ${datos.caravana}`;
+      switch (tabla) {
+        case 'registros_manga':
+          titulo = `🐄 ${op} registró un pesaje`;
+          cuerpo = `Caravana ${datos.caravana} · ${datos.peso_kg ? datos.peso_kg + ' kg' : ''} · ${datos.estado_sanitario || ''}`;
+          break;
+        case 'recorridas_meta':
+          titulo = `🎤 ${op} subió una recorrida`;
+          cuerpo = `${datos.fecha || ''} ${datos.hora || ''} · ${datos.duracion_seg ? Math.floor(datos.duracion_seg / 60) + ' min' : ''}`.trim();
+          break;
+        case 'fotos_meta':
+          titulo = `📸 ${op} subió una foto`;
+          cuerpo = `${datos.fecha || ''} ${datos.hora || ''} · ${datos.nombre_original || ''}`.trim();
+          break;
+        case 'videos_meta':
+          titulo = `🎥 ${op} subió un video`;
+          cuerpo = `${datos.fecha || ''} ${datos.hora || ''} · ${datos.nombre_original || ''}`.trim();
+          break;
+        default:
+          titulo = `📋 ${op} actualizó el rodeo`;
+          cuerpo  = datos.caravana ? `Caravana ${datos.caravana}` : '';
+      }
 
       // Fire & forget — no esperamos la respuesta del push
       fetch(`${req.headers['x-forwarded-proto'] || 'https'}://${req.headers['host']}/api/push-notify`, {
