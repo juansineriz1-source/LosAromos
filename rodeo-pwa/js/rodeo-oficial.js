@@ -9,9 +9,10 @@
 import { obtenerOCrearAnimalUuid, renderizarGaleriaAnimal } from './fotos-animal.js';
 
 // ─── Estado ───────────────────────────────────────────────────────────────────
-let _animales = [];
-let _onToast  = null;
-let _esAdmin  = false;
+let _animales   = [];
+let _onToast    = null;
+let _esAdmin    = false;
+let _filtroTipo = 'todos'; // chip de filtro activo en Rodeo
 
 // ─── Opciones de campo (actualizadas) ────────────────────────────────────────
 const ESTADOS = ['P', 'V', 'I'];
