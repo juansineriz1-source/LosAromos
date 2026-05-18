@@ -11,6 +11,13 @@
 
 import db from './db.js';
 
+// ─── Permisos ─────────────────────────────────────────────────────────────────
+const ADMINS_CON_BORRADO = ['juan', 'ana', 'manuela', 'juanf', 'juan f'];
+function esAdmin() {
+  const op = (localStorage.getItem('rodeo_operador') || '').toLowerCase().trim();
+  return ADMINS_CON_BORRADO.includes(op);
+}
+
 // ─── Estado del calendario ────────────────────────────────────────────────────
 // Fecha en zona horaria de Argentina (UTC-3, sin DST)
 function ahoraArgentina() {
@@ -62,7 +69,8 @@ export async function cargarFeedHoy() {
   }
 
   const blobURLs = await crearBlobURLs(items);
-  contenedor.innerHTML = items.map(item => renderFeedItem(item, blobURLs)).join('');
+  const puedeAdmin = esAdmin();
+  contenedor.innerHTML = items.map(item => renderFeedItem(item, blobURLs, puedeAdmin)).join('');
 }
 
 // ─── Cargar actividad local (IndexedDB) ───────────────────────────────────
@@ -227,7 +235,8 @@ window.abrirDiaCalendario = async function(fechaStr) {
   }
 
   const blobURLs = await crearBlobURLs(items);
-  contenido.innerHTML = items.map(item => renderFeedItem(item, blobURLs)).join('');
+  const puedeAdmin = esAdmin();
+  contenido.innerHTML = items.map(item => renderFeedItem(item, blobURLs, puedeAdmin)).join('');
 
   detalle.scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
@@ -249,19 +258,21 @@ function construirFeedItems(novedades, registros, recorridas, fotos, videos) {
 
   recorridas.forEach(r => items.push({
     tipo: 'recorrida', hora: r.hora || '', operador: r.operador,
-    duracion: r.duracion_seg, storage_url: r.storage_url, id: r.id,
-    audio_blob: r.audio_blob,
+    duracion: r.duracion_seg, storage_url: r.storage_url, storage_key: r.storage_key,
+    id: r.id, uuid: r.uuid, audio_blob: r.audio_blob,
   }));
 
   fotos.forEach(f => items.push({
     tipo: 'foto', hora: f.hora || '', operador: f.operador,
-    imagen_blob: f.imagen_blob, storage_url: f.storage_url, id: f.id,
+    imagen_blob: f.imagen_blob, storage_url: f.storage_url, storage_key: f.storage_key,
+    id: f.id, uuid: f.uuid,
   }));
 
   videos.forEach(v => items.push({
     tipo: 'video', hora: v.hora || '', operador: v.operador,
     nombre: v.nombre_original, size: v.video_size,
-    storage_url: v.storage_url, id: v.id,
+    storage_url: v.storage_url, storage_key: v.storage_key,
+    id: v.id, uuid: v.uuid,
   }));
 
   // Ordenar por hora
@@ -283,7 +294,7 @@ async function crearBlobURLs(items) {
 }
 
 // ─── Render de cada item del feed ────────────────────────────────────────────
-function renderFeedItem(item, blobURLs = {}) {
+function renderFeedItem(item, blobURLs = {}, puedeAdmin = false) {
   const hora = item.hora || '--:--';
   const op   = item.operador || 'Operador';
 
@@ -294,6 +305,18 @@ function renderFeedItem(item, blobURLs = {}) {
     novedad:   'Novedad', registro: 'Pesaje en manga', recorrida: 'Recorrida de campo',
     foto: 'Foto', video: 'Video',
   };
+
+  // Botón borrar solo para admins y solo si el archivo está en el servidor
+  const puedesBorrar = puedeAdmin && item.storage_key &&
+    ['recorrida','foto','video'].includes(item.tipo);
+  const tablaMap = { recorrida: 'recorridas_meta', foto: 'fotos_meta', video: 'videos_meta' };
+  const btnBorrar = puedesBorrar
+    ? `<button
+        class="feed-btn-borrar"
+        onclick="borrarMediaFeed('${item.storage_key}','${tablaMap[item.tipo]}','${item.uuid || ''}','${item.id || ''}','${item.tipo}')"
+        title="Borrar para todos"
+       >🗑️</button>`
+    : '';
 
   let detalle = '';
   if (item.tipo === 'novedad') {
@@ -308,7 +331,6 @@ function renderFeedItem(item, blobURLs = {}) {
       </div>`;
   } else if (item.tipo === 'recorrida') {
     const dur      = item.duracion ? formatearSeg(item.duracion) : '';
-    // Audios locales → blob URL; audios remotos → proxy unificado /api/media-proxy
     const proxyUrl = item.storage_key ? `/api/media-proxy?key=${encodeURIComponent(item.storage_key)}` : '';
     const audioSrc = blobURLs[`recorrida-${item.id}`] || proxyUrl || item.storage_url || '';
     detalle = `
@@ -345,13 +367,14 @@ function renderFeedItem(item, blobURLs = {}) {
   }
 
   return `
-    <div class="feed-item feed-${item.tipo}">
+    <div class="feed-item feed-${item.tipo}" data-id="${item.id}" data-tipo="${item.tipo}">
       <div class="feed-item-header">
         <span class="feed-icono">${ICONOS[item.tipo]}</span>
         <div class="feed-meta">
           <span class="feed-label">${LABELS[item.tipo]}${item._remoto ? ' <span class="feed-remoto">📡</span>' : ''}</span>
           <span class="feed-hora">${hora} · ${op}</span>
         </div>
+        ${btnBorrar}
       </div>
       <div class="feed-detalle">${detalle}</div>
     </div>
@@ -378,12 +401,45 @@ export async function hidratarFeed(contenedor) {
   });
 }
 
+// ─── Borrar media (solo admins) ──────────────────────────────────────────────
+window.borrarMediaFeed = async function(storageKey, tabla, uuid, localId, tipo) {
+  if (!confirm('¿Borrar este archivo para todos? Esta acción no se puede deshacer.')) return;
+
+  try {
+    const resp = await fetch('/api/borrar-media', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ storage_key: storageKey, tabla, uuid }),
+    });
+    const result = await resp.json();
+    if (!result.ok) throw new Error(result.error || 'Error del servidor');
+
+    // Borrar también de IndexedDB local
+    const tablaLocal = { recorrida: 'recorridas', foto: 'fotos', video: 'videos' }[tipo];
+    if (tablaLocal && localId && db[tablaLocal]) {
+      await db[tablaLocal].delete(parseInt(localId)).catch(() => {});
+    }
+
+    // Refrescar el feed
+    const feedHoy = document.getElementById('feed-hoy');
+    if (feedHoy) await cargarFeedHoy();
+
+    // Si hay un panel de detalle de calendario abierto, refrescarlo también
+    const detalle = document.getElementById('cal-detalle');
+    if (detalle && !detalle.classList.contains('oculto')) {
+      const fechaLabel = document.getElementById('cal-detalle-fecha');
+      // No podemos re-lanzar fácilmente sin la fecha; simplemente cerramos el panel
+      detalle.classList.add('oculto');
+    }
+
+  } catch (err) {
+    alert(`Error al borrar: ${err.message}`);
+  }
+};
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function fechaISO(date) {
-  // Usa zona horaria Argentina (UTC-3, sin DST) para que el día no cambie
-  // a medianoche UTC mientras en Argentina todavía es el día anterior.
   return date.toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' });
-  // en-CA devuelve YYYY-MM-DD que es el formato ISO esperado
 }
 
 function formatearSeg(seg) {

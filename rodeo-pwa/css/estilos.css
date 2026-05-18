@@ -1863,3 +1863,34 @@ body {
   white-space: nowrap;
 }
 
+/* ════════════════════════════════════════════
+   BOTÓN BORRAR MEDIA (solo admins)
+   ════════════════════════════════════════════ */
+.feed-item-header {
+  position: relative;
+}
+
+.feed-btn-borrar {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 8px;
+  color: var(--gris);
+  line-height: 1;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s, transform 0.1s;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.feed-btn-borrar:hover {
+  background: #fee2e2;
+  color: var(--rojo);
+}
+
+.feed-btn-borrar:active {
+  transform: scale(0.88);
+  background: #fecaca;
+}
