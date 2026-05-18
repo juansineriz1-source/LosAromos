@@ -93,17 +93,9 @@ function mostrarPantallaLogin() {
         <div class="login-titulo">Los Aromos</div>
         <div class="login-sub">¿Quién sos?</div>
 
-        <div class="login-nombres">
-          ${['Juan','Ana','Juan F','Manuela','Domingo'].map(n => `
-            <button class="login-btn-nombre" data-nombre="${n}">${n}</button>
-          `).join('')}
-        </div>
-
-        <div class="login-divider">o escribí tu nombre</div>
-
         <div class="login-input-row">
           <input type="text" id="login-input" class="login-input"
-            placeholder="Nombre..." autocomplete="off" autocorrect="off" spellcheck="false">
+            placeholder="Tu nombre..." autocomplete="off" autocorrect="off" spellcheck="false">
           <button class="login-btn-entrar" id="login-btn-entrar">Entrar →</button>
         </div>
       </div>
@@ -128,19 +120,15 @@ function mostrarPantallaLogin() {
       }, 350);
     };
 
-    // Botones de nombres predefinidos
-    overlay.querySelectorAll('.login-btn-nombre').forEach(btn => {
-      btn.addEventListener('click', () => entrar(btn.dataset.nombre));
-    });
 
     // Input + botón entrar
     const input  = overlay.querySelector('#login-input');
     const btnEnt = overlay.querySelector('#login-btn-entrar');
     btnEnt.addEventListener('click', () => {
-      entrar(input.value.trim() || 'Operario');
+      if (input.value.trim()) entrar(input.value.trim());
     });
     input.addEventListener('keydown', e => {
-      if (e.key === 'Enter') entrar(input.value.trim() || 'Operario');
+      if (e.key === 'Enter' && input.value.trim()) entrar(input.value.trim());
     });
     // Focus automático
     setTimeout(() => input.focus(), 100);
