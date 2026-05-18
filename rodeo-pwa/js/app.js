@@ -28,8 +28,13 @@ const USUARIOS = {
   'domingo': { display: 'Domingo', rol: 'operario' },
 };
 
-const TABS_ADMIN    = ['inicio', 'baston', 'manual', 'rodeo', 'recorrida'];
-const TABS_OPERARIO = ['recorrida', 'rodeo', 'manual'];
+const TABS_ADMIN    = ['inicio', 'baston', 'rodeo', 'recorrida'];
+const TABS_OPERARIO = ['recorrida', 'rodeo'];
+
+// Tab inicial por usuario (override del default por rol)
+const TAB_INICIAL_USUARIO = {
+  'domingo': 'recorrida',
+};
 
 function detectarRol(nombre) {
   const clave = (nombre || '').toLowerCase().trim();
@@ -70,7 +75,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Restaurar rol desde localStorage
     aplicarRol(estado.rol || 'operario');
     $('operador-nombre').textContent = estado.operador;
-    const tabInicial = estado.rol === 'admin' ? 'inicio' : 'recorrida';
+    const claveUsuario = (estado.operador || '').toLowerCase();
+    const tabInicial = TAB_INICIAL_USUARIO[claveUsuario] ||
+                       (estado.rol === 'admin' ? 'inicio' : 'recorrida');
     mostrarTab(tabInicial);
   }
 });
@@ -114,7 +121,8 @@ function mostrarPantallaLogin() {
         overlay.remove();
         aplicarRol(usuario.rol);
         $('operador-nombre').textContent = usuario.display;
-        const tabInicial = usuario.rol === 'admin' ? 'inicio' : 'recorrida';
+        const tabInicial = TAB_INICIAL_USUARIO[usuario.display.toLowerCase()] || 
+                           (usuario.rol === 'admin' ? 'inicio' : 'recorrida');
         mostrarTab(tabInicial);
         resolve();
       }, 350);

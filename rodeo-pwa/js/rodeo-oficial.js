@@ -27,6 +27,13 @@ const COLORES = ['Negra', 'Colorada'];
 export function inicializarRodeoOficial(onToast, esAdmin) {
   _onToast = onToast;
   _esAdmin = esAdmin;
+
+  // Botón + agregar animal
+  const btnAgregar = document.getElementById('btn-agregar-animal');
+  if (btnAgregar) {
+    btnAgregar.style.display = esAdmin ? 'flex' : 'none';
+    btnAgregar.onclick = () => abrirModalAgregarAnimal();
+  }
 }
 
 // ─── Cargar desde Sheets ──────────────────────────────────────────────────────
@@ -54,10 +61,10 @@ function renderizarRodeo(animales, total) {
   const resumen    = document.getElementById('rodeo-oficial-resumen');
   if (!contenedor) return;
 
-  // Stats rápidos por tipo
-  const tipos = {};
-  animales.forEach(a => { tipos[a.tipo] = (tipos[a.tipo] || 0) + 1; });
-  const statsHtml = Object.entries(tipos)
+  // Stats usando el listado COMPLETO (no el filtrado)
+  const conteoTotal = {};
+  _animales.forEach(a => { conteoTotal[a.tipo] = (conteoTotal[a.tipo] || 0) + 1; });
+  const statsHtml = Object.entries(conteoTotal)
     .sort((a, b) => b[1] - a[1])
     .map(([t, n]) => `<span class="rodeo-stat-chip">${t} <b>${n}</b></span>`)
     .join('');
@@ -69,8 +76,11 @@ function renderizarRodeo(animales, total) {
     `;
   }
 
+  // Actualizar chips de filtro
+  actualizarChipsFiltro();
+
   if (!animales.length) {
-    contenedor.innerHTML = '<p class="sin-historial">Sin animales en el rodeo</p>';
+    contenedor.innerHTML = '<p class="sin-historial">Sin animales en este filtro</p>';
     return;
   }
 
@@ -81,7 +91,6 @@ function renderizarRodeo(animales, total) {
 
     return `
       <div class="rodeo-of-item" data-idx="${i}">
-        <!-- IDs: Botón y Caravana visibles en móvil -->
         <div class="rodeo-of-ids">
           <div class="rodeo-of-ids-row">
             ${a.boton    ? `<span class="rodeo-of-boton">🔖 ${a.boton}</span>`    : ''}
@@ -97,6 +106,49 @@ function renderizarRodeo(animales, total) {
       </div>
     `;
   }).join('');
+}
+
+// ─── Chips de filtro por tipo ─────────────────────────────────────────────────
+function actualizarChipsFiltro() {
+  const barra = document.getElementById('rodeo-filtros-chips');
+  if (!barra) return;
+
+  const conteo = {};
+  _animales.forEach(a => { if (a.tipo) conteo[a.tipo] = (conteo[a.tipo] || 0) + 1; });
+  const tiposOrdenados = Object.entries(conteo).sort((a, b) => b[1] - a[1]).map(([t]) => t);
+
+  barra.innerHTML = [
+    `<button class="rodeo-filtro-chip${_filtroTipo === 'todos' ? ' activo' : ''}" data-filtro="todos">Todos <b>${_animales.length}</b></button>`,
+    ...tiposOrdenados.map(t =>
+      `<button class="rodeo-filtro-chip${_filtroTipo === t ? ' activo' : ''}" data-filtro="${t}">${t} <b>${conteo[t]}</b></button>`
+    ),
+  ].join('');
+
+  barra.querySelectorAll('.rodeo-filtro-chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      _filtroTipo = btn.dataset.filtro;
+      aplicarFiltros();
+    });
+  });
+}
+
+function aplicarFiltros() {
+  const texto = (document.getElementById('rodeo-of-buscar')?.value || '').toLowerCase().trim();
+  let filtrados = _animales;
+  if (_filtroTipo !== 'todos') {
+    filtrados = filtrados.filter(a => (a.tipo || '') === _filtroTipo);
+  }
+  if (texto) {
+    filtrados = filtrados.filter(a =>
+      (a.boton     || '').toLowerCase().includes(texto) ||
+      (a.caravana  || '').toLowerCase().includes(texto) ||
+      (a.tipo      || '').toLowerCase().includes(texto) ||
+      (a.estado    || '').toLowerCase().includes(texto) ||
+      (a.color     || '').toLowerCase().includes(texto) ||
+      (a.comentario|| '').toLowerCase().includes(texto)
+    );
+  }
+  renderizarRodeo(filtrados, _animales.length);
 }
 
 // ─── Abrir modal de edición ───────────────────────────────────────────────────
@@ -307,25 +359,140 @@ async function guardarEdicionAnimal(animal_viejo, cerrarModal) {
   }
 }
 
-// ─── Filtro de búsqueda ───────────────────────────────────────────────────────
+// ─── Filtro de búsqueda (llamado desde app.js al tipear) ──────────────────────
 export function filtrarRodeo(texto) {
-  const q = (texto || '').toLowerCase().trim();
-  if (!q) {
-    renderizarRodeo(_animales, _animales.length);
-    return;
-  }
-  const filtrados = _animales.filter(a =>
-    (a.boton     || '').toLowerCase().includes(q) ||
-    (a.caravana  || '').toLowerCase().includes(q) ||
-    (a.tipo      || '').toLowerCase().includes(q) ||
-    (a.estado    || '').toLowerCase().includes(q) ||
-    (a.color     || '').toLowerCase().includes(q) ||
-    (a.comentario|| '').toLowerCase().includes(q)
-  );
-  renderizarRodeo(filtrados, _animales.length);
+  aplicarFiltros(); // usa el texto del input + chip activo
 }
+
+// ─── Modal: agregar animal nuevo ──────────────────────────────────────────────
+function abrirModalAgregarAnimal() {
+  const existente = document.getElementById('modal-agregar-animal');
+  if (existente) existente.remove();
+
+  const modal = document.createElement('div');
+  modal.id        = 'modal-agregar-animal';
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `
+    <div class="modal" style="border-radius:24px 24px 0 0; padding:0 0 40px; max-height:92vh; overflow-y:auto;">
+      <div style="position:sticky; top:0; background:var(--bg-card); padding:16px 20px 12px; border-bottom:1px solid var(--borde); display:flex; align-items:center; justify-content:space-between; z-index:10;">
+        <span style="font-weight:700; font-size:17px;">➕ Nuevo animal</span>
+        <button onclick="document.getElementById('modal-agregar-animal').remove()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--texto-secundario)">✕</button>
+      </div>
+      <div style="padding:20px;">
+        <div class="grupo-campo">
+          <label class="campo-label">Botón</label>
+          <input id="nuevo-boton" class="campo-input" placeholder="Nro de botón..." autocomplete="off">
+        </div>
+        <div class="grupo-campo" style="margin-top:12px;">
+          <label class="campo-label">Caravana</label>
+          <input id="nuevo-caravana" class="campo-input" placeholder="Nro de caravana..." autocomplete="off">
+        </div>
+        <div class="grupo-campo" style="margin-top:12px;">
+          <label class="campo-label">Estado</label>
+          <select id="nuevo-estado" class="campo-select">
+            ${ESTADOS.map(e => `<option value="${e}">${e} — ${ETIQUETAS_ESTADO[e] || e}</option>`).join('')}
+          </select>
+        </div>
+        <div class="grupo-campo" style="margin-top:12px;">
+          <label class="campo-label">Tipo</label>
+          <select id="nuevo-tipo" class="campo-select">
+            ${TIPOS.map(t => `<option value="${t}">${t}</option>`).join('')}
+          </select>
+        </div>
+        <div class="grupo-campo" style="margin-top:12px;">
+          <label class="campo-label">Color</label>
+          <select id="nuevo-color" class="campo-select">
+            ${COLORES.map(c => `<option value="${c}">${c}</option>`).join('')}
+          </select>
+        </div>
+        <div class="grupo-campo" style="margin-top:12px;">
+          <label class="campo-label">Comentario (opcional)</label>
+          <textarea id="nuevo-comentario" class="campo-textarea" rows="2" placeholder="Observaciones..."></textarea>
+        </div>
+        <button id="btn-guardar-nuevo-animal" class="btn btn-primario" style="margin-top:20px; min-height:56px; width:100%;">
+          💾 Agregar animal
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+  // Cerrar al tocar el fondo
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+
+  modal.querySelector('#btn-guardar-nuevo-animal').addEventListener('click', async () => {
+    const btn      = modal.querySelector('#btn-guardar-nuevo-animal');
+    const boton    = modal.querySelector('#nuevo-boton').value.trim();
+    const caravana = modal.querySelector('#nuevo-caravana').value.trim();
+    const estado   = modal.querySelector('#nuevo-estado').value;
+    const tipo     = modal.querySelector('#nuevo-tipo').value;
+    const color    = modal.querySelector('#nuevo-color').value;
+    const comentario = modal.querySelector('#nuevo-comentario').value.trim();
+
+    if (!boton && !caravana) {
+      if (_onToast) _onToast('Ingresá al menos botón o caravana', 'advertencia', 3000);
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Guardando...';
+
+    try {
+      const TZ    = 'America/Argentina/Buenos_Aires';
+      const fecha = new Date().toLocaleDateString('en-CA', { timeZone: TZ });
+      const hora  = new Date().toLocaleTimeString('es-AR', { timeZone: TZ, hour: '2-digit', minute: '2-digit' });
+
+      const payload = {
+        boton, caravana, estado, tipo, color, comentario,
+        fecha, hora,
+        operador: localStorage.getItem('rodeo_operador') || 'Admin',
+        tiene_boton:    boton    ? 'si' : 'no',
+        tiene_caravana: caravana ? 'si' : 'no',
+      };
+
+      const resp = await fetch('/api/actualizar-animal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!resp.ok) throw new Error(`Error ${resp.status}`);
+
+      if (_onToast) _onToast('✓ Animal agregado al rodeo', 'exito', 3000);
+      modal.remove();
+      await cargarRodeoOficial();
+
+    } catch (err) {
+      if (_onToast) _onToast(`✗ Error: ${err.message}`, 'error', 4000);
+      btn.disabled = false;
+      btn.textContent = '💾 Agregar animal';
+    }
+  });
+}
+
+// ─── Lightbox — ver imagen completa ──────────────────────────────────────────
+window.abrirLightbox = function(src) {
+  const lb  = document.getElementById('lightbox');
+  const img = document.getElementById('lightbox-img');
+  if (!lb || !img) return;
+  img.src          = src;
+  lb.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+};
+
+window.cerrarLightbox = function() {
+  const lb = document.getElementById('lightbox');
+  if (lb) lb.style.display = 'none';
+  document.body.style.overflow = '';
+};
+
+// Cerrar lightbox con Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') window.cerrarLightbox();
+});
 
 // ─── Helper ───────────────────────────────────────────────────────────────────
 function formatearFecha(str) {
   return str.replace(/(\d{4})-(\d{2})-(\d{2})/, '$3/$2/$1');
 }
+

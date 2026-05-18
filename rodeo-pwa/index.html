@@ -368,94 +368,19 @@
 
     </section>
 
-    <!-- ──────────── TAB: CARGA MANUAL ──────────── -->
-    <section class="tab-panel oculto" id="tab-manual">
-
-      <!-- Búsqueda -->
-      <div class="card">
-        <div class="card-titulo">🔍 Buscar Caravana</div>
-        <div class="grupo-campo">
-          <input
-            type="text"
-            id="manual-buscar"
-            class="campo-input"
-            placeholder="Número de caravana..."
-            autocomplete="off"
-            autocorrect="off"
-            spellcheck="false"
-            inputmode="text"
-          >
-        </div>
-        <button class="btn btn-secundario" id="btn-manual-buscar" style="min-height: 52px; font-size: 17px;">
-          🔍 Buscar
-        </button>
-      </div>
-
-      <!-- Resultado: animal encontrado -->
-      <div class="card oculto" id="manual-resultado">
-        <div class="card-titulo">🏷 Animal encontrado</div>
-        <div class="animal-detalle" id="manual-animal-info"></div>
-        <div class="divider"></div>
-
-        <!-- Agregar comentario rápido -->
-        <div class="grupo-campo" style="margin-top: 12px;">
-          <label class="campo-label">Agregar comentario</label>
-          <textarea
-            id="manual-comentario"
-            class="campo-textarea"
-            placeholder="Ej: Se revisó la oreja. Mejora visible..."
-            rows="3"
-          ></textarea>
-        </div>
-
-        <!-- Editar características -->
-        <details class="accordion">
-          <summary class="accordion-titulo">✏ Editar características</summary>
-          <div class="accordion-body">
-            <div class="grid-2">
-              <div class="grupo-campo">
-                <label class="campo-label">Categoría</label>
-                <select id="manual-categoria" class="campo-select"></select>
-              </div>
-              <div class="grupo-campo">
-                <label class="campo-label">Raza</label>
-                <select id="manual-raza" class="campo-select"></select>
-              </div>
-            </div>
-            <div class="grupo-campo">
-              <label class="campo-label">Estado Sanitario</label>
-              <select id="manual-estado" class="campo-select"></select>
-            </div>
-            <div class="grupo-campo">
-              <label class="campo-label">Vacuna / Medicamento</label>
-              <input type="text" id="manual-vacuna" class="campo-input" placeholder="Vacuna aplicada...">
-            </div>
-          </div>
-        </details>
-
-        <button class="btn btn-primario" id="btn-manual-guardar" style="margin-top: 12px; min-height: 60px;">
-          💾 Guardar cambios
-        </button>
-      </div>
-
-      <!-- Estado: no encontrado -->
-      <div class="card oculto" id="manual-no-encontrado">
-        <div style="text-align: center; padding: 20px 0;">
-          <div style="font-size: 48px; margin-bottom: 12px;">🔍</div>
-          <div style="font-weight: 700; font-size: 18px; margin-bottom: 6px;">Animal no encontrado</div>
-          <p class="sin-historial">Esta caravana no tiene registros locales.<br>Usá el bastón para registrarla primero.</p>
-        </div>
-      </div>
-
-    </section>
 
     <!-- ──────────── TAB: RODEO ──────────── -->
     <section class="tab-panel oculto" id="tab-rodeo">
 
-      <!-- Stats rápidos del rodeo -->
+      <!-- Stats y filtros por tipo -->
       <div class="card" style="padding: 12px 16px;">
         <div class="rodeo-of-stats" id="rodeo-oficial-resumen">
           <span class="rodeo-stat-total">Cargando rodeo...</span>
+        </div>
+
+        <!-- Chips de filtro por tipo -->
+        <div class="rodeo-filtros-chips" id="rodeo-filtros-chips" style="margin-top:10px; display:flex; flex-wrap:wrap; gap:6px;">
+          <button class="rodeo-filtro-chip activo" data-filtro="todos">Todos</button>
         </div>
 
         <!-- Buscador -->
@@ -476,6 +401,11 @@
         <p class="sin-historial" style="margin: 24px 0;">Cargando...</p>
       </div>
 
+      <!-- Botón flotante + para agregar animal (solo admins) -->
+      <button id="btn-agregar-animal" class="btn-flotante-agregar" title="Agregar animal" style="display:none">
+        +
+      </button>
+
       <!-- Modal antiguo de detalle (mantener para compatibilidad) -->
       <div class="modal-overlay oculto" id="modal-overlay">
         <div class="modal">
@@ -489,6 +419,12 @@
 
     </section>
 
+    <!-- ═══════════════════════ LIGHTBOX ════════════════════════ -->
+    <div id="lightbox" class="lightbox-overlay" style="display:none" onclick="cerrarLightbox()">
+      <button class="lightbox-cerrar" onclick="cerrarLightbox()" aria-label="Cerrar">✕</button>
+      <img id="lightbox-img" src="" alt="Foto" class="lightbox-img"  onclick="event.stopPropagation()">
+    </div>
+
   </main>
 
   <!-- ═══════════════════════ BOTTOM NAV ═══════════════════════════ -->
@@ -500,10 +436,6 @@
     <button class="nav-item" id="nav-baston" data-tab="baston">
       <span class="nav-icon">📡</span>
       <span class="nav-label">Bastón</span>
-    </button>
-    <button class="nav-item" id="nav-manual" data-tab="manual">
-      <span class="nav-icon">✏</span>
-      <span class="nav-label">Manual</span>
     </button>
     <button class="nav-item" id="nav-rodeo" data-tab="rodeo">
       <span class="nav-icon">🐄</span>

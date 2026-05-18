@@ -1670,3 +1670,116 @@ body {
 
 /* === RODEO OFICIAL CSS === */
 .rodeo-of-stats{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.rodeo-stat-total{font-size:15px;font-weight:700;color:var(--texto)}.rodeo-stat-chip{background:var(--verde-claro);color:var(--verde-oscuro);border-radius:20px;padding:3px 10px;font-size:13px;font-weight:600}.rodeo-of-item{background:var(--blanco);border-radius:var(--radio);padding:12px 14px;margin:6px 12px;display:flex;align-items:center;gap:10px;box-shadow:0 1px 4px rgba(0,0,0,.07)}.rodeo-of-ids{flex:1;min-width:0}.rodeo-of-boton{display:block;font-size:15px;font-weight:700;color:var(--texto);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rodeo-of-caravana{display:block;font-size:12px;color:var(--gris);font-weight:500;margin-top:1px}.rodeo-of-info{display:flex;flex-wrap:wrap;gap:4px;align-items:center}.rodeo-of-tipo,.rodeo-of-estado{padding:3px 9px;border-radius:20px;font-size:12px;font-weight:700;background:#f5f5f5;color:#555}.rodeo-tipo-v{background:#e3f2fd;color:#0d47a1}.rodeo-tipo-v1{background:#fff3e0;color:#e65100}.rodeo-tipo-va{background:#e8f5e9;color:#1b5e20}.rodeo-tipo-t{background:#fce4ec;color:#880e4f}.rodeo-tipo-tn{background:#f3e5f5;color:#4a148c}.rodeo-estado-p{background:#e8f5e9;color:#1b5e20}.rodeo-estado-v{background:#fff9c4;color:#f57f17}.rodeo-estado-d{background:#fce4ec;color:#c62828}.rodeo-estado-b{background:#eee;color:#616161}.rodeo-of-badge{padding:2px 7px;border-radius:20px;font-size:11px;font-weight:600;background:#e8f5e9;color:#2e7d32}.rodeo-badge-no{background:#fafafa;color:#9e9e9e;border:1px solid #e0e0e0}.rodeo-of-fecha{font-size:11px;color:var(--gris);white-space:nowrap}.rodeo-of-btn-editar{background:none;border:1.5px solid var(--verde);border-radius:10px;color:var(--verde);font-size:16px;padding:5px 8px;cursor:pointer;flex-shrink:0;font-family:inherit}.rodeo-edit-seccion{margin-bottom:14px}.rodeo-edit-opciones{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.rodeo-edit-chip{padding:6px 14px;border-radius:20px;border:1.5px solid #ddd;background:#f9f9f9;color:var(--texto);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}.rodeo-edit-chip.activo{background:var(--verde);border-color:var(--verde);color:#fff}
+/* ════════════════════════════════════════════════════
+   LIGHTBOX — ver imagen completa
+   ════════════════════════════════════════════════════ */
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.92);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn 0.18s ease;
+}
+.lightbox-img {
+  max-width: 100%;
+  max-height: 90vh;
+  border-radius: 12px;
+  object-fit: contain;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+}
+.lightbox-cerrar {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: #fff;
+  font-size: 22px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(6px);
+  transition: background 0.15s;
+}
+.lightbox-cerrar:hover { background: rgba(255,255,255,0.3); }
+
+/* Fotos clickeables */
+.feed-foto-thumb {
+  cursor: zoom-in;
+  border-radius: 8px;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.feed-foto-thumb:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+}
+
+/* ════════════════════════════════════════════════════
+   CHIPS DE FILTRO — Rodeo por categoría
+   ════════════════════════════════════════════════════ */
+.rodeo-filtros-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.rodeo-filtro-chip {
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1.5px solid var(--borde);
+  background: transparent;
+  color: var(--texto-secundario);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.rodeo-filtro-chip b { font-weight: 700; color: inherit; }
+.rodeo-filtro-chip:hover {
+  border-color: var(--verde-oscuro);
+  color: var(--verde-oscuro);
+}
+.rodeo-filtro-chip.activo {
+  background: var(--verde-oscuro);
+  border-color: var(--verde-oscuro);
+  color: #fff;
+}
+.rodeo-filtro-chip.activo b { color: #fff; }
+
+/* ════════════════════════════════════════════════════
+   BOTÓN FLOTANTE + (agregar animal)
+   ════════════════════════════════════════════════════ */
+.btn-flotante-agregar {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--verde-oscuro);
+  color: #fff;
+  font-size: 30px;
+  font-weight: 300;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  transition: transform 0.15s, box-shadow 0.15s;
+  line-height: 1;
+}
+.btn-flotante-agregar:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 28px rgba(0,0,0,0.35);
+}
+.btn-flotante-agregar:active { transform: scale(0.95); }
