@@ -130,11 +130,15 @@ async function guardarRecorrida(onToast) {
 
     const id = await db.recorridas.add(recorrida);
     onToast(`✓ Recorrida guardada (${formatearTiempo(segundos)})`, 'exito', 3000);
+
+    // ⚠️ Capturar referencia al blob ANTES de descartarRecorrida()
+    // porque descartarRecorrida() pone blobActual = null
+    const blobParaSubir = blobActual;
     descartarRecorrida();
     await cargarListaRecorridas();
 
     // Subida en background al NAS (MinIO) — no bloquea la UI
-    subirAudioEnBackground(id, blobActual, operador, onToast);
+    subirAudioEnBackground(id, blobParaSubir, operador, onToast);
 
   } catch (err) {
     onToast(`✗ Error al guardar: ${err.message}`, 'error');
