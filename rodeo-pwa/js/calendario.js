@@ -18,6 +18,21 @@ function esAdmin() {
   return ADMINS_CON_BORRADO.includes(op);
 }
 
+// ─── Caché local de keys borradas (respaldo si Sheets update falla) ─────────────────
+const LS_BORRADOS = 'rodeo_deleted_keys';
+function getKeysBorradas() {
+  try { return new Set(JSON.parse(localStorage.getItem(LS_BORRADOS) || '[]')); }
+  catch { return new Set(); }
+}
+function marcarKeyBorrada(key) {
+  if (!key) return;
+  const set = getKeysBorradas();
+  set.add(key);
+  // Mantener máx 200 entradas para no inflar localStorage
+  const arr = [...set].slice(-200);
+  localStorage.setItem(LS_BORRADOS, JSON.stringify(arr));
+}
+
 // ─── Estado del calendario ────────────────────────────────────────────────────
 // Fecha en zona horaria de Argentina (UTC-3, sin DST)
 function ahoraArgentina() {
@@ -61,7 +76,7 @@ export async function cargarFeedHoy() {
   const items = construirFeedItems(
     merged.novedades, merged.registros,
     merged.recorridas, merged.fotos, merged.videos
-  );
+  ).filter(item => !item.storage_key || !getKeysBorradas().has(item.storage_key));
 
   if (!items.length) {
     contenedor.innerHTML = '<p class="sin-historial">Sin actividad registrada hoy</p>';
@@ -227,7 +242,7 @@ window.abrirDiaCalendario = async function(fechaStr) {
   const items = construirFeedItems(
     merged.novedades, merged.registros,
     merged.recorridas, merged.fotos, merged.videos
-  );
+  ).filter(item => !item.storage_key || !getKeysBorradas().has(item.storage_key));
 
   if (!items.length) {
     contenido.innerHTML = '<p class="sin-historial">Sin actividad ese día</p>';
@@ -413,6 +428,9 @@ window.borrarMediaFeed = async function(event, storageKey, tabla, uuid, localId,
     card.style.transform  = 'translateX(40px)';
     setTimeout(() => card.remove(), 220);
   }
+
+  // Guardar en localStorage inmediatamente (respaldo ante falla de Sheets)
+  marcarKeyBorrada(storageKey);
 
   try {
     const resp = await fetch('/api/borrar-media', {

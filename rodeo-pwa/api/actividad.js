@@ -85,7 +85,9 @@ function parsearFilas(filas, columnas, fecha) {
         obj[col]  = idx >= 0 ? (fila[idx] || '') : '';
       });
       return obj;
-    });
+    })
+    // Excluir ítems borrados por /api/borrar-media (storage_key o storage_url = 'DELETED')
+    .filter(obj => obj.storage_key !== 'DELETED' && obj.storage_url !== 'DELETED');
 }
 
 // ─── Handler principal ────────────────────────────────────────────────────────
