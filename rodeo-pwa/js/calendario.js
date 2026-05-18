@@ -324,7 +324,7 @@ function renderFeedItem(item, blobURLs = {}) {
   } else if (item.tipo === 'foto') {
     const fotoSrc = blobURLs[`foto-${item.id}`] || item.storage_url || '';
     detalle = fotoSrc
-      ? `<img class="feed-foto-thumb" src="${fotoSrc}" alt="Foto">`
+      ? `<img class="feed-foto-thumb" src="${fotoSrc}" alt="Foto" onclick="abrirLightbox('${fotoSrc}')">`
       : '<p class="sin-historial" style="font-size:12px">Foto no disponible</p>';
   } else if (item.tipo === 'video') {
     detalle = `
