@@ -148,55 +148,69 @@ async function guardarRecorrida(onToast) {
   }
 }
 
-// ─── Subida al NAS en background ──────────────────────────────────────────────
+// ─── Subida al NAS via proxy Vercel (evita CORS de MinIO) ─────────────────────
 async function subirAudioEnBackground(recorridaId, blob, operador, onToast) {
-  if (!navigator.onLine) return; // Sin red → queda solo local por ahora
+  if (!navigator.onLine) {
+    console.log('[Recorrida] Sin red — audio queda local hasta reconectar');
+    return;
+  }
+  if (!blob) {
+    console.warn('[Recorrida] blob es null — no se puede subir');
+    return;
+  }
 
   try {
-    // 1. Pedir URL pre-firmada a Vercel
-    const resp = await fetch('/api/upload-url', {
+    // Convertir blob → base64 (necesario para enviarlo como JSON al proxy)
+    const base64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload  = () => resolve(reader.result.split(',')[1]); // quitar "data:...;base64,"
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+
+    // Subir via Vercel (server-side → sin CORS con MinIO)
+    const resp = await fetch('/api/subir-audio', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        tipo: 'recorrida',
-        contentType: blob.type || 'audio/webm',
-        operador,
+        audioBase64: base64,
+        mimeType:    blob.type || 'audio/webm',
+        operador:    operador,
       }),
     });
 
-    if (!resp.ok) throw new Error(`upload-url ${resp.status}`);
-    const { uploadUrl, publicUrl, objectKey } = await resp.json();
+    if (!resp.ok) {
+      const txt = await resp.text();
+      throw new Error(`subir-audio ${resp.status}: ${txt}`);
+    }
 
-    // 2. Subir el binario directamente al MinIO (presigned PUT)
-    const upload = await fetch(uploadUrl, {
-      method: 'PUT',
-      headers: { 'Content-Type': blob.type || 'audio/webm' },
-      body: blob,
-    });
+    const { ok, publicUrl, objectKey, error } = await resp.json();
+    if (!ok) throw new Error(error || 'Error desconocido en subir-audio');
 
-    if (!upload.ok) throw new Error(`Subida MinIO ${upload.status}`);
-
-    // 3. Actualizar el registro local con la URL pública
+    // Actualizar registro local con la URL
     const recorridaActualizada = await db.recorridas.get(recorridaId);
     await db.recorridas.update(recorridaId, {
-      storage_url: publicUrl,
-      storage_key: objectKey,
+      storage_url:  publicUrl,
+      storage_key:  objectKey,
     });
 
-    // 4. Sincronizar metadata a Sheets para visibilidad cross-device
+    // Sincronizar metadata a Sheets para que aparezca en otros dispositivos
     if (recorridaActualizada) {
-      await sincronizarMedia('recorrida', { ...recorridaActualizada, storage_url: publicUrl, storage_key: objectKey });
+      await sincronizarMedia('recorrida', {
+        ...recorridaActualizada,
+        storage_url: publicUrl,
+        storage_key: objectKey,
+      });
     }
 
     onToast('☁ Audio subido al servidor', 'info', 2500);
     await cargarListaRecorridas();
 
   } catch (err) {
-    // No fatal — el audio ya está guardado local
-    console.warn('[Recorrida] Subida background fallida:', err.message);
+    console.warn('[Recorrida] Subida fallida:', err.message);
+    // No fatal — el audio ya está guardado local y se puede reintentar
   }
 }
-
 
 // ─── Descartar ────────────────────────────────────────────────────────────────
 function descartarRecorrida() {
