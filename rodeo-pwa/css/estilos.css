@@ -1796,3 +1796,70 @@ body {
   display: block;
   max-height: 320px;
 }
+
+/* ════════════════════════════════════════════
+   TAB VIDEOS — lista y player
+   ════════════════════════════════════════════ */
+.video-item {
+  background: var(--blanco);
+  border-radius: var(--radio-grande);
+  padding: 14px;
+  box-shadow: var(--sombra);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: hidden;        /* evita que el <video> desborde la card */
+}
+
+.video-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.video-player {
+  width: 100%;             /* ocupa todo el ancho de la card */
+  max-width: 100%;
+  display: block;
+  border-radius: 8px;
+  background: #000;
+  max-height: 340px;       /* cap para videos portrait muy altos */
+  object-fit: contain;     /* sin recorte, con barras negras si hace falta */
+}
+
+/* Preview antes de guardar */
+.video-item-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--gris-claro);
+  border-radius: var(--radio);
+  padding: 10px;
+  overflow: hidden;
+}
+
+.video-item-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.video-nombre {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--texto);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 180px;
+}
+
+.video-size {
+  font-size: 12px;
+  color: var(--gris);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
