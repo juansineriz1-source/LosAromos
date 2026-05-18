@@ -1,9 +1,11 @@
 /**
  * videos.js — Captura y gestión de videos del día
  *
- * Los videos se guardan en IndexedDB como Blob y se suben a MinIO en background.
- * NOTA: los videos pueden ser grandes (>50MB). Se guarda el blob localmente
- * y se sube directamente al NAS via presigned URL sin pasar por Vercel.
+ * Los videos se guardan en IndexedDB como Blob y se suben a MinIO en background
+ * via /api/subir-media (mismo proxy que audios y fotos, base64 JSON).
+ *
+ * Límite práctico: ~15 MB por video (Vercel body limit ~50 MB, base64 infla ~33%).
+ * Videos más grandes muestran un aviso y no se suben al servidor.
  */
 
 import db, { crearMetadatos } from './db.js';
@@ -28,11 +30,11 @@ export function inicializarVideos(onToast) {
 function procesarVideos(files, onToast) {
   if (!files || files.length === 0) return;
 
-  const MAX_MB = 500; // límite razonable por video
+  const MAX_MB = 15; // límite por el body de Vercel (~50MB, base64 infla 33%)
   Array.from(files).forEach(file => {
     if (!file.type.startsWith('video/')) return;
     if (file.size > MAX_MB * 1024 * 1024) {
-      onToast(`Video muy grande (máx ${MAX_MB}MB): ${file.name}`, 'advertencia', 4000);
+      onToast(`Video muy grande (máx ${MAX_MB} MB). Comprimilo antes de subir.`, 'advertencia', 5000);
       return;
     }
     const objectUrl = URL.createObjectURL(file);
@@ -123,34 +125,50 @@ async function guardarVideos(onToast) {
   }
 }
 
-// ─── Subida a MinIO en background ─────────────────────────────────────────────
+// ─── Subida a MinIO via proxy Vercel (mismo patrón que audios y fotos) ──────────
 async function subirVideoEnBackground(videoId, file, operador, onToast) {
-  if (!navigator.onLine) return;
+  if (!navigator.onLine) {
+    console.log('[Videos] Sin red — video queda local hasta reconectar');
+    return;
+  }
+  if (!file) {
+    console.warn('[Videos] file es null — no se puede subir');
+    return;
+  }
 
   try {
-    const resp = await fetch('/api/upload-url', {
+    onToast(`☁ Subiendo video (${(file.size / (1024 * 1024)).toFixed(1)} MB)...`, 'info', 4000);
+
+    // Convertir blob/file → base64 para enviarlo como JSON al proxy
+    const base64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload  = () => resolve(reader.result.split(',')[1]); // quitar "data:...;base64,"
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+    // Subir via proxy Vercel → MinIO (server-side, sin CORS)
+    const resp = await fetch('/api/subir-media', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        tipo: 'video',
-        contentType: file.type || 'video/mp4',
+        tipo:     'video',
+        base64,
+        mimeType: file.type || 'video/mp4',
         operador,
       }),
     });
 
-    if (!resp.ok) throw new Error(`upload-url ${resp.status}`);
-    const { uploadUrl, publicUrl, objectKey } = await resp.json();
+    if (!resp.ok) {
+      const txt = await resp.text();
+      throw new Error(`subir-media HTTP ${resp.status}: ${txt.slice(0, 200)}`);
+    }
 
-    onToast(`☁ Subiendo video (${(file.size / (1024*1024)).toFixed(0)}MB)...`, 'info', 3000);
+    const result = await resp.json();
+    if (!result.ok) throw new Error(result.error || 'Error desconocido en subir-media');
+    const { publicUrl, objectKey } = result;
 
-    const upload = await fetch(uploadUrl, {
-      method: 'PUT',
-      headers: { 'Content-Type': file.type || 'video/mp4' },
-      body: file,
-    });
-
-    if (!upload.ok) throw new Error(`MinIO PUT ${upload.status}`);
-
+    // Actualizar registro local con URL y key
     const videoActualizado = await db.videos.get(videoId);
     await db.videos.update(videoId, { storage_url: publicUrl, storage_key: objectKey });
 
@@ -163,7 +181,8 @@ async function subirVideoEnBackground(videoId, file, operador, onToast) {
     await cargarListaVideos();
 
   } catch (err) {
-    console.warn('[Videos] Subida background fallida:', err.message);
+    console.error('[Videos] Subida background fallida:', err.message);
+    onToast(`✗ Error al subir video: ${err.message}`, 'error');
   }
 }
 
@@ -201,14 +220,18 @@ export async function cargarListaVideos() {
     </div>
   `).join('');
 
-  // Cargar blobs en los players
+  // Cargar src en los players: proxy > blob local > nada
   videos.forEach(async v => {
     const player = lista.querySelector(`video[data-video-id="${v.id}"]`);
     if (!player) return;
-    if (v.storage_url) {
-      player.src = v.storage_url;
+
+    if (v.storage_key) {
+      // Reproducir via proxy Vercel → MinIO (evita CORS, soporta Range requests)
+      player.src = `/api/media-proxy?key=${encodeURIComponent(v.storage_key)}`;
     } else if (v.video_blob) {
+      // Blob local (grabado pero aún no subido)
       player.src = URL.createObjectURL(v.video_blob);
     }
+    // Si no hay ni key ni blob, el player queda sin src (no reproduce, que es correcto)
   });
 }
