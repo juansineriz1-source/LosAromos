@@ -55,26 +55,56 @@ async function obtenerToken() {
 async function leerHoja(token, rango = 'A:G') {
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(HOJA + '!' + rango)}`;
   const r = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  if (!r.ok) return []; // Hoja no existe — devolver vacío
   const d = await r.json();
   return d.values || [];
 }
 
+async function crearHojaConCabeceras(token) {
+  // 1. Crear la pestaña push_subs
+  const urlBatch = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}:batchUpdate`;
+  const r = await fetch(urlBatch, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ requests: [{ addSheet: { properties: { title: HOJA } } }] }),
+  });
+  // 400 puede significar que la hoja ya existe — ignorar
+  if (!r.ok && (await r.json().catch(() => ({}))).error?.code !== 400) {
+    console.error('[push-subscribe] Error creando hoja push_subs:', r.status);
+  }
+  // 2. Escribir cabeceras
+  await escribirFila(token, COLUMNAS);
+  console.log('[push-subscribe] Hoja push_subs creada con cabeceras');
+}
+
 async function escribirFila(token, fila) {
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(HOJA)}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`;
-  await fetch(url, {
+  const r = await fetch(url, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ values: [fila] }),
   });
+  if (!r.ok) {
+    const txt = await r.text();
+    console.error('[push-subscribe] Error escribirFila:', r.status, txt.slice(0, 200));
+    throw new Error(`Sheets append ${r.status}`);
+  }
+  console.log('[push-subscribe] Fila escrita OK');
 }
 
 async function actualizarFila(token, numFila, fila) {
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(HOJA + '!A' + numFila)}?valueInputOption=RAW`;
-  await fetch(url, {
+  const r = await fetch(url, {
     method: 'PUT',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ values: [fila] }),
   });
+  if (!r.ok) {
+    const txt = await r.text();
+    console.error('[push-subscribe] Error actualizarFila:', r.status, txt.slice(0, 200));
+    throw new Error(`Sheets update ${r.status}`);
+  }
+  console.log('[push-subscribe] Fila actualizada OK');
 }
 
 // ─── Handler ──────────────────────────────────────────────────────────────────
@@ -100,11 +130,11 @@ export default async function handler(req, res) {
     }
 
     const token = await obtenerToken();
-    const filas = await leerHoja(token);
+    const filas  = await leerHoja(token);
 
-    // Asegurar cabeceras
+    // Si la hoja no existe o está vacía — crearla con cabeceras
     if (!filas.length) {
-      await escribirFila(token, COLUMNAS);
+      await crearHojaConCabeceras(token);
     }
 
     const colDeviceId = 0;
@@ -127,8 +157,10 @@ export default async function handler(req, res) {
     ];
 
     if (filaExistente > 0) {
+      console.log('[push-subscribe] Actualizando suscripción existente, fila:', filaExistente);
       await actualizarFila(token, filaExistente, fila);
     } else {
+      console.log('[push-subscribe] Guardando nueva suscripción para device:', device_id);
       await escribirFila(token, fila);
     }
 

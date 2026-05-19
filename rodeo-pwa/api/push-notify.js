@@ -8,8 +8,7 @@
  *   { sender_device_id, titulo, cuerpo, data? }
  */
 
-// CommonJS require para compatibilidad con Vercel (web-push no es ESM puro)
-const webpush = require('web-push');
+import webpush from 'web-push';
 
 const SHEET_ID              = process.env.GOOGLE_SHEET_ID;
 const SERVICE_ACCOUNT_EMAIL = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
@@ -76,7 +75,7 @@ async function obtenerSuscripciones(token) {
 }
 
 // ─── Handler ──────────────────────────────────────────────────────────────────
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
