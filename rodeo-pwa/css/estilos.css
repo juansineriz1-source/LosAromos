@@ -1564,6 +1564,33 @@ body {
 .feed-foto      { border-color: var(--tierra); }
 .feed-video     { border-color: #7c3aed; }
 
+/* Texto claro dentro de la card de video (fondo oscuro) */
+.feed-item.feed-video .feed-label,
+.feed-item.feed-video .feed-hora,
+.feed-item.feed-video .feed-icono {
+  color: #e2e8f0;
+}
+.feed-item.feed-video .feed-item-header {
+  padding: 8px 10px 6px 12px;
+}
+.feed-item.feed-video .feed-tag {
+  background: rgba(255,255,255,0.12);
+  color: #e2e8f0;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+.feed-item.feed-video .feed-tag-ok {
+  background: rgba(34,197,94,0.2);
+  color: #86efac;
+  border-color: rgba(34,197,94,0.3);
+}
+.feed-item.feed-video .feed-btn-borrar {
+  color: #94a3b8;
+}
+.feed-item.feed-video .feed-btn-borrar:hover {
+  background: rgba(239,68,68,0.2);
+  color: #fca5a5;
+}
+
 .feed-item-header {
   display: flex;
   align-items: flex-start;
@@ -1787,14 +1814,31 @@ body {
 /* ════════════════════════════════════════════
    VIDEO PLAYER en el feed
    ════════════════════════════════════════════ */
+
+/* Card contenedora del video — contiene el player */
+.feed-item.feed-video {
+  padding-bottom: 0;        /* el video ocupa el borde inferior */
+  overflow: hidden;
+  border-radius: 12px;
+  border-left-width: 4px;
+  background: #0a0a0a;
+}
+
+/* El video se estira de borde a borde dentro de la card */
+.feed-video .feed-detalle {
+  margin: 0 -12px;          /* cancela el padding-left de .feed-item */
+  margin-left: -15px;       /* cancela el padding-left + border */
+}
+
 .feed-video {
   width: 100%;
   max-width: 100%;
-  border-radius: 10px;
-  margin-top: 8px;
+  border-radius: 0 0 10px 10px;
+  margin-top: 6px;
   background: #000;
   display: block;
-  max-height: 320px;
+  max-height: 340px;
+  object-fit: contain;      /* no distorsiona proporción */
 }
 
 /* ════════════════════════════════════════════
