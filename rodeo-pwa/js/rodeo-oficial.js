@@ -91,7 +91,7 @@ function renderizarRodeo(animales, total) {
     const colorDot    = a.color === 'Negra' ? '⚫' : a.color === 'Colorada' ? '🟠' : '';
 
     return `
-      <div class="rodeo-of-item" data-idx="${i}">
+      <div class="rodeo-of-item rodeo-of-item-tap" data-idx="${i}" onclick="abrirDetalleAnimal(${i})">
         <div class="rodeo-of-ids">
           <div class="rodeo-of-ids-row">
             ${a.boton    ? `<span class="rodeo-of-boton">🔖 ${a.boton}</span>`    : ''}
@@ -103,7 +103,7 @@ function renderizarRodeo(animales, total) {
             ${colorDot ? `<span class="rodeo-of-color">${colorDot} ${a.color}</span>` : ''}
           </div>
         </div>
-        ${_esAdmin ? `<button class="rodeo-of-btn-editar" onclick="abrirEditorAnimal(${i})">✏️</button>` : ''}
+        ${_esAdmin ? `<button class="rodeo-of-btn-editar" onclick="event.stopPropagation(); abrirEditorAnimal(${i})">✏️</button>` : '<span class="rodeo-of-chevron">›</span>'}
       </div>
     `;
   }).join('');
@@ -151,6 +151,59 @@ function aplicarFiltros() {
   }
   renderizarRodeo(filtrados, _animales.length);
 }
+
+// ─── Modal de detalle (todos los usuarios) ─────────────────────────────────
+window.abrirDetalleAnimal = function(idx) {
+  const a = _animales[idx];
+  if (!a) return;
+
+  // Si es admin, abrir directamente el editor
+  if (_esAdmin) { window.abrirEditorAnimal(idx); return; }
+
+  const existente = document.getElementById('modal-detalle-animal');
+  if (existente) existente.remove();
+
+  const estadoLabel = ETIQUETAS_ESTADO[a.estado] || a.estado || '—';
+  const colorDot    = a.color === 'Negra' ? '⚫' : a.color === 'Colorada' ? '🟠' : '';
+
+  const fila = (label, valor) => valor
+    ? `<div class="detalle-fila"><span class="detalle-label">${label}</span><span class="detalle-valor">${valor}</span></div>`
+    : '';
+
+  const modal = document.createElement('div');
+  modal.id        = 'modal-detalle-animal';
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `
+    <div class="modal" style="border-radius:24px 24px 0 0; padding:0 0 40px; max-height:88vh; overflow-y:auto;">
+      <div class="modal-header" style="position:sticky;top:0;z-index:2;background:var(--verde-oscuro);">
+        <div>
+          <div class="modal-caravana" style="font-size:18px;">
+            ${a.boton ? `🔖 ${a.boton}` : ''} ${a.caravana ? `🏷 ${a.caravana}` : ''}
+          </div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.7);margin-top:2px">Detalle del animal</div>
+        </div>
+        <button class="modal-cerrar" id="modal-detalle-cerrar">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="detalle-card">
+          ${fila('🔖 Botón',    a.boton)}
+          ${fila('🏷 Caravana', a.caravana)}
+          ${fila('Estado',    a.estado ? `<span class="rodeo-of-estado rodeo-estado-${(a.estado||'').toLowerCase()}">${a.estado} · ${estadoLabel}</span>` : '')}
+          ${fila('Tipo',      a.tipo   ? `<span class="rodeo-of-tipo rodeo-tipo-${(a.tipo||'').toLowerCase().replace(' ','-')}">${a.tipo}</span>` : '')}
+          ${fila('Color',     a.color  ? `${colorDot} ${a.color}` : '')}
+          ${fila('¿Tiene caravana?', a.tiene_caravana)}
+          ${fila('¿Tiene botón?',    a.tiene_boton)}
+          ${fila('Fecha',     a.fecha)}
+          ${a.comentario ? `<div class="detalle-comentario"><span class="detalle-label">💬 Comentario</span><p>${a.comentario}</p></div>` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+  document.getElementById('modal-detalle-cerrar').addEventListener('click', () => modal.remove());
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+};
 
 // ─── Abrir modal de edición ───────────────────────────────────────────────────
 window.abrirEditorAnimal = function(idx) {
