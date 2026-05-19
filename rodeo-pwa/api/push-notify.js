@@ -8,7 +8,8 @@
  *   { sender_device_id, titulo, cuerpo, data? }
  */
 
-import webpush from 'web-push';
+// CommonJS require para compatibilidad con Vercel (web-push no es ESM puro)
+const webpush = require('web-push');
 
 const SHEET_ID              = process.env.GOOGLE_SHEET_ID;
 const SERVICE_ACCOUNT_EMAIL = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
@@ -75,16 +76,20 @@ async function obtenerSuscripciones(token) {
 }
 
 // ─── Handler ──────────────────────────────────────────────────────────────────
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).end();
 
+  console.log('[push-notify] Solicitud recibida');
+
   if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
+    console.error('[push-notify] VAPID keys no configuradas en env vars');
     return res.status(500).json({ ok: false, error: 'VAPID keys no configuradas' });
   }
+  console.log('[push-notify] VAPID keys OK');
 
   try {
     const { sender_device_id, titulo, cuerpo, data = {} } = req.body;
@@ -93,24 +98,28 @@ export default async function handler(req, res) {
       return res.status(400).json({ ok: false, error: 'Faltan titulo y cuerpo' });
     }
 
+    console.log('[push-notify] Obteniendo token Google...');
     const token = await obtenerToken();
+    console.log('[push-notify] Token OK, leyendo suscripciones...');
     const suscripciones = await obtenerSuscripciones(token);
+    console.log('[push-notify] Suscripciones encontradas en Sheets:', suscripciones.length);
 
     // Filtrar al que mandó el evento
     const destinatarios = suscripciones.filter(s =>
       s.device_id !== sender_device_id && s.endpoint && s.p256dh && s.auth
     );
+    console.log('[push-notify] Destinatarios válidos (excl. sender):', destinatarios.length);
 
     if (destinatarios.length === 0) {
-      return res.status(200).json({ ok: true, enviadas: 0, mensaje: 'Sin otros destinatarios' });
+      return res.status(200).json({ ok: true, enviadas: 0, mensaje: 'Sin otros destinatarios', total_subs: suscripciones.length });
     }
 
     const payload = JSON.stringify({
       titulo,
       cuerpo,
-      icon: '/icons/icon-192.png',
+      icon:  '/icons/icon-192.png',
       badge: '/icons/icon-72.png',
-      data: { url: '/', ...data },
+      data:  { url: '/', ...data },
     });
 
     // Enviar en paralelo — ignorar errores individuales (suscripción expirada)
@@ -127,11 +136,18 @@ export default async function handler(req, res) {
     const enviadas = resultados.filter(r => r.status === 'fulfilled').length;
     const fallidas = resultados.filter(r => r.status === 'rejected').length;
 
+    // Loguear razón de fallas
+    resultados.forEach((r, i) => {
+      if (r.status === 'rejected') {
+        console.error(`[push-notify] Falla ${i}:`, r.reason?.message || r.reason);
+      }
+    });
+
     console.log(`[push-notify] Enviadas: ${enviadas}, Fallidas: ${fallidas}`);
-    return res.status(200).json({ ok: true, enviadas, fallidas });
+    return res.status(200).json({ ok: true, enviadas, fallidas, total_subs: suscripciones.length });
 
   } catch (err) {
-    console.error('[push-notify]', err);
+    console.error('[push-notify] Error general:', err.message);
     return res.status(500).json({ ok: false, error: err.message });
   }
-}
+};
