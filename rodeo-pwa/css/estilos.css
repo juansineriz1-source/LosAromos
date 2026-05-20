@@ -1175,27 +1175,36 @@ body {
   font-family: 'Manrope', sans-serif;
 }
 
-/* Grid 2×2 de usuarios rápidos */
+/* Grid dinámico de usuarios — adapta a cualquier cantidad */
 .login-usuarios-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 24px;
+  gap: 8px;
+  margin-bottom: 0;      /* sin divisor ni input manual */
+  max-height: 280px;
+  overflow-y: auto;
+  scrollbar-width: none;
 }
+.login-usuarios-grid::-webkit-scrollbar { display: none; }
+
 .login-usuario-btn {
   background: rgba(26,92,48,0.20);
   border: 1px solid rgba(26,92,48,0.35);
   border-radius: 14px;
   color: #ffffff;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
-  padding: 16px 8px;
+  padding: 14px 8px;
   cursor: pointer;
   font-family: 'Manrope', sans-serif;
   transition: background 0.2s cubic-bezier(0.4,0,0.2,1), transform 0.1s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .login-usuario-btn:hover  { background: rgba(26,92,48,0.35); border-color: rgba(255,255,255,0.25); }
 .login-usuario-btn:active { transform: scale(0.96); }
+
 
 /* Divisor */
 .login-divisor {

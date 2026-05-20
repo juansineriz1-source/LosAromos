@@ -20,14 +20,28 @@ import { inicializarRodeoOficial, cargarRodeoOficial, filtrarRodeo } from './rod
 import { initAgenda, cargarAgenda } from './agenda.js';
 
 // ─── Usuarios y roles ─────────────────────────────────────────────────────────
-const USUARIOS = {
-  'juan':    { display: 'Juan',    rol: 'admin' },
-  'ana':     { display: 'Ana',     rol: 'admin' },
-  'juan f':  { display: 'Juan F',  rol: 'admin' },
-  'juanf':   { display: 'Juan F',  rol: 'admin' },
-  'manuela': { display: 'Manuela', rol: 'admin' },
-  'domingo': { display: 'Domingo', rol: 'operario' },
+// Mapa base (se sobreescribe con datos de la hoja "Usuarios" al iniciar)
+let USUARIOS = {
+  'juan':     { display: 'Juan',     rol: 'admin' },
+  'juan f':   { display: 'Juan F',   rol: 'admin' },
+  'juanf':    { display: 'Juan F',   rol: 'admin' },
+  'ana':      { display: 'Ana',      rol: 'admin' },
+  'manuela':  { display: 'Manuela',  rol: 'admin' },
+  'catalina': { display: 'Catalina', rol: 'admin' },
+  'domingo':  { display: 'Domingo',  rol: 'operario' },
+  'otro':     { display: 'Otro',     rol: 'operario' },
 };
+
+// Lista ordenada de usuarios para el grid del login (se carga desde Sheets)
+let USUARIOS_LISTA = [
+  { nombre: 'Juan',     rol: 'admin' },
+  { nombre: 'Juan F',   rol: 'admin' },
+  { nombre: 'Ana',      rol: 'admin' },
+  { nombre: 'Manuela',  rol: 'admin' },
+  { nombre: 'Catalina', rol: 'admin' },
+  { nombre: 'Domingo',  rol: 'operario' },
+  { nombre: 'Otro',     rol: 'operario' },
+];
 
 const TABS_ADMIN    = ['inicio', 'baston', 'rodeo', 'recorrida', 'agenda'];
 const TABS_OPERARIO = ['recorrida', 'rodeo'];
@@ -35,11 +49,37 @@ const TABS_OPERARIO = ['recorrida', 'rodeo'];
 // Tab inicial por usuario (override del default por rol)
 const TAB_INICIAL_USUARIO = {
   'domingo': 'recorrida',
+  'otro':    'recorrida',
 };
 
 function detectarRol(nombre) {
   const clave = (nombre || '').toLowerCase().trim();
   return USUARIOS[clave] || { display: nombre || 'Operario', rol: 'operario' };
+}
+
+// ─── Cargar usuarios desde /api/usuarios ──────────────────────────────────────
+async function cargarUsuariosDesdeSheets() {
+  try {
+    const resp = await fetch('/api/usuarios');
+    if (!resp.ok) return;
+    const lista = await resp.json();
+    if (!Array.isArray(lista) || lista.length === 0) return;
+
+    // Reconstruir el mapa USUARIOS
+    USUARIOS = {};
+    lista.forEach(u => {
+      const clave = u.nombre.toLowerCase().trim();
+      USUARIOS[clave] = { display: u.nombre, rol: u.rol };
+      // Alias sin espacio (ej: "juan f" → "juanf")
+      const sinEspacio = clave.replace(/\s+/g, '');
+      if (sinEspacio !== clave) USUARIOS[sinEspacio] = { display: u.nombre, rol: u.rol };
+    });
+
+    // Actualizar lista para el grid de login
+    USUARIOS_LISTA = lista.map(u => ({ nombre: u.nombre, rol: u.rol }));
+  } catch (e) {
+    console.warn('[usuarios] usando fallback hardcodeado', e);
+  }
 }
 
 // ─── Estado global ────────────────────────────────────────────────────────────
@@ -58,6 +98,8 @@ const $ = id => document.getElementById(id);
 // ─── Init ─────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
   await registrarServiceWorker();
+  // Cargar usuarios desde Sheets en paralelo (no bloquea el init)
+  cargarUsuariosDesdeSheets();
   inicializarSync(manejarCambioConectividad);
   poblarSelects();
   configurarNavegacion();
@@ -83,15 +125,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-// ─── Pantalla de login (diseño Stitch Pro) ────────────────────────────────────
+// ─── Pantalla de login (diseño Stitch Pro — usuarios desde Sheets) ────────────
 function mostrarPantallaLogin() {
   return new Promise(resolve => {
     const overlay = document.createElement('div');
     overlay.id = 'login-overlay';
+
+    // Generar botones desde USUARIOS_LISTA (ya cargado o fallback)
+    const botonesHTML = USUARIOS_LISTA.map(u => `
+      <button class="login-usuario-btn" data-nombre="${u.nombre}" data-rol="${u.rol}">
+        ${u.nombre}
+      </button>
+    `).join('');
+
     overlay.innerHTML = `
       <div class="login-screen">
 
-        <!-- Hero background: vaca angus colorada -->
+        <!-- Hero background -->
         <div class="login-hero-bg">
           <div class="login-hero-img-wrap">
             <img
@@ -118,46 +168,23 @@ function mostrarPantallaLogin() {
           <div class="login-glass-card">
             <h2 class="login-card-titulo">Seleccionar Perfil</h2>
 
-            <!-- Grid 2x2 de usuarios rápidos -->
+            <!-- Grid dinámico de usuarios desde Sheets -->
             <div class="login-usuarios-grid" id="login-usuarios-grid">
-              <button class="login-usuario-btn" data-nombre="Juan">Juan</button>
-              <button class="login-usuario-btn" data-nombre="Ana">Ana</button>
-              <button class="login-usuario-btn" data-nombre="Carlos">Carlos</button>
-              <button class="login-usuario-btn" data-nombre="Maru">Maru</button>
+              ${botonesHTML}
             </div>
-
-            <!-- Divisor -->
-            <div class="login-divisor">
-              <div class="login-divisor-line"></div>
-              <span class="login-divisor-texto">o ingresar nombre</span>
-              <div class="login-divisor-line"></div>
-            </div>
-
-            <!-- Input manual -->
-            <form class="login-form" onsubmit="event.preventDefault();">
-              <input
-                type="text"
-                id="login-input"
-                class="login-input"
-                placeholder="Nombre del operador"
-                autocomplete="off"
-                autocorrect="off"
-                spellcheck="false"
-              >
-              <button class="login-btn-entrar" id="login-btn-entrar" type="submit">
-                Ingresar <span class="login-arrow">→</span>
-              </button>
-            </form>
           </div>
 
-          <p class="login-footer-texto">Sistema Profesional de Administración Rural</p>
+          <p class="login-footer-texto">Los Aromos • Sistema de Gestión Rural</p>
         </main>
       </div>
     `;
     document.body.appendChild(overlay);
 
-    const entrar = nombre => {
-      const usuario = detectarRol(nombre);
+    const entrar = (nombre, rol) => {
+      // Si viene el rol directo del botón, lo usamos; si no, buscamos en el mapa
+      const usuario = rol
+        ? { display: nombre, rol }
+        : detectarRol(nombre);
       estado.operador = usuario.display;
       estado.rol      = usuario.rol;
       localStorage.setItem('rodeo_operador', usuario.display);
@@ -174,22 +201,12 @@ function mostrarPantallaLogin() {
       }, 350);
     };
 
-    // Grid de usuarios rápidos
+    // Tap en cualquier botón de usuario
     overlay.querySelectorAll('.login-usuario-btn').forEach(btn => {
-      btn.addEventListener('click', () => entrar(btn.dataset.nombre));
+      btn.addEventListener('click', () =>
+        entrar(btn.dataset.nombre, btn.dataset.rol)
+      );
     });
-
-    // Input + botón entrar
-    const input  = overlay.querySelector('#login-input');
-    const btnEnt = overlay.querySelector('#login-btn-entrar');
-    btnEnt.addEventListener('click', () => {
-      if (input.value.trim()) entrar(input.value.trim());
-    });
-    input.addEventListener('keydown', e => {
-      if (e.key === 'Enter' && input.value.trim()) entrar(input.value.trim());
-    });
-    // Focus automático
-    setTimeout(() => input.focus(), 300);
   });
 }
 
