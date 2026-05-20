@@ -2611,3 +2611,224 @@ html { scroll-behavior: smooth; }
   .cal-detalle { background: #1e261e; }
   .recorrida-item { background: #1e261e; }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   PANEL DE FILTROS AVANZADOS — Rodeo
+══════════════════════════════════════════════════════════════ */
+
+/* Barra superior: total + botones */
+.rodeo-filtros-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.rodeo-filtros-acciones {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Botón "⚙ Filtros" */
+.rodeo-btn-filtros {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--gris-claro);
+  border: 1.5px solid var(--borde);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--texto);
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.rodeo-btn-filtros.activo {
+  background: var(--verde-oscuro);
+  border-color: var(--verde-oscuro);
+  color: #fff;
+}
+.rodeo-btn-filtros:active { opacity: .8; }
+
+/* Badge numérico de filtros activos */
+.filtros-badge {
+  background: #ff3b30;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  border-radius: 99px;
+  padding: 1px 5px;
+  min-width: 18px;
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* Botón "✕ Limpiar" */
+.rodeo-btn-limpiar {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 1.5px solid var(--rojo);
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--rojo);
+  cursor: pointer;
+  transition: background .15s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.rodeo-btn-limpiar:active { background: #fee2e2; }
+
+/* Panel contenedor (desplegable) */
+.panel-filtros {
+  margin-top: 12px;
+  border: 1.5px solid var(--borde);
+  border-radius: var(--radio-grande);
+  overflow: hidden;
+  animation: fadeIn .18s ease;
+}
+
+/* Divisor entre secciones */
+.filtro-divisor {
+  height: 1px;
+  background: var(--borde);
+}
+
+/* Sección individual */
+.filtro-seccion {}
+
+/* Header colapsable de sección */
+.filtro-seccion-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  cursor: pointer;
+  background: var(--bg-card);
+  -webkit-user-select: none;
+  user-select: none;
+  transition: background .12s;
+}
+.filtro-seccion-header:active { background: var(--gris-claro); }
+
+.filtro-seccion-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--texto);
+}
+
+.filtro-seccion-arrow {
+  font-size: 16px;
+  color: var(--gris);
+  transition: transform .2s;
+  line-height: 1;
+}
+
+/* Cuerpo de sección (chips) */
+.filtro-seccion-body {
+  padding: 10px 14px 14px;
+  background: #fafbfa;
+}
+
+/* Grid de chips multi-select */
+.filtro-chips-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Chip individual */
+.filtro-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 13px;
+  border-radius: 99px;
+  border: 1.5px solid var(--borde);
+  background: var(--bg-card);
+  color: var(--texto-secundario);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+  font-family: inherit;
+  white-space: nowrap;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.filtro-chip b { font-weight: 800; color: inherit; }
+.filtro-chip:active { opacity: .75; transform: scale(0.95); }
+
+/* Estado activo del chip */
+.filtro-chip.activo {
+  background: var(--verde-oscuro);
+  border-color: var(--verde-oscuro);
+  color: #fff;
+}
+.filtro-chip.activo b { color: #fff; }
+
+/* Row toggle SÍ/NO vacunas */
+.filtro-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.filtro-toggle-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--texto-secundario);
+  text-transform: uppercase;
+  letter-spacing: .4px;
+}
+
+/* Botones toggle SÍ / NO */
+.filtro-toggle-btns {
+  display: flex;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1.5px solid var(--borde);
+  flex-shrink: 0;
+}
+
+.filtro-toggle-btn {
+  padding: 7px 18px;
+  border: none;
+  background: var(--bg-card);
+  color: var(--texto-secundario);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+  font-family: inherit;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.filtro-toggle-btn:not(:last-child) {
+  border-right: 1.5px solid var(--borde);
+}
+.filtro-toggle-btn.activo {
+  background: var(--verde-oscuro);
+  color: #fff;
+}
+.filtro-toggle-btn:active { opacity: .75; }
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .filtro-seccion-header  { background: #1e261e; }
+  .filtro-seccion-body    { background: #192319; }
+  .filtro-chip            { background: #1e261e; border-color: #2a362a; color: #c0cfc0; }
+  .filtro-toggle-btn      { background: #1e261e; color: #c0cfc0; }
+  .panel-filtros          { border-color: #2a362a; }
+  .filtro-divisor         { background: #2a362a; }
+  .rodeo-btn-filtros      { background: #1e261e; border-color: #2a362a; color: #f0f0f0; }
+}

@@ -789,10 +789,13 @@ function configurarEventos() {
   });
   if ($('btn-manual-guardar')) $('btn-manual-guardar').addEventListener('click', guardarCambiosManual);
 
-  // ── RODEO filtro de búsqueda (nuevo) ──
+  // ── RODEO filtro de búsqueda ──
   const buscarRodeo = document.getElementById('rodeo-of-buscar');
   if (buscarRodeo) {
-    buscarRodeo.addEventListener('input', e => filtrarRodeo(e.target.value));
+    buscarRodeo.addEventListener('input', () => {
+      // aplicarFiltros está exportada como window.aplicarFiltrosRodeo desde rodeo-oficial.js
+      if (window.aplicarFiltrosRodeo) window.aplicarFiltrosRodeo();
+    });
   }
 
   // ── MODAL cerrar ──

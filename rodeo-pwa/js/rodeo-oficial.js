@@ -12,7 +12,16 @@ import { obtenerOCrearAnimalUuid, renderizarGaleriaAnimal } from './fotos-animal
 let _animales   = [];
 let _onToast    = null;
 let _esAdmin    = false;
-let _filtroTipo = 'todos'; // chip de filtro activo en Rodeo
+
+// Filtros multi-select
+let _filtros = {
+  tipos:       new Set(),   // Set de strings — vacío = todos
+  estados:     new Set(),   // Set de 'P','V','I' — vacío = todos
+  vacunas:     new Set(),   // Set de 'vac_aftosa', etc. — vacío = sin filtro de vacuna
+  vacunaEstAño: null,       // null | 'si' | 'no'
+  periodoVacuna: 365,       // días hacia atrás para considerar "este año"
+};
+let _panelFiltrosAbierto = false;
 
 // ─── Opciones de campo (actualizadas) ────────────────────────────────────────
 const ESTADOS = ['P', 'V', 'I'];
@@ -35,6 +44,128 @@ export function inicializarRodeoOficial(onToast, esAdmin) {
     btnAgregar.style.display = esAdmin ? 'flex' : 'none';
     btnAgregar.onclick = () => abrirModalAgregarAnimal();
   }
+
+  // ── Panel de filtros avanzados ──────────────────────────────────────────────
+  const btnToggle  = document.getElementById('btn-toggle-filtros');
+  const btnLimpiar = document.getElementById('btn-limpiar-filtros');
+  const panel      = document.getElementById('panel-filtros');
+
+  // Toggle abrir/cerrar panel
+  if (btnToggle) {
+    btnToggle.addEventListener('click', () => {
+      _panelFiltrosAbierto = !_panelFiltrosAbierto;
+      panel.style.display   = _panelFiltrosAbierto ? 'block' : 'none';
+      btnToggle.classList.toggle('activo', _panelFiltrosAbierto);
+    });
+  }
+
+  // Limpiar todos los filtros
+  if (btnLimpiar) {
+    btnLimpiar.addEventListener('click', () => {
+      _filtros.tipos.clear();
+      _filtros.estados.clear();
+      _filtros.vacunas.clear();
+      _filtros.vacunaEstAño  = null;
+      _filtros.periodoVacuna = 365;
+      // Resetear UI
+      document.querySelectorAll('.filtro-chip').forEach(c => c.classList.remove('activo'));
+      document.querySelector('[data-grupo="periodo"][data-val="365"]')?.classList.add('activo');
+      document.getElementById('vac-toggle-si')?.classList.remove('activo');
+      document.getElementById('vac-toggle-no')?.classList.remove('activo');
+      document.getElementById('filtro-vacunas-detalle').style.display = 'none';
+      _actualizarBarraFiltros();
+      aplicarFiltros();
+    });
+  }
+
+  // ── Secciones colapsables ───────────────────────────────────────────────────
+  document.querySelectorAll('.filtro-seccion-header').forEach(header => {
+    header.addEventListener('click', () => {
+      const seccion = header.dataset.seccion;
+      const body    = document.getElementById(`filtro-body-${seccion}`);
+      const arrow   = header.querySelector('.filtro-seccion-arrow');
+      const abierta = body.style.display !== 'none';
+      body.style.display  = abierta ? 'none' : 'block';
+      arrow.textContent   = abierta ? '›' : '▾';
+    });
+  });
+
+  // ── Chips de Tipo (se generan después al cargar datos) ──────────────────────
+
+  // ── Chips de Estado ─────────────────────────────────────────────────────────
+  document.querySelectorAll('[data-grupo="estado"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const val = btn.dataset.val;
+      if (_filtros.estados.has(val)) {
+        _filtros.estados.delete(val);
+        btn.classList.remove('activo');
+      } else {
+        _filtros.estados.add(val);
+        btn.classList.add('activo');
+      }
+      _actualizarBarraFiltros();
+      aplicarFiltros();
+    });
+  });
+
+  // ── Toggle Vacunadas SÍ / NO ────────────────────────────────────────────────
+  const toggleSi = document.getElementById('vac-toggle-si');
+  const toggleNo = document.getElementById('vac-toggle-no');
+  const detalle  = document.getElementById('filtro-vacunas-detalle');
+
+  function _setVacToggle(val) {
+    if (_filtros.vacunaEstAño === val) {
+      // Deseleccionar
+      _filtros.vacunaEstAño = null;
+      toggleSi.classList.remove('activo');
+      toggleNo.classList.remove('activo');
+      detalle.style.display = 'none';
+    } else {
+      _filtros.vacunaEstAño = val;
+      toggleSi.classList.toggle('activo', val === 'si');
+      toggleNo.classList.toggle('activo', val === 'no');
+      detalle.style.display = val === 'si' ? 'block' : 'none';
+      if (val === 'no') {
+        // Limpiar chips de vacuna específica al poner NO
+        _filtros.vacunas.clear();
+        document.querySelectorAll('[data-grupo="vacuna"]').forEach(c => c.classList.remove('activo'));
+      }
+    }
+    _actualizarBarraFiltros();
+    aplicarFiltros();
+  }
+
+  toggleSi?.addEventListener('click', () => _setVacToggle('si'));
+  toggleNo?.addEventListener('click', () => _setVacToggle('no'));
+
+  // ── Chips de Vacuna específica ──────────────────────────────────────────────
+  document.querySelectorAll('[data-grupo="vacuna"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const val = btn.dataset.val;
+      if (_filtros.vacunas.has(val)) {
+        _filtros.vacunas.delete(val);
+        btn.classList.remove('activo');
+      } else {
+        _filtros.vacunas.add(val);
+        btn.classList.add('activo');
+      }
+      _actualizarBarraFiltros();
+      aplicarFiltros();
+    });
+  });
+
+  // ── Chips de Período ────────────────────────────────────────────────────────
+  document.querySelectorAll('[data-grupo="periodo"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-grupo="periodo"]').forEach(b => b.classList.remove('activo'));
+      btn.classList.add('activo');
+      _filtros.periodoVacuna = parseInt(btn.dataset.val);
+      if (_filtros.vacunaEstAño) aplicarFiltros();
+    });
+  });
+
+  // Exponer para que app.js pueda llamar desde el buscador
+  window.aplicarFiltrosRodeo = aplicarFiltros;
 }
 
 // ─── Cargar desde Sheets ──────────────────────────────────────────────────────
@@ -63,35 +194,30 @@ function renderizarRodeo(animales, total) {
   if (!contenedor) return;
 
   // Stats usando el listado COMPLETO (no el filtrado)
-  const conteoTotal = {};
-  _animales.forEach(a => { conteoTotal[a.tipo] = (conteoTotal[a.tipo] || 0) + 1; });
-  const statsHtml = Object.entries(conteoTotal)
-    .sort((a, b) => b[1] - a[1])
-    .map(([t, n]) => `<span class="rodeo-stat-chip">${t} <b>${n}</b></span>`)
-    .join('');
-
+  const hayFiltros = _filtros.tipos.size || _filtros.estados.size ||
+                     _filtros.vacunaEstAño !== null || _filtros.vacunas.size;
   if (resumen) {
-    resumen.innerHTML = `
-      <span class="rodeo-stat-total">${total} animales</span>
-      ${statsHtml}
-    `;
+    resumen.innerHTML = hayFiltros
+      ? `<span class="rodeo-stat-total">${animales.length} <span style="color:var(--gris);font-size:12px;">de ${_animales.length}</span></span>`
+      : `<span class="rodeo-stat-total">${total} animales</span>`;
   }
 
-  // Actualizar chips de filtro
-  actualizarChipsFiltro();
+  // Generar chips de Tipo dinámicamente desde los datos reales
+  _actualizarChipsTipo();
 
   if (!animales.length) {
-    contenedor.innerHTML = '<p class="sin-historial">Sin animales en este filtro</p>';
+    contenedor.innerHTML = '<p class="sin-historial" style="padding:32px 0">Sin animales en este filtro</p>';
     return;
   }
 
   contenedor.innerHTML = animales.map((a, i) => {
+    const idx         = _animales.indexOf(a);
     const estadoClass = (a.estado || '').toLowerCase().replace(' ', '-');
     const tipoClass   = (a.tipo   || '').toLowerCase().replace(' ', '-');
     const colorDot    = a.color === 'Negra' ? '⚫' : a.color === 'Colorada' ? '🟠' : '';
 
     return `
-      <div class="rodeo-of-item rodeo-of-item-tap" data-idx="${i}" onclick="abrirDetalleAnimal(${i})">
+      <div class="rodeo-of-item rodeo-of-item-tap" data-idx="${idx}" onclick="abrirDetalleAnimal(${idx})">
         <div class="rodeo-of-ids">
           <div class="rodeo-of-ids-row">
             ${a.boton    ? `<span class="rodeo-of-boton">🔖 ${a.boton}</span>`    : ''}
@@ -103,42 +229,123 @@ function renderizarRodeo(animales, total) {
             ${colorDot ? `<span class="rodeo-of-color">${colorDot} ${a.color}</span>` : ''}
           </div>
         </div>
-        ${_esAdmin ? `<button class="rodeo-of-btn-editar" onclick="event.stopPropagation(); abrirEditorAnimal(${i})">✏️</button>` : '<span class="rodeo-of-chevron">›</span>'}
+        ${_esAdmin ? `<button class="rodeo-of-btn-editar" onclick="event.stopPropagation(); abrirEditorAnimal(${idx})">✏️</button>` : '<span class="rodeo-of-chevron">›</span>'}
       </div>
     `;
   }).join('');
 }
 
-// ─── Chips de filtro por tipo ─────────────────────────────────────────────────
-function actualizarChipsFiltro() {
-  const barra = document.getElementById('rodeo-filtros-chips');
-  if (!barra) return;
+// ─── Chips de Tipo (dinámicos, multi-select) ───────────────────────────────────
+function _actualizarChipsTipo() {
+  const wrap = document.getElementById('filtro-chips-tipo');
+  if (!wrap || wrap.dataset.generado === 'true') return; // solo generar una vez
 
   const conteo = {};
   _animales.forEach(a => { if (a.tipo) conteo[a.tipo] = (conteo[a.tipo] || 0) + 1; });
-  const tiposOrdenados = Object.entries(conteo).sort((a, b) => b[1] - a[1]).map(([t]) => t);
+  const tiposOrdenados = Object.entries(conteo).sort((a, b) => b[1] - a[1]);
 
-  barra.innerHTML = [
-    `<button class="rodeo-filtro-chip${_filtroTipo === 'todos' ? ' activo' : ''}" data-filtro="todos">Todos <b>${_animales.length}</b></button>`,
-    ...tiposOrdenados.map(t =>
-      `<button class="rodeo-filtro-chip${_filtroTipo === t ? ' activo' : ''}" data-filtro="${t}">${t} <b>${conteo[t]}</b></button>`
-    ),
-  ].join('');
+  wrap.innerHTML = tiposOrdenados.map(([t, n]) =>
+    `<button class="filtro-chip" data-grupo="tipo" data-val="${t}">${t} <b>${n}</b></button>`
+  ).join('');
+  wrap.dataset.generado = 'true';
 
-  barra.querySelectorAll('.rodeo-filtro-chip').forEach(btn => {
+  // Agregar listeners
+  wrap.querySelectorAll('[data-grupo="tipo"]').forEach(btn => {
     btn.addEventListener('click', () => {
-      _filtroTipo = btn.dataset.filtro;
+      const val = btn.dataset.val;
+      if (_filtros.tipos.has(val)) {
+        _filtros.tipos.delete(val);
+        btn.classList.remove('activo');
+      } else {
+        _filtros.tipos.add(val);
+        btn.classList.add('activo');
+      }
+      _actualizarBarraFiltros();
       aplicarFiltros();
     });
   });
 }
 
+// ─── Barra de filtros activos (chips resumen) ──────────────────────────────────
+function _actualizarBarraFiltros() {
+  const badge    = document.getElementById('filtros-badge');
+  const limpiar  = document.getElementById('btn-limpiar-filtros');
+
+  const ETIQ_VAC = {
+    vac_aftosa: 'Aftosa', vac_brucelosis: 'Brucelosis', vac_carbunclo: 'Carbunclo',
+    vac_mancha: 'Mancha', vac_queratoconjuntivitis: 'Querato.', vac_otras: 'Otras',
+  };
+  const ETIQ_ESTADO = { P: 'Preñada', V: 'Vacía', I: 'Inseminada' };
+
+  const chips = [];
+  _filtros.tipos.forEach(t   => chips.push(t));
+  _filtros.estados.forEach(e => chips.push(ETIQ_ESTADO[e] || e));
+  if (_filtros.vacunaEstAño === 'si') {
+    if (_filtros.vacunas.size) {
+      _filtros.vacunas.forEach(v => chips.push('💉 ' + (ETIQ_VAC[v] || v)));
+    } else {
+      chips.push('💉 Vacunadas');
+    }
+  }
+  if (_filtros.vacunaEstAño === 'no') chips.push('💉 Sin vacunar');
+
+  const total = chips.length;
+  if (badge)   { badge.textContent = total; badge.style.display = total ? 'inline-flex' : 'none'; }
+  if (limpiar) { limpiar.style.display = total ? 'inline-flex' : 'none'; }
+}
+
+// ─── Aplicar todos los filtros ────────────────────────────────────────────────
 function aplicarFiltros() {
   const texto = (document.getElementById('rodeo-of-buscar')?.value || '').toLowerCase().trim();
   let filtrados = _animales;
-  if (_filtroTipo !== 'todos') {
-    filtrados = filtrados.filter(a => (a.tipo || '') === _filtroTipo);
+
+  // Filtro por Tipo (OR entre tipos seleccionados)
+  if (_filtros.tipos.size) {
+    filtrados = filtrados.filter(a => _filtros.tipos.has(a.tipo || ''));
   }
+
+  // Filtro por Estado (OR entre estados seleccionados)
+  if (_filtros.estados.size) {
+    filtrados = filtrados.filter(a => _filtros.estados.has(a.estado || ''));
+  }
+
+  // Filtro por Vacunas este año
+  if (_filtros.vacunaEstAño !== null) {
+    const hoy    = new Date();
+    const desde  = new Date(hoy.getTime() - _filtros.periodoVacuna * 24 * 60 * 60 * 1000);
+
+    // Función para parsear fecha "dd/mm/yyyy" → Date
+    const parseFecha = str => {
+      if (!str) return null;
+      const [d, m, y] = str.split('/');
+      if (!d || !m || !y) return null;
+      return new Date(+y, +m - 1, +d);
+    };
+
+    // Campos de vacuna a evaluar
+    const camposVac = ['vac_aftosa','vac_brucelosis','vac_carbunclo','vac_mancha','vac_queratoconjuntivitis','vac_otras'];
+
+    const tuvoVacuna = animal => {
+      // Si hay vacunas específicas seleccionadas → OR entre ellas
+      const camposAEvaluar = _filtros.vacunas.size ? [..._filtros.vacunas] : camposVac;
+      return camposAEvaluar.some(campo => {
+        const fecha = parseFecha(animal[campo]);
+        return fecha && fecha >= desde;
+      });
+    };
+
+    if (_filtros.vacunaEstAño === 'si') {
+      filtrados = filtrados.filter(a => tuvoVacuna(a));
+    } else {
+      // 'no' → los que NO tuvieron NINGUNA vacuna en el período
+      filtrados = filtrados.filter(a => !camposVac.some(campo => {
+        const fecha = parseFecha(a[campo]);
+        return fecha && fecha >= desde;
+      }));
+    }
+  }
+
+  // Filtro por texto libre
   if (texto) {
     filtrados = filtrados.filter(a =>
       (a.boton     || '').toLowerCase().includes(texto) ||
@@ -149,6 +356,7 @@ function aplicarFiltros() {
       (a.comentario|| '').toLowerCase().includes(texto)
     );
   }
+
   renderizarRodeo(filtrados, _animales.length);
 }
 
