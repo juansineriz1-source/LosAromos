@@ -83,22 +83,75 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-// ─── Pantalla de login ─────────────────────────────────────────────────────────
+// ─── Pantalla de login (diseño Stitch Pro) ────────────────────────────────────
 function mostrarPantallaLogin() {
   return new Promise(resolve => {
     const overlay = document.createElement('div');
     overlay.id = 'login-overlay';
     overlay.innerHTML = `
-      <div class="login-card">
-        <div class="login-logo">🐄</div>
-        <div class="login-titulo">Los Aromos</div>
-        <div class="login-sub">¿Quién sos?</div>
+      <div class="login-screen">
 
-        <div class="login-input-row">
-          <input type="text" id="login-input" class="login-input"
-            placeholder="Tu nombre..." autocomplete="off" autocorrect="off" spellcheck="false">
-          <button class="login-btn-entrar" id="login-btn-entrar">Entrar →</button>
+        <!-- Hero background: vaca angus colorada -->
+        <div class="login-hero-bg">
+          <div class="login-hero-img-wrap">
+            <img
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1XZpajtb_AMKl-skaKo22A2hf8zJV4k2axV3P0PdojRprrMQ0SQCMgK50AtcUZq0ZrJCV-jWiOu1pFCo2xYOrtcByjdRw1FfvsmHMLv6GKUJJ7RQjm_zUO22pJJmaXHh7YkQfx4U_ID35T3FnQfLoSpurwIvTueEDt1M7tisn7tf8X5iG_zsFZDsqdsOeJ_BjtlC4oH6cCiuuGMLgg2xRPcOWVJPuThewnHc5EM2ofkpyUyb14bRBDhWgcfNbpelBn_CfIxC5UA"
+              alt="Rodeo Los Aromos"
+              class="login-hero-img"
+              onerror="this.style.display='none'"
+            >
+            <div class="login-hero-gradient"></div>
+          </div>
+          <div class="login-hero-overlay"></div>
         </div>
+
+        <!-- Contenido -->
+        <main class="login-content animate-fade-in">
+
+          <!-- Branding -->
+          <div class="login-branding">
+            <h1 class="login-titulo-app">RodeoApp</h1>
+            <p class="login-subtitulo-app">Los Aromos • Gestión Ganadera</p>
+          </div>
+
+          <!-- Card de selección -->
+          <div class="login-glass-card">
+            <h2 class="login-card-titulo">Seleccionar Perfil</h2>
+
+            <!-- Grid 2x2 de usuarios rápidos -->
+            <div class="login-usuarios-grid" id="login-usuarios-grid">
+              <button class="login-usuario-btn" data-nombre="Juan">Juan</button>
+              <button class="login-usuario-btn" data-nombre="Ana">Ana</button>
+              <button class="login-usuario-btn" data-nombre="Carlos">Carlos</button>
+              <button class="login-usuario-btn" data-nombre="Maru">Maru</button>
+            </div>
+
+            <!-- Divisor -->
+            <div class="login-divisor">
+              <div class="login-divisor-line"></div>
+              <span class="login-divisor-texto">o ingresar nombre</span>
+              <div class="login-divisor-line"></div>
+            </div>
+
+            <!-- Input manual -->
+            <form class="login-form" onsubmit="event.preventDefault();">
+              <input
+                type="text"
+                id="login-input"
+                class="login-input"
+                placeholder="Nombre del operador"
+                autocomplete="off"
+                autocorrect="off"
+                spellcheck="false"
+              >
+              <button class="login-btn-entrar" id="login-btn-entrar" type="submit">
+                Ingresar <span class="login-arrow">→</span>
+              </button>
+            </form>
+          </div>
+
+          <p class="login-footer-texto">Sistema Profesional de Administración Rural</p>
+        </main>
       </div>
     `;
     document.body.appendChild(overlay);
@@ -114,13 +167,17 @@ function mostrarPantallaLogin() {
         overlay.remove();
         aplicarRol(usuario.rol);
         $('operador-nombre').textContent = usuario.display;
-        const tabInicial = TAB_INICIAL_USUARIO[usuario.display.toLowerCase()] || 
+        const tabInicial = TAB_INICIAL_USUARIO[usuario.display.toLowerCase()] ||
                            (usuario.rol === 'admin' ? 'inicio' : 'recorrida');
         mostrarTab(tabInicial);
         resolve();
       }, 350);
     };
 
+    // Grid de usuarios rápidos
+    overlay.querySelectorAll('.login-usuario-btn').forEach(btn => {
+      btn.addEventListener('click', () => entrar(btn.dataset.nombre));
+    });
 
     // Input + botón entrar
     const input  = overlay.querySelector('#login-input');
@@ -132,7 +189,7 @@ function mostrarPantallaLogin() {
       if (e.key === 'Enter' && input.value.trim()) entrar(input.value.trim());
     });
     // Focus automático
-    setTimeout(() => input.focus(), 100);
+    setTimeout(() => input.focus(), 300);
   });
 }
 

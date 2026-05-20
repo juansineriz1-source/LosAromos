@@ -1,47 +1,60 @@
 /* ═══════════════════════════════════════════════════════════════════
-   estilos.css — RodeoApp — Apple-style redesign
+   estilos.css — RodeoApp — Stitch redesign
    ═══════════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Inter:wght@400;600;700&display=swap');
+
+/* Material Symbols */
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* ── Paleta principal (iOS-inspired greens) ─────────────────────────── */
-  --verde:         hsl(142, 38%, 32%);
-  --verde-oscuro:  hsl(142, 42%, 22%);
-  --verde-claro:   hsl(142, 40%, 95%);
-  --verde-medio:   hsl(142, 36%, 42%);
-  --verde-ui:      hsl(142, 38%, 32%);   /* tint uniforme para UI */
+  /* ── Paleta Stitch ───────────────────────────────────────────────── */
+  --verde-oscuro:  #1a5c30;    /* primario — header, botones, tabs activos */
+  --verde-medio:   #2e7d52;    /* hover, chips activos */
+  --verde-suave:   #e8f5e9;    /* fondos soft */
+  --verde:         #1a5c30;    /* alias para compatibilidad */
+  --verde-claro:   #e8f5e9;    /* alias --verde-suave */
+  --verde-ui:      #1a5c30;    /* tint uniforme para UI */
+  --tierra:        #7c5c1e;    /* acento cálido */
+  --tierra-claro:  hsl(25, 40%, 96%);
 
   /* ── Semánticos ───────────────────────────────────────────── */
-  --tierra:        hsl(25, 42%, 40%);
-  --tierra-claro:  hsl(25, 40%, 96%);
   --amarillo:      hsl(38, 92%, 50%);
-  --rojo:          hsl(4,  72%, 51%);
+  --rojo:          #dc2626;
   --azul:          hsl(217, 72%, 48%);
   --azul-bt:       hsl(217, 72%, 48%);
 
-  /* ── Grises iOS ───────────────────────────────────────────── */
-  --gris:          #6E6E73;   /* iOS secondary label */
-  --gris-claro:    #F2F2F7;   /* iOS grouped background */
-  --gris-borde:    rgba(60,60,67,.12);
-  --texto:         #1C1C1E;   /* iOS primary label */
-  --texto-secundario: #48484A;
+  /* ── Backgrounds ──────────────────────────────────────────── */
+  --bg-app:        #f4f6f4;    /* fondo general */
+  --bg:            #f4f6f4;    /* alias --bg-app */
+  --bg-card:       #ffffff;    /* cards */
   --blanco:        #FFFFFF;
 
-  /* ── Backgrounds ──────────────────────────────────────────── */
-  --bg:            #F2F2F7;
-  --bg-card:       #FFFFFF;
-  --borde:         rgba(60,60,67,.12);
+  /* ── Texto ────────────────────────────────────────────────── */
+  --texto:         #1a5c30;    /* texto principal oscuro (verde) */
+  --texto-secundario: #6b7a6e; /* texto secundario */
+  --gris:          #6b7a6e;    /* alias --texto-secundario */
+  --gris-claro:    #f3f4f6;    /* fondos suaves */
+  --gris-borde:    rgba(60,60,67,.12);
 
-  /* ── Radios ──────────────────────────────────────────────── */
+  /* ── Bordes ───────────────────────────────────────────────── */
+  --borde:         #e5e7eb;
+
+  /* ── Radios Stitch ────────────────────────────────────────── */
   --radio:         12px;
   --radio-grande:  18px;
-  --radio-xl:      22px;
+  --radio-xl:      20px;       /* cards */
+  --radio-chip:    99px;       /* pill chips */
+  --radio-input:   14px;       /* inputs */
 
-  /* ── Sombras ────────────────────────────────────────────── */
-  --sombra:        0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.06);
+  /* ── Sombras Stitch ──────────────────────────────────────── */
+  --sombra-card:   0 2px 12px rgba(0,0,0,0.07);
+  --sombra-header: 0 1px 4px rgba(0,0,0,0.10);
+  --sombra-nav:    0 -2px 12px rgba(0,0,0,0.07);
+  --sombra:        0 2px 12px rgba(0,0,0,0.07);
   --sombra-alta:   0 8px 32px rgba(0,0,0,.14);
-  --sombra-card:   0 1px 0 rgba(0,0,0,.04), 0 2px 12px rgba(0,0,0,.06);
 
   /* ── Tipografía ───────────────────────────────────────────── */
   --alto-boton: 52px;
@@ -58,8 +71,8 @@ html {
 }
 
 body {
-  font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', 'Segoe UI', system-ui, sans-serif;
-  background: var(--bg);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg-app);
   color: var(--texto);
   min-height: 100vh;
   max-width: 480px;
@@ -72,9 +85,9 @@ body {
 
 /* ─── HEADER ──────────────────────────────────────────────────────── */
 .header {
-  background: rgba(22, 78, 44, 0.92);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  backdrop-filter: saturate(180%) blur(20px);
+  background: rgba(26, 92, 48, 0.80);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   color: var(--blanco);
   padding: 12px 18px 10px;
   position: sticky;
@@ -83,7 +96,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  border-bottom: 1px solid rgba(255,255,255,.10);
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+  box-shadow: var(--sombra-header);
 }
 
 .header-top {
@@ -165,11 +179,13 @@ body {
   width: 100%;
   max-width: 480px;
   height: var(--nav-height);
-  background: rgba(249,249,249,.88);
-  backdrop-filter: saturate(180%) blur(24px);
+  background: rgba(255,255,255,0.80);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
   display: flex;
   align-items: stretch;
-  border-top: 1px solid rgba(60,60,67,.15);
+  border-top: 1px solid rgba(229,231,235,0.50);
+  box-shadow: var(--sombra-nav);
   z-index: 300;
   padding-bottom: env(safe-area-inset-bottom, 0);
 }
@@ -251,16 +267,17 @@ body {
 }
 
 /* ─── TAB PANELS ──────────────────────────────────────────────────── */
-.tab-panel { display: flex; flex-direction: column; gap: 12px; }
+.tab-panel { display: flex; flex-direction: column; gap: 12px; background: var(--bg-app); }
 .tab-panel.oculto { display: none !important; }
 .oculto { display: none !important; }
 
 /* ─── CARD ─────────────────────────────────────────────────────────── */
 .card {
   background: var(--bg-card);
-  border-radius: var(--radio-grande);
+  border-radius: 20px;
   padding: 16px 18px;
-  box-shadow: var(--sombra-card);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  border: 1px solid rgba(229,231,235,0.50);
   margin: 0 12px;
 }
 
@@ -275,34 +292,35 @@ body {
 
 /* ─── TAB INICIO ────────────────────────────────────────────────────── */
 .inicio-hero {
-  background: linear-gradient(150deg, hsl(142,42%,18%) 0%, hsl(142,36%,30%) 100%);
-  border-radius: 0 0 var(--radio-xl) var(--radio-xl);
-  padding: 28px 22px 30px;
+  background: linear-gradient(to bottom, #1a5c30, #2e7d52);
+  border-radius: 0 0 30px 30px;
+  padding: 16px 20px 56px;
   color: var(--blanco);
   margin-bottom: 2px;
 }
 
 .inicio-fecha {
-  font-size: 12px;
-  opacity: 0.6;
-  font-weight: 500;
+  font-size: 10px;
+  color: rgba(255,255,255,0.70);
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1.2px;
+  letter-spacing: 0.6px;
   margin-bottom: 10px;
 }
 
 .inicio-saludo {
-  font-size: 17px;
-  font-weight: 400;
-  opacity: 0.82;
+  font-size: 18px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.90);
   margin-bottom: 3px;
 }
 
 .inicio-operador-name {
-  font-size: 33px;
-  font-weight: 700;
-  letter-spacing: -0.8px;
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   line-height: 1.1;
+  font-family: 'Manrope', sans-serif;
 }
 
 .stats-grid {
@@ -314,28 +332,31 @@ body {
 
 .stat-card {
   background: var(--bg-card);
-  border-radius: var(--radio-grande);
-  padding: 18px 14px;
+  border-radius: 20px;
+  padding: 16px 14px;
   text-align: center;
-  box-shadow: var(--sombra-card);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  border: 1px solid rgba(229,231,235,0.50);
 }
 
 .stat-numero {
-  font-size: 36px;
-  font-weight: 700;
-  color: var(--verde-ui);
+  font-size: 40px;
+  font-weight: 800;
+  color: var(--verde-oscuro);
   line-height: 1;
   margin-bottom: 5px;
   letter-spacing: -1px;
+  font-variant-numeric: tabular-nums;
+  font-family: 'Manrope', sans-serif;
 }
 
 
 .stat-label {
-  font-size: 11px;
-  color: var(--gris);
-  font-weight: 600;
+  font-size: 10px;
+  color: var(--texto-secundario);
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
 }
 
 /* Novedad item */
@@ -896,22 +917,36 @@ body {
 #login-overlay {
   position: fixed;
   inset: 0;
-  background: linear-gradient(160deg, hsl(142,42%,14%) 0%, hsl(142,36%,24%) 100%);
+  background-color: #131f17;
   z-index: 1000;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
-  padding: 32px 24px;
-  animation: login-entrada 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  padding: 0;
+  overflow: hidden;
 }
 
 #login-overlay.login-saliendo {
   animation: login-salida 0.35s ease forwards;
 }
 
+/* Hero image container con mask-image gradient */
+.login-hero {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.login-hero img {
+  width: 100%;
+  height: 60%;
+  object-fit: cover;
+  -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+}
+
 @keyframes login-entrada {
-  from { opacity: 0; transform: scale(0.95); }
-  to   { opacity: 1; transform: scale(1); }
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes login-salida {
@@ -919,15 +954,20 @@ body {
   to   { opacity: 0; transform: scale(1.04); }
 }
 
+/* Glass card — bottom sheet estilo Stitch */
 .login-card {
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 24px;
-  padding: 32px 24px;
+  background: rgba(255,255,255,0.03);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 24px 24px 0 0;
+  padding: 32px 24px 48px;
   width: 100%;
-  max-width: 380px;
-  backdrop-filter: blur(12px);
+  max-width: 480px;
   text-align: center;
+  position: relative;
+  z-index: 1;
+  animation: login-entrada 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .login-logo {
@@ -958,9 +998,10 @@ body {
   margin-bottom: 20px;
 }
 
+/* Botones de usuario — Stitch user-btn style */
 .login-btn-nombre {
-  background: rgba(255,255,255,0.15);
-  border: 1.5px solid rgba(255,255,255,0.25);
+  background: rgba(26,92,48,0.20);
+  border: 1px solid rgba(26,92,48,0.30);
   border-radius: 14px;
   color: #fff;
   font-size: 17px;
@@ -969,10 +1010,11 @@ body {
   cursor: pointer;
   transition: background 0.15s, transform 0.1s;
   font-family: inherit;
+  animation: fadeIn 0.35s ease;
 }
 
 .login-btn-nombre:active {
-  background: rgba(255,255,255,0.30);
+  background: rgba(26,92,48,0.40);
   transform: scale(0.96);
 }
 
@@ -992,9 +1034,9 @@ body {
 
 .login-input {
   flex: 1;
-  background: rgba(255,255,255,0.12);
-  border: 1.5px solid rgba(255,255,255,0.25);
-  border-radius: 12px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 14px;
   color: #fff;
   font-size: 16px;
   font-weight: 600;
@@ -1003,22 +1045,23 @@ body {
 }
 
 .login-input::placeholder { color: rgba(255,255,255,0.4); }
-.login-input:focus        { outline: none; border-color: rgba(255,255,255,0.6); }
+.login-input:focus        { outline: none; border-color: rgba(46,125,82,0.60); }
 
 .login-btn-entrar {
   background: #fff;
-  color: var(--verde-oscuro);
+  color: #1a5c30;
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
   font-size: 15px;
-  font-weight: 800;
-  padding: 12px 16px;
+  font-weight: 700;
+  padding: 0 16px;
+  height: 56px;
   cursor: pointer;
   white-space: nowrap;
   font-family: inherit;
-  transition: transform 0.1s;
+  transition: transform 0.1s, opacity 0.1s;
 }
-.login-btn-entrar:active { transform: scale(0.95); }
+.login-btn-entrar:active { transform: scale(0.95); opacity: 0.9; }
 
 /* Badge de rol en el header */
 .operador-badge[data-rol="admin"]    { background: rgba(255,255,255,0.25); }
@@ -1731,7 +1774,48 @@ body {
 .feed-item.feed-video .feed-btn-borrar { color: #94a3b8; }
 .feed-item.feed-video .feed-btn-borrar:hover { background: rgba(239,68,68,0.2); color: #fca5a5; }
 
-.rodeo-of-stats{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.rodeo-stat-total{font-size:15px;font-weight:700;color:var(--texto)}.rodeo-stat-chip{background:var(--verde-claro);color:var(--verde-oscuro);border-radius:20px;padding:3px 10px;font-size:13px;font-weight:600}.rodeo-of-item{background:var(--blanco);border-radius:var(--radio);padding:12px 14px;margin:6px 12px;display:flex;align-items:center;gap:10px;box-shadow:0 1px 4px rgba(0,0,0,.07)}.rodeo-of-ids{flex:1;min-width:0}.rodeo-of-boton{display:block;font-size:15px;font-weight:700;color:var(--texto);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rodeo-of-caravana{display:block;font-size:12px;color:var(--gris);font-weight:500;margin-top:1px}.rodeo-of-info{display:flex;flex-wrap:wrap;gap:4px;align-items:center}.rodeo-of-tipo,.rodeo-of-estado{padding:3px 9px;border-radius:20px;font-size:12px;font-weight:700;background:#f5f5f5;color:#555}.rodeo-tipo-v{background:#e3f2fd;color:#0d47a1}.rodeo-tipo-v1{background:#fff3e0;color:#e65100}.rodeo-tipo-va{background:#e8f5e9;color:#1b5e20}.rodeo-tipo-t{background:#fce4ec;color:#880e4f}.rodeo-tipo-tn{background:#f3e5f5;color:#4a148c}.rodeo-estado-p{background:#e8f5e9;color:#1b5e20}.rodeo-estado-v{background:#fff9c4;color:#f57f17}.rodeo-estado-d{background:#fce4ec;color:#c62828}.rodeo-estado-b{background:#eee;color:#616161}.rodeo-of-badge{padding:2px 7px;border-radius:20px;font-size:11px;font-weight:600;background:#e8f5e9;color:#2e7d32}.rodeo-badge-no{background:#fafafa;color:#9e9e9e;border:1px solid #e0e0e0}.rodeo-of-fecha{font-size:11px;color:var(--gris);white-space:nowrap}.rodeo-of-btn-editar{background:none;border:1.5px solid var(--verde);border-radius:10px;color:var(--verde);font-size:16px;padding:5px 8px;cursor:pointer;flex-shrink:0;font-family:inherit}.rodeo-edit-seccion{margin-bottom:14px}.rodeo-edit-opciones{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.rodeo-edit-chip{padding:6px 14px;border-radius:20px;border:1.5px solid #ddd;background:#f9f9f9;color:var(--texto);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}.rodeo-edit-chip.activo{background:var(--verde);border-color:var(--verde);color:#fff}
+.rodeo-of-stats{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.rodeo-stat-total{font-size:15px;font-weight:700;color:var(--texto)}
+.rodeo-stat-chip{background:var(--verde-suave);color:var(--verde-oscuro);border-radius:20px;padding:3px 10px;font-size:13px;font-weight:600}
+/* Animal card — Stitch bento style */
+.rodeo-of-item{background:#ffffff;border-radius:20px;padding:16px;margin:6px 12px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 12px rgba(0,0,0,0.07);border:1px solid rgba(229,231,235,0.50);transition:transform 0.1s;-webkit-user-select:none;user-select:none}
+.rodeo-of-item:active{transform:scale(0.98)}
+.rodeo-of-ids{flex:1;min-width:0}
+/* Número grande — caravan */
+.rodeo-of-boton{display:block;font-size:22px;font-weight:800;color:#1a5c30;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rodeo-of-caravana{display:block;font-size:12px;color:var(--texto-secundario);font-weight:500;margin-top:1px}
+.rodeo-of-info{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+/* Badges tipo — Stitch spec */
+.rodeo-of-tipo,.rodeo-of-estado{padding:3px 10px;border-radius:6px;font-size:12px;font-weight:700}
+/* Tipo V */
+.rodeo-tipo-v{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
+/* Tipo VQ */
+.rodeo-tipo-vq,.rodeo-tipo-tn{background:#faf5ff;color:#7e22ce;border:1px solid #e9d5ff}
+/* Tipo V1 (Vacía 1) */
+.rodeo-tipo-v1{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
+/* Tipo VA */
+.rodeo-tipo-va{background:#e8f5e9;color:#1a5c30;border:1px solid rgba(46,125,82,0.20)}
+/* Tipo T, TH, TM — tierra/naranja */
+.rodeo-tipo-t,.rodeo-tipo-th,.rodeo-tipo-tm{background:#fff7ed;color:#c2410c;border:1px solid #fed7aa}
+/* Estado Preñada */
+.rodeo-estado-p{background:#e8f5e9;color:#1a5c30;border-radius:12px;padding:12px 16px}
+/* Estado Vacía */
+.rodeo-estado-v{background:#fff7ed;color:#c2410c;border-radius:12px;padding:12px 16px}
+/* Estado D (descarte) */
+.rodeo-estado-d{background:#fce4ec;color:#c62828;border-radius:12px;padding:12px 16px}
+/* Estado Inseminada */
+.rodeo-estado-i{background:#eff6ff;color:#1d4ed8;border-radius:12px;padding:12px 16px}
+/* Estado B (baja) */
+.rodeo-estado-b{background:#eee;color:#616161;border-radius:12px;padding:12px 16px}
+.rodeo-of-badge{padding:2px 7px;border-radius:20px;font-size:11px;font-weight:600;background:#e8f5e9;color:#1a5c30;border:1px solid rgba(46,125,82,0.20)}
+.rodeo-badge-no{background:#f9fafb;color:#6b7a6e;border:1px solid #e5e7eb}
+.rodeo-of-fecha{font-size:11px;color:var(--texto-secundario);white-space:nowrap}
+/* Botón editar — 48x48 Stitch */
+.rodeo-of-btn-editar{background:none;border:2px solid #e8f5e9;border-radius:14px;color:var(--verde-oscuro);font-size:16px;padding:0;width:48px;height:48px;cursor:pointer;flex-shrink:0;font-family:inherit;display:flex;align-items:center;justify-content:center}
+.rodeo-edit-seccion{margin-bottom:14px}
+.rodeo-edit-opciones{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.rodeo-edit-chip{padding:6px 14px;border-radius:20px;border:1.5px solid #ddd;background:#f9f9f9;color:var(--texto);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+.rodeo-edit-chip.activo{background:var(--verde-oscuro);border-color:var(--verde-oscuro);color:#fff}
 
 /* Card tappable — efecto táctil */
 .rodeo-of-item-tap {
@@ -1880,10 +1964,10 @@ body {
 }
 .rodeo-filtro-chip {
   padding: 5px 12px;
-  border-radius: 999px;
+  border-radius: 99px;
   border: 1.5px solid var(--borde);
-  background: transparent;
-  color: var(--texto-secundario);
+  background: #f3f4f6;
+  color: #6b7a6e;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -1892,12 +1976,12 @@ body {
 }
 .rodeo-filtro-chip b { font-weight: 700; color: inherit; }
 .rodeo-filtro-chip:hover {
-  border-color: var(--verde-oscuro);
-  color: var(--verde-oscuro);
+  border-color: var(--verde-medio);
+  color: var(--verde-medio);
 }
 .rodeo-filtro-chip.activo {
-  background: var(--verde-oscuro);
-  border-color: var(--verde-oscuro);
+  background: #2e7d52;
+  border-color: #2e7d52;
   color: #fff;
 }
 .rodeo-filtro-chip.activo b { color: #fff; }
@@ -2176,14 +2260,15 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Chips de vacunas — Stitch */
 .vac-chip.vac-pendiente {
-  background: #f1f3f5;
-  border: 1.5px solid #dee2e6;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
 }
 
 .vac-chip.vac-ok {
-  background: #e6f7ed;
-  border: 1.5px solid #52c77f;
+  background: #e8f5e9;
+  border: 1px solid rgba(46,125,82,0.20);
 }
 
 .vac-chip[onclick]:active,
@@ -2199,21 +2284,21 @@ body {
 .vac-nombre {
   font-size: 12px;
   font-weight: 700;
-  color: var(--texto);
+  color: var(--texto-secundario);
 }
 
 .vac-chip.vac-pendiente .vac-nombre {
-  color: #868e96;
+  color: #6b7a6e;
 }
 
 .vac-fecha {
   font-size: 11px;
   font-weight: 600;
-  color: #2d9c5b;
+  color: #1a5c30;
 }
 
 .vac-fecha.vac-sin {
-  color: #adb5bd;
+  color: #6b7a6e;
   font-weight: 500;
 }
 
@@ -2588,10 +2673,10 @@ html { scroll-behavior: smooth; }
   padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
 }
 
-/* Animación fadeIn para lightbox */
+/* Animación global fadeIn — Stitch */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* Mejora dark mode - agenda */
@@ -2769,8 +2854,8 @@ html { scroll-behavior: smooth; }
 
 /* Estado activo del chip */
 .filtro-chip.activo {
-  background: var(--verde-oscuro);
-  border-color: var(--verde-oscuro);
+  background: #2e7d52;
+  border-color: #2e7d52;
   color: #fff;
 }
 .filtro-chip.activo b { color: #fff; }

@@ -19,7 +19,7 @@ const { core, precaching, routing, strategies, backgroundSync, expiration } = wo
 // ─── Configuración base ─────────────────────────────────────────────────────
 core.setCacheNameDetails({
   prefix: 'rodeo-pwa',
-  suffix: 'v7',
+  suffix: 'v8',
 });
 
 core.skipWaiting();
@@ -28,18 +28,18 @@ core.clientsClaim();
 // ─── Pre-caché ───────────────────────────────────────────────────────────────
 // Revisión 5 — cross-device feed + /api/actividad
 precaching.precacheAndRoute([
-  { url: '/', revision: '7' },
-  { url: '/index.html', revision: '7' },
-  { url: '/css/estilos.css', revision: '7' },
-  { url: '/js/app.js', revision: '7' },
-  { url: '/js/db.js', revision: '7' },
-  { url: '/js/bluetooth.js', revision: '7' },
-  { url: '/js/sync.js', revision: '7' },
-  { url: '/js/recorrida.js', revision: '7' },
-  { url: '/js/fotos.js', revision: '7' },
-  { url: '/js/videos.js', revision: '7' },
-  { url: '/js/push.js', revision: '7' },
-  { url: '/js/calendario.js', revision: '7' },
+  { url: '/', revision: '8' },
+  { url: '/index.html', revision: '8' },
+  { url: '/css/estilos.css', revision: '8' },
+  { url: '/js/app.js', revision: '8' },
+  { url: '/js/db.js', revision: '8' },
+  { url: '/js/bluetooth.js', revision: '8' },
+  { url: '/js/sync.js', revision: '8' },
+  { url: '/js/recorrida.js', revision: '8' },
+  { url: '/js/fotos.js', revision: '8' },
+  { url: '/js/videos.js', revision: '8' },
+  { url: '/js/push.js', revision: '8' },
+  { url: '/js/calendario.js', revision: '8' },
   { url: '/manifest.json', revision: '1' },
 ]);
 
