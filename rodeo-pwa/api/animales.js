@@ -1,9 +1,10 @@
 /**
- * api/animales.js — Lee el registro maestro + historial de vacunas
+ * api/animales.js — Lee el registro maestro + historial de vacunas + usuarios
  *
  * GET /api/animales                → lista todos los animales del maestro
  * GET /api/animales?modo=historial-vacunas&boton=X&caravana=Y
  *                                  → historial de vacunas de un animal (hoja Vacunas)
+ * GET /api/animales?modo=usuarios  → lista de usuarios desde hoja Usuarios
  *
  * Columnas LosAromos (A:R):
  *   A=Botón  B=Caravana  C=Estado  D=Tiene_caravana  E=Tiene_botón
@@ -109,6 +110,36 @@ export default async function handler(req, res) {
       });
 
       return res.status(200).json({ historial, porVacuna });
+    }
+
+    // ── MODO: lista de usuarios desde hoja Usuarios ───────────────────────────
+    if (modo === 'usuarios') {
+      const urlU  = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent('Usuarios!A2:B100')}`;
+      const respU = await fetch(urlU, { headers: { Authorization: `Bearer ${token}` } });
+      if (!respU.ok) throw new Error(`Sheets error usuarios: ${respU.status}`);
+      const rowsU = (await respU.json()).values || [];
+
+      const usuarios = rowsU
+        .filter(r => r[0] && r[0].trim())
+        .map(r => ({
+          nombre:    r[0].trim(),
+          categoria: (r[1] || 'Operario').trim(),
+          rol:       (r[1] || 'Operario').trim().toLowerCase() === 'administrador' ? 'admin' : 'operario',
+        }));
+
+      // Fallback si la hoja está vacía
+      if (!usuarios.length) {
+        return res.status(200).json([
+          { nombre: 'Juan',     categoria: 'Administrador', rol: 'admin' },
+          { nombre: 'Juan F',   categoria: 'Administrador', rol: 'admin' },
+          { nombre: 'Ana',      categoria: 'Administrador', rol: 'admin' },
+          { nombre: 'Manuela',  categoria: 'Administrador', rol: 'admin' },
+          { nombre: 'Catalina', categoria: 'Administrador', rol: 'admin' },
+          { nombre: 'Domingo',  categoria: 'Operario',      rol: 'operario' },
+          { nombre: 'Otro',     categoria: 'Operario',      rol: 'operario' },
+        ]);
+      }
+      return res.status(200).json(usuarios);
     }
 
     // ── MODO: lista de animales (default) ─────────────────────────────────────

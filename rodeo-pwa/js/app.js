@@ -60,7 +60,7 @@ function detectarRol(nombre) {
 // ─── Cargar usuarios desde /api/usuarios ──────────────────────────────────────
 async function cargarUsuariosDesdeSheets() {
   try {
-    const resp = await fetch('/api/usuarios');
+    const resp = await fetch('/api/animales?modo=usuarios');
     if (!resp.ok) return;
     const lista = await resp.json();
     if (!Array.isArray(lista) || lista.length === 0) return;
