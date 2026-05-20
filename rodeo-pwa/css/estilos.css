@@ -236,6 +236,10 @@ body {
 .tab-panel.oculto { display: none !important; }
 .oculto { display: none !important; }
 
+/* ─── CARD ─────────────────────────────────────────────────────────── */
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radio-grande);
   padding: 16px 18px;
   box-shadow: var(--sombra-card);
   margin: 0 12px;
@@ -250,59 +254,62 @@ body {
   margin-bottom: 12px;
 }
 
-/* ─── TAB INICIO ──────────────────────────────────────────────────── */
+/* ─── TAB INICIO ────────────────────────────────────────────────────── */
 .inicio-hero {
-  background: linear-gradient(135deg, var(--verde-oscuro) 0%, var(--verde-medio) 100%);
-  border-radius: var(--radio-grande);
-  padding: 24px 20px 20px;
+  background: linear-gradient(150deg, hsl(142,42%,18%) 0%, hsl(142,36%,30%) 100%);
+  border-radius: 0 0 var(--radio-xl) var(--radio-xl);
+  padding: 28px 22px 30px;
   color: var(--blanco);
-  text-align: center;
-  box-shadow: var(--sombra-alta);
-}
-
-.inicio-fecha {
-  font-size: 13px;
-  opacity: 0.75;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 8px;
-}
-
-.inicio-saludo {
-  font-size: 22px;
-  font-weight: 700;
-  opacity: 0.9;
   margin-bottom: 2px;
 }
 
+.inicio-fecha {
+  font-size: 12px;
+  opacity: 0.6;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin-bottom: 10px;
+}
+
+.inicio-saludo {
+  font-size: 17px;
+  font-weight: 400;
+  opacity: 0.82;
+  margin-bottom: 3px;
+}
+
 .inicio-operador-name {
-  font-size: 30px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
+  font-size: 33px;
+  font-weight: 700;
+  letter-spacing: -0.8px;
+  line-height: 1.1;
 }
 
 .stats-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
+  padding: 14px 12px 2px;
 }
 
 .stat-card {
-  background: var(--blanco);
+  background: var(--bg-card);
   border-radius: var(--radio-grande);
-  padding: 16px 12px;
+  padding: 18px 14px;
   text-align: center;
-  box-shadow: var(--sombra);
+  box-shadow: var(--sombra-card);
 }
 
 .stat-numero {
-  font-size: 34px;
-  font-weight: 800;
-  color: var(--verde-oscuro);
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--verde-ui);
   line-height: 1;
-  margin-bottom: 4px;
+  margin-bottom: 5px;
+  letter-spacing: -1px;
 }
+
 
 .stat-label {
   font-size: 11px;
