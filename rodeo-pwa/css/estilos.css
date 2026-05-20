@@ -1,4 +1,4 @@
-﻿/* ═══════════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════════
    estilos.css — RodeoApp v2
    4 tabs: Inicio / Bastón / Manual / Rodeo
    Diseñado para: uso en la manga con guantes, sol directo.
@@ -1902,4 +1902,100 @@ body {
 .feed-btn-borrar:active {
   transform: scale(0.88);
   background: #fecaca;
+}
+
+/* ════════════════════════════════════════════════════
+   DETALLE ANIMAL — Bottom Sheet
+   ════════════════════════════════════════════════════ */
+.det-seccion-titulo {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--texto-secundario);
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  margin-bottom: 6px;
+}
+
+.det-card {
+  background: var(--blanco);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
+}
+
+.det-card-gris {
+  background: #f8f9fa;
+}
+
+.det-comentario {
+  padding: 12px 14px;
+}
+
+.det-fila {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.det-fila:last-child { border-bottom: none; }
+
+.det-icono {
+  font-size: 18px;
+  width: 26px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.det-contenido {
+  flex: 1;
+  min-width: 0;
+}
+
+.det-label {
+  display: block;
+  font-size: 11px;
+  color: var(--texto-secundario);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+}
+
+.det-valor {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--texto);
+  margin-top: 1px;
+}
+
+/* Histórico */
+.det-hist-fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 14px;
+  border-bottom: 1px solid #ebebeb;
+  gap: 8px;
+}
+.det-hist-fila:last-child { border-bottom: none; }
+.det-hist-fila .det-label  { text-transform: none; font-size: 12px; }
+.det-hist-fila .det-valor  { font-size: 13px; color: var(--verde-oscuro); }
+
+/* Tarjeta de animal clickeable — efecto tap */
+.rodeo-of-item-tap {
+  cursor: pointer;
+  transition: background 0.12s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.rodeo-of-item-tap:active {
+  background: #f0f8f2;
+  transform: scale(0.985);
+}
+
+/* Chevron para operarios (sin botón editar) */
+.rodeo-of-chevron {
+  font-size: 20px;
+  color: var(--gris);
+  flex-shrink: 0;
 }

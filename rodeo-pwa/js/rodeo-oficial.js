@@ -157,53 +157,128 @@ window.abrirDetalleAnimal = function(idx) {
   const a = _animales[idx];
   if (!a) return;
 
-  // Si es admin, abrir directamente el editor
-  if (_esAdmin) { window.abrirEditorAnimal(idx); return; }
-
   const existente = document.getElementById('modal-detalle-animal');
   if (existente) existente.remove();
 
   const estadoLabel = ETIQUETAS_ESTADO[a.estado] || a.estado || '—';
+  const estadoClass = (a.estado || '').toLowerCase();
+  const tipoClass   = (a.tipo   || '').toLowerCase().replace(' ', '-');
   const colorDot    = a.color === 'Negra' ? '⚫' : a.color === 'Colorada' ? '🟠' : '';
 
-  const fila = (label, valor) => valor
-    ? `<div class="detalle-fila"><span class="detalle-label">${label}</span><span class="detalle-valor">${valor}</span></div>`
+  // Fila de detalle
+  const fila = (icono, label, valor) => valor
+    ? `<div class="det-fila">
+         <span class="det-icono">${icono}</span>
+         <div class="det-contenido">
+           <span class="det-label">${label}</span>
+           <span class="det-valor">${valor}</span>
+         </div>
+       </div>`
     : '';
+
+  // Cambios históricos (si los hay)
+  const hayHistorico = a.boton_viejo || a.caravana_vieja || a.estado_viejo || a.tipo_viejo;
+  const historicoHtml = hayHistorico ? `
+    <div class="det-seccion-titulo">📋 Cambios registrados</div>
+    <div class="det-card det-card-gris">
+      ${a.boton_viejo     ? `<div class="det-hist-fila"><span class="det-label">Botón anterior</span><span class="det-valor">${a.boton_viejo}</span></div>`        : ''}
+      ${a.caravana_vieja  ? `<div class="det-hist-fila"><span class="det-label">Caravana anterior</span><span class="det-valor">${a.caravana_vieja}</span></div>`   : ''}
+      ${a.estado_viejo    ? `<div class="det-hist-fila"><span class="det-label">Estado anterior</span><span class="det-valor">${a.estado_viejo} → ${a.estado}</span></div>` : ''}
+      ${a.tipo_viejo      ? `<div class="det-hist-fila"><span class="det-label">Tipo anterior</span><span class="det-valor">${a.tipo_viejo} → ${a.tipo}</span></div>`     : ''}
+    </div>
+  ` : '';
 
   const modal = document.createElement('div');
   modal.id        = 'modal-detalle-animal';
   modal.className = 'modal-overlay';
   modal.innerHTML = `
-    <div class="modal" style="border-radius:24px 24px 0 0; padding:0 0 40px; max-height:88vh; overflow-y:auto;">
-      <div class="modal-header" style="position:sticky;top:0;z-index:2;background:var(--verde-oscuro);">
-        <div>
-          <div class="modal-caravana" style="font-size:18px;">
-            ${a.boton ? `🔖 ${a.boton}` : ''} ${a.caravana ? `🏷 ${a.caravana}` : ''}
-          </div>
-          <div style="font-size:12px;color:rgba(255,255,255,0.7);margin-top:2px">Detalle del animal</div>
-        </div>
-        <button class="modal-cerrar" id="modal-detalle-cerrar">✕</button>
+    <div class="modal modal-detalle" style="border-radius:24px 24px 0 0; padding:0; max-height:92vh; display:flex; flex-direction:column;">
+
+      <!-- Handle de arrastre -->
+      <div style="display:flex;justify-content:center;padding:10px 0 4px;">
+        <div style="width:40px;height:4px;border-radius:99px;background:rgba(0,0,0,0.15);"></div>
       </div>
-      <div class="modal-body">
-        <div class="detalle-card">
-          ${fila('🔖 Botón',    a.boton)}
-          ${fila('🏷 Caravana', a.caravana)}
-          ${fila('Estado',    a.estado ? `<span class="rodeo-of-estado rodeo-estado-${(a.estado||'').toLowerCase()}">${a.estado} · ${estadoLabel}</span>` : '')}
-          ${fila('Tipo',      a.tipo   ? `<span class="rodeo-of-tipo rodeo-tipo-${(a.tipo||'').toLowerCase().replace(' ','-')}">${a.tipo}</span>` : '')}
-          ${fila('Color',     a.color  ? `${colorDot} ${a.color}` : '')}
-          ${fila('¿Tiene caravana?', a.tiene_caravana)}
-          ${fila('¿Tiene botón?',    a.tiene_boton)}
-          ${fila('Fecha',     a.fecha)}
-          ${a.comentario ? `<div class="detalle-comentario"><span class="detalle-label">💬 Comentario</span><p>${a.comentario}</p></div>` : ''}
+
+      <!-- Header pegajoso -->
+      <div style="padding:0 20px 14px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--borde);">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            ${a.boton    ? `<span style="font-size:18px;font-weight:800;color:var(--texto);">🔖 ${a.boton}</span>`    : ''}
+            ${a.caravana ? `<span style="font-size:16px;font-weight:700;color:var(--gris);">🏷 ${a.caravana}</span>` : ''}
+          </div>
+          <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">
+            <span class="rodeo-of-tipo rodeo-tipo-${tipoClass}" style="font-size:13px;">${a.tipo || '—'}</span>
+            <span class="rodeo-of-estado rodeo-estado-${estadoClass}" style="font-size:13px;">${a.estado || '—'} · ${estadoLabel}</span>
+            ${colorDot ? `<span style="font-size:13px;">${colorDot} ${a.color}</span>` : ''}
+          </div>
         </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          ${_esAdmin ? `<button class="rodeo-of-btn-editar" onclick="document.getElementById('modal-detalle-animal').remove(); abrirEditorAnimal(${idx})">✏️</button>` : ''}
+          <button id="det-cerrar" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--gris);padding:4px;">✕</button>
+        </div>
+      </div>
+
+      <!-- Contenido scrolleable -->
+      <div style="overflow-y:auto;padding:16px 20px 40px;flex:1;">
+
+        <!-- Datos principales -->
+        <div class="det-seccion-titulo">📌 Identificación</div>
+        <div class="det-card">
+          ${fila('🔖', 'Botón',    a.boton    || '—')}
+          ${fila('🏷', 'Caravana', a.caravana || '—')}
+          ${fila('🐄', 'Tipo',     a.tipo     || '—')}
+          ${fila('❤️', 'Estado',   `${a.estado} — ${estadoLabel}`)}
+          ${a.color ? fila('🎨', 'Color', `${colorDot} ${a.color}`) : ''}
+        </div>
+
+        <!-- Datos extra -->
+        <div class="det-seccion-titulo" style="margin-top:14px;">📋 Información</div>
+        <div class="det-card">
+          ${fila('📅', 'Última actualización', a.fecha    ? a.fecha.replace(/(\d{4})-(\d{2})-(\d{2})/, '$3/$2/$1') : '')}
+          ${fila('👤', 'Registrado por',       a.usuario  || '')}
+          ${a.tiene_boton    === 'si' || a.tiene_boton    === 'no' ? fila('🔖', '¿Tiene botón?',    a.tiene_boton   ) : ''}
+          ${a.tiene_caravana === 'si' || a.tiene_caravana === 'no' ? fila('🏷', '¿Tiene caravana?', a.tiene_caravana) : ''}
+        </div>
+
+        <!-- Comentario -->
+        ${a.comentario ? `
+          <div class="det-seccion-titulo" style="margin-top:14px;">💬 Comentario</div>
+          <div class="det-card det-comentario">
+            <p style="margin:0;line-height:1.5;color:var(--texto);">${a.comentario}</p>
+          </div>
+        ` : ''}
+
+        <!-- Histórico de cambios -->
+        ${hayHistorico ? `<div style="margin-top:14px;">${historicoHtml}</div>` : ''}
+
+        <!-- Galería de fotos del animal -->
+        <div class="det-seccion-titulo" style="margin-top:14px;">📷 Fotos del animal</div>
+        <div id="det-galeria-${idx}" style="min-height:48px;">
+          <p class="sin-historial" style="font-size:13px;">Cargando fotos...</p>
+        </div>
+
       </div>
     </div>
   `;
 
   document.body.appendChild(modal);
-  document.getElementById('modal-detalle-cerrar').addEventListener('click', () => modal.remove());
+  document.getElementById('det-cerrar').addEventListener('click', () => modal.remove());
   modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+
+  // Cargar galería de fotos del animal
+  _cargarGaleriaEnDetalle(a, idx);
 };
+
+async function _cargarGaleriaEnDetalle(a, idx) {
+  const contenedor = document.getElementById(`det-galeria-${idx}`);
+  if (!contenedor) return;
+  try {
+    const uuid = await obtenerOCrearAnimalUuid(a.boton, a.caravana);
+    await renderizarGaleriaAnimal(uuid, contenedor, { clickable: true, onFotoClick: src => window.abrirLightbox(src) });
+  } catch {
+    contenedor.innerHTML = '<p class="sin-historial" style="font-size:13px;">Sin fotos registradas</p>';
+  }
+}
 
 // ─── Abrir modal de edición ───────────────────────────────────────────────────
 window.abrirEditorAnimal = function(idx) {
