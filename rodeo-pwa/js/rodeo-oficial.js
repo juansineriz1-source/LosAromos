@@ -290,12 +290,12 @@ async function _cargarGaleriaEnDetalle(a, idx) {
 
 // ─── Vacunas ──────────────────────────────────────────────────────────────────
 const LISTA_VACUNAS = [
-  { key: 'vac_aftosa',               label: 'Aftosa' },
-  { key: 'vac_brucelosis',           label: 'Brucelosis' },
-  { key: 'vac_carbunclo',            label: 'Carbunclo' },
-  { key: 'vac_mancha',               label: 'Mancha' },
-  { key: 'vac_queratoconjuntivitis', label: 'Queratoconjuntivitis' },
-  { key: 'vac_otras',               label: 'Otras' },
+  { key: 'vac_aftosa',               id: 'aftosa',               label: 'Aftosa' },
+  { key: 'vac_brucelosis',           id: 'brucelosis',           label: 'Brucelosis' },
+  { key: 'vac_carbunclo',            id: 'carbunclo',            label: 'Carbunclo' },
+  { key: 'vac_mancha',               id: 'mancha',               label: 'Mancha' },
+  { key: 'vac_queratoconjuntivitis', id: 'queratoconjuntivitis', label: 'Queratoconjuntivitis' },
+  { key: 'vac_otras',               id: 'otras',               label: 'Otras' },
 ];
 
 function _renderizarVacunas(a, idx) {
@@ -303,108 +303,172 @@ function _renderizarVacunas(a, idx) {
   if (!grid) return;
 
   grid.innerHTML = LISTA_VACUNAS.map(v => {
-    const fecha = a[v.key] || '';
-    const aplicada = !!fecha;
+    const fecha     = a[v.key] || '';
+    const aplicada  = !!fecha;
+    const esOtras   = v.id === 'otras';
+    const subtitulo = aplicada
+      ? (esOtras && a.vac_comentario_otras ? `✓ ${fecha} — ${a.vac_comentario_otras}` : `✓ ${fecha}`)
+      : (_esAdmin ? '+ Registrar' : 'Sin aplicar');
+
     return `
-      <div class="vac-chip ${aplicada ? 'vac-ok' : 'vac-pendiente'}"
-           onclick="${_esAdmin ? `window._vacunarAnimal(${idx},'${v.key.replace('vac_','')}')` : ''}"
-           title="${_esAdmin && !aplicada ? 'Tap para registrar aplicación' : ''}"
-      >
+      <div class="vac-chip ${aplicada ? 'vac-ok' : 'vac-pendiente'} ${_esAdmin ? 'vac-clickable' : ''}"
+           onclick="${_esAdmin ? `window._abrirVacunaModal(${idx},'${v.id}')` : ''}">
         <span class="vac-nombre">${v.label}</span>
-        ${aplicada
-          ? `<span class="vac-fecha">✓ ${fecha}</span>`
-          : `<span class="vac-fecha vac-sin">${_esAdmin ? '+ Registrar' : 'Sin aplicar'}</span>`
-        }
+        <span class="vac-fecha ${aplicada ? '' : 'vac-sin'}">${subtitulo}</span>
       </div>
     `;
   }).join('');
 }
 
-window._vacunarAnimal = async function(idx, vacunaKey) {
+window._abrirVacunaModal = async function(idx, vacunaId) {
   const a = _animales[idx];
   if (!a || !_esAdmin) return;
 
-  // Si ya está aplicada, mostrar info (no se puede des-aplicar desde la UI)
-  const campoKey = `vac_${vacunaKey}`;
-  if (a[campoKey]) {
-    _onToast && _onToast(`Ya registrada el ${a[campoKey]}`);
-    return;
-  }
+  const vac      = LISTA_VACUNAS.find(v => v.id === vacunaId);
+  const campoKey = vac.key;
+  const label    = vac.label;
+  const esOtras  = vacunaId === 'otras';
 
-  // Pedir fecha (hoy por defecto)
-  const hoy = new Date();
-  const hoyStr = `${hoy.getDate().toString().padStart(2,'0')}/${(hoy.getMonth()+1).toString().padStart(2,'0')}/${hoy.getFullYear()}`;
-
-  // Modal de confirmación con opción de fecha
   const existente = document.getElementById('modal-vacunar');
   if (existente) existente.remove();
 
-  const vacunaLabel = LISTA_VACUNAS.find(v => v.key === campoKey)?.label || vacunaKey;
+  const hoy    = new Date();
+  const hoyISO = `${hoy.getFullYear()}-${(hoy.getMonth()+1).toString().padStart(2,'0')}-${hoy.getDate().toString().padStart(2,'0')}`;
 
+  // Crear modal base
   const dlg = document.createElement('div');
   dlg.id = 'modal-vacunar';
   dlg.className = 'modal-overlay';
   dlg.innerHTML = `
-    <div class="modal" style="border-radius:20px;padding:0;max-width:340px;margin:auto;margin-top:30vh;">
-      <div class="modal-header" style="background:var(--verde-oscuro);border-radius:20px 20px 0 0;">
-        <div>
-          <div style="font-size:16px;font-weight:700;">💉 Registrar vacuna</div>
-          <div style="font-size:12px;color:rgba(255,255,255,.7);margin-top:2px;">${a.boton || a.caravana} — ${vacunaLabel}</div>
-        </div>
-        <button class="modal-cerrar" onclick="document.getElementById('modal-vacunar').remove()">✕</button>
+    <div class="modal modal-detalle" style="border-radius:24px 24px 0 0;padding:0;max-height:85vh;display:flex;flex-direction:column;">
+      <div style="display:flex;justify-content:center;padding:10px 0 4px;">
+        <div style="width:40px;height:4px;border-radius:99px;background:rgba(0,0,0,.15);"></div>
       </div>
-      <div class="modal-body" style="padding:20px;">
-        <label style="font-size:13px;font-weight:600;color:var(--texto-secundario);display:block;margin-bottom:6px;">Fecha de aplicación</label>
-        <input id="vac-fecha-input" type="date" value="${hoy.getFullYear()}-${(hoy.getMonth()+1).toString().padStart(2,'0')}-${hoy.getDate().toString().padStart(2,'0')}"
-               style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--borde);font-size:15px;box-sizing:border-box;">
-        <button id="vac-confirmar" style="width:100%;margin-top:14px;padding:13px;background:var(--verde-oscuro);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;">
-          ✓ Confirmar aplicación
-        </button>
+      <div style="padding:0 20px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--borde);">
+        <div>
+          <div style="font-size:16px;font-weight:800;">💉 ${label}</div>
+          <div style="font-size:12px;color:var(--gris);margin-top:2px;">${a.boton || a.caravana}</div>
+        </div>
+        <button id="vac-modal-cerrar" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--gris);">✕</button>
+      </div>
+      <div style="overflow-y:auto;padding:16px 20px 32px;flex:1;">
+
+        <!-- Historial -->
+        <div class="det-seccion-titulo">📋 Historial de aplicaciones</div>
+        <div id="vac-historial-lista" class="det-card" style="margin-bottom:16px;padding:10px 14px;min-height:42px;">
+          <p class="sin-historial" style="font-size:13px;">Cargando...</p>
+        </div>
+
+        <!-- Nueva aplicación -->
+        <div class="det-seccion-titulo">+ Nueva aplicación</div>
+        <div class="det-card" style="padding:14px;">
+          <label style="font-size:12px;font-weight:700;color:var(--texto-secundario);display:block;margin-bottom:6px;">FECHA DE APLICACIÓN</label>
+          <input id="vac-fecha-input" type="date" value="${hoyISO}"
+                 style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--borde);font-size:15px;box-sizing:border-box;margin-bottom:${esOtras ? '12px' : '0'};">
+          ${esOtras ? `
+            <label style="font-size:12px;font-weight:700;color:var(--texto-secundario);display:block;margin-bottom:6px;">¿QUÉ VACUNA?</label>
+            <input id="vac-comentario-input" type="text" placeholder="Ej: IBR, Clostridium, Leptospira..."
+                   value="${a.vac_comentario_otras || ''}"
+                   style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--borde);font-size:15px;box-sizing:border-box;">
+          ` : ''}
+          <button id="vac-confirmar" style="width:100%;margin-top:14px;padding:13px;background:var(--verde-oscuro);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;">
+            ✓ Confirmar aplicación
+          </button>
+        </div>
+
       </div>
     </div>
   `;
   document.body.appendChild(dlg);
+  document.getElementById('vac-modal-cerrar').addEventListener('click', () => dlg.remove());
   dlg.addEventListener('click', e => { if (e.target === dlg) dlg.remove(); });
 
-  document.getElementById('vac-confirmar').addEventListener('click', async () => {
-    const rawDate = document.getElementById('vac-fecha-input').value;
-    const [y, m, d] = rawDate.split('-');
-    const fechaFmt = `${d}/${m}/${y}`;
+  // Cargar historial en paralelo
+  _cargarHistorialVacuna(a, vacunaId, campoKey);
 
-    document.getElementById('vac-confirmar').textContent = 'Registrando...';
-    document.getElementById('vac-confirmar').disabled = true;
+  // Confirmar nueva aplicación
+  document.getElementById('vac-confirmar').addEventListener('click', async () => {
+    const rawDate       = document.getElementById('vac-fecha-input').value;
+    const [y, m, d]     = rawDate.split('-');
+    const fechaFmt      = `${d}/${m}/${y}`;
+    const comentOtras   = esOtras
+      ? (document.getElementById('vac-comentario-input')?.value || '').trim()
+      : '';
+
+    const btn = document.getElementById('vac-confirmar');
+    btn.textContent = 'Registrando...';
+    btn.disabled    = true;
 
     try {
       const resp = await fetch('/api/actualizar-animal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          modo:          'vacunar',
-          vacuna:        vacunaKey,
-          fecha:         fechaFmt,
-          usuario:       a.usuario || 'Admin',
-          animal_actual: a,
+          modo:             'vacunar',
+          vacuna:           vacunaId,
+          fecha:            fechaFmt,
+          comentario_otras: comentOtras,
+          usuario:          a.usuario || 'Admin',
+          animal_actual:    a,
         }),
       });
       const data = await resp.json();
       if (data.ok) {
-        // Actualizar el animal en memoria
-        _animales[idx] = { ..._animales[idx], [campoKey]: fechaFmt, fecha_vacuna: fechaFmt };
+        // Actualizar en memoria
+        const update = { [campoKey]: fechaFmt, fecha_vacuna: fechaFmt };
+        if (esOtras && comentOtras) update.vac_comentario_otras = comentOtras;
+        _animales[idx] = { ..._animales[idx], ...update };
         dlg.remove();
         _renderizarVacunas(_animales[idx], idx);
-        _onToast && _onToast(`✓ ${vacunaLabel} registrada el ${fechaFmt}`);
+        _onToast && _onToast(`✓ ${label} registrada el ${fechaFmt}`);
       } else {
-        _onToast && _onToast('Error al registrar: ' + data.error);
-        document.getElementById('vac-confirmar').textContent = '✓ Confirmar aplicación';
-        document.getElementById('vac-confirmar').disabled = false;
+        _onToast && _onToast('Error: ' + data.error);
+        btn.textContent = '✓ Confirmar aplicación';
+        btn.disabled    = false;
       }
     } catch (err) {
       _onToast && _onToast('Error de red: ' + err.message);
-      document.getElementById('vac-confirmar').textContent = '✓ Confirmar aplicación';
-      document.getElementById('vac-confirmar').disabled = false;
+      btn.textContent = '✓ Confirmar aplicación';
+      btn.disabled    = false;
     }
   });
 };
+
+async function _cargarHistorialVacuna(a, vacunaId, campoKey) {
+  const contenedor = document.getElementById('vac-historial-lista');
+  if (!contenedor) return;
+
+  try {
+    const qs   = new URLSearchParams({ boton: a.boton || '', caravana: a.caravana || '' });
+    const resp = await fetch(`/api/historial-vacunas?${qs}`);
+    const data = await resp.json();
+
+    // Filtrar registros donde esta vacuna fue aplicada
+    const registros = (data.historial || [])
+      .filter(h => h[campoKey])
+      .map(h => ({ fecha: h[campoKey], comentario: h.vac_comentario_otras || '' }))
+      .reverse(); // más reciente primero
+
+    if (!registros.length) {
+      contenedor.innerHTML = '<p class="sin-historial" style="font-size:13px;">Sin aplicaciones previas</p>';
+      return;
+    }
+
+    contenedor.innerHTML = registros.map((r, i) => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:${i > 0 ? '8px 0 0' : '0'};${i > 0 ? 'border-top:1px solid #f0f0f0;margin-top:8px;' : ''}">
+        <div>
+          <span style="font-size:14px;font-weight:700;color:${i === 0 ? 'var(--verde-oscuro)' : 'var(--texto)'};">
+            ${i === 0 ? '● ' : '○ '}${r.fecha}
+          </span>
+          ${r.comentario ? `<span style="font-size:12px;color:var(--gris);margin-left:6px;">${r.comentario}</span>` : ''}
+        </div>
+        ${i === 0 ? '<span style="font-size:11px;background:#e6f7ed;color:#2d9c5b;padding:2px 8px;border-radius:99px;font-weight:700;">última</span>' : ''}
+      </div>
+    `).join('');
+  } catch {
+    contenedor.innerHTML = '<p class="sin-historial" style="font-size:13px;">Error al cargar historial</p>';
+  }
+}
 
 // ─── Abrir modal de edición ───────────────────────────────────────────────────
 window.abrirEditorAnimal = function(idx) {

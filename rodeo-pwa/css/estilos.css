@@ -2030,9 +2030,14 @@ body {
   border: 1.5px solid #52c77f;
 }
 
-.vac-chip[onclick]:active {
+.vac-chip[onclick]:active,
+.vac-chip.vac-clickable:active {
   transform: scale(0.96);
   box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+
+.vac-chip.vac-clickable {
+  cursor: pointer;
 }
 
 .vac-nombre {

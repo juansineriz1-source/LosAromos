@@ -88,22 +88,27 @@ export default async function handler(req, res) {
 
   // ── MODO VACUNAR ──────────────────────────────────────────────────────────
   if (body.modo === 'vacunar') {
-    const { vacuna, fecha, usuario, animal_actual: a } = body;
+    const { vacuna, fecha, comentario_otras, usuario, animal_actual: a } = body;
     if (!a || !vacuna)             return res.status(400).json({ error: 'Faltan campos: vacuna, animal_actual' });
     if (!VACUNAS_CAMPO[vacuna])    return res.status(400).json({ error: `Vacuna desconocida: ${vacuna}` });
 
     const fechaVac = fecha || fechaHoy;
     const vacunas = {
-      fecha_vacuna:             a.fecha_vacuna             || fechaVac,
+      fecha_vacuna:             fechaVac,  // siempre la nueva fecha
       vac_aftosa:               a.vac_aftosa               || '',
       vac_brucelosis:           a.vac_brucelosis           || '',
       vac_carbunclo:            a.vac_carbunclo            || '',
       vac_mancha:               a.vac_mancha               || '',
       vac_queratoconjuntivitis: a.vac_queratoconjuntivitis || '',
       vac_otras:                a.vac_otras                || '',
+      vac_comentario_otras:     a.vac_comentario_otras     || '',
     };
+    // Marcar la vacuna aplicada
     vacunas[VACUNAS_CAMPO[vacuna]] = fechaVac;
-    vacunas.fecha_vacuna = fechaVac;
+    // Para 'otras': guardar el comentario
+    if (vacuna === 'otras' && comentario_otras) {
+      vacunas.vac_comentario_otras = comentario_otras;
+    }
 
     const fila = [
       a.boton || '', a.caravana || '', a.estado || '',
@@ -112,7 +117,8 @@ export default async function handler(req, res) {
       a.comentario || '', usuario || a.usuario || '',
       vacunas.fecha_vacuna, vacunas.vac_aftosa, vacunas.vac_brucelosis,
       vacunas.vac_carbunclo, vacunas.vac_mancha, vacunas.vac_queratoconjuntivitis,
-      vacunas.vac_otras, '',
+      vacunas.vac_otras,
+      vacunas.vac_comentario_otras,   // R
       a.boton_viejo || '', a.caravana_vieja || '', a.estado_viejo || '', a.tipo_viejo || '',
     ];
 

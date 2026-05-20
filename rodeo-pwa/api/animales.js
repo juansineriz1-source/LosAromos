@@ -10,7 +10,7 @@
  *   A=Botón  B=Caravana  C=Estado  D=Tiene_caravana  E=Tiene_botón
  *   F=TIPO   G=Color     H=Fecha   I=Comentario       J=Usuario
  *   K=FechaVacuna  L=Aftosa  M=Brucelosis  N=Carbunclo  O=Mancha
- *   P=Queratoconjuntivitis  Q=Otras
+ *   P=Queratoconjuntivitis  Q=Otras  R=Comentario_otras
  *   S=Botón_viejo  T=Caravana_vieja  U=Estado_viejo  V=TIPO_viejo
  */
 
@@ -54,7 +54,7 @@ async function leerHoja(token) {
 // ─── Parsear fila ─────────────────────────────────────────────────────────────
 function parsearFila(fila, idx) {
   return {
-    _rowIndex:       idx + 2,              // fila real en Sheet (1-indexed, +1 cabecera)
+    _rowIndex:       idx + 2,
     boton:           fila[0]  || '',
     caravana:        fila[1]  || '',
     estado:          fila[2]  || '',
@@ -65,7 +65,7 @@ function parsearFila(fila, idx) {
     fecha:           fila[7]  || '',
     comentario:      fila[8]  || '',
     usuario:         fila[9]  || '',
-    // vacunas (columnas K-Q)
+    // vacunas (columnas K-R)
     fecha_vacuna:              fila[10] || '',
     vac_aftosa:                fila[11] || '',
     vac_brucelosis:            fila[12] || '',
@@ -73,6 +73,7 @@ function parsearFila(fila, idx) {
     vac_mancha:                fila[14] || '',
     vac_queratoconjuntivitis:  fila[15] || '',
     vac_otras:                 fila[16] || '',
+    vac_comentario_otras:      fila[17] || '',   // R — qué vacuna se aplicó
     // historico (columnas S-V, índices 18-21)
     boton_viejo:     fila[18] || '',
     caravana_vieja:  fila[19] || '',
