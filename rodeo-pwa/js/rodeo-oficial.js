@@ -443,11 +443,8 @@ async function _cargarHistorialVacuna(a, vacunaId, campoKey) {
     const resp = await fetch(`/api/historial-vacunas?${qs}`);
     const data = await resp.json();
 
-    // Filtrar registros donde esta vacuna fue aplicada
-    const registros = (data.historial || [])
-      .filter(h => h[campoKey])
-      .map(h => ({ fecha: h[campoKey], comentario: h.vac_comentario_otras || '' }))
-      .reverse(); // más reciente primero
+    // El nuevo API devuelve porVacuna: { vac_aftosa: [{fecha, comentario, usuario}], ... }
+    const registros = (data.porVacuna?.[campoKey] || []).slice().reverse(); // más reciente primero
 
     if (!registros.length) {
       contenedor.innerHTML = '<p class="sin-historial" style="font-size:13px;">Sin aplicaciones previas</p>';
@@ -455,20 +452,24 @@ async function _cargarHistorialVacuna(a, vacunaId, campoKey) {
     }
 
     contenedor.innerHTML = registros.map((r, i) => `
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:${i > 0 ? '8px 0 0' : '0'};${i > 0 ? 'border-top:1px solid #f0f0f0;margin-top:8px;' : ''}">
+      <div style="display:flex;align-items:center;justify-content:space-between;
+                  ${i > 0 ? 'padding-top:8px;border-top:1px solid #f0f0f0;margin-top:8px;' : ''}">
         <div>
           <span style="font-size:14px;font-weight:700;color:${i === 0 ? 'var(--verde-oscuro)' : 'var(--texto)'};">
             ${i === 0 ? '● ' : '○ '}${r.fecha}
           </span>
           ${r.comentario ? `<span style="font-size:12px;color:var(--gris);margin-left:6px;">${r.comentario}</span>` : ''}
+          ${r.usuario ? `<span style="font-size:11px;color:#bbb;margin-left:6px;">— ${r.usuario}</span>` : ''}
         </div>
         ${i === 0 ? '<span style="font-size:11px;background:#e6f7ed;color:#2d9c5b;padding:2px 8px;border-radius:99px;font-weight:700;">última</span>' : ''}
       </div>
     `).join('');
-  } catch {
+  } catch (err) {
     contenedor.innerHTML = '<p class="sin-historial" style="font-size:13px;">Error al cargar historial</p>';
+    console.error('[historial-vacuna]', err);
   }
 }
+
 
 // ─── Abrir modal de edición ───────────────────────────────────────────────────
 window.abrirEditorAnimal = function(idx) {
