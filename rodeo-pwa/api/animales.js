@@ -1,12 +1,11 @@
 /**
- * api/animales.js — Lee el registro maestro de animales desde Google Sheets
+ * api/animales.js — Lee el registro maestro + historial de vacunas
  *
- * GET /api/animales
+ * GET /api/animales                → lista todos los animales del maestro
+ * GET /api/animales?modo=historial-vacunas&boton=X&caravana=Y
+ *                                  → historial de vacunas de un animal (hoja Vacunas)
  *
- * Lee la hoja "LosAromos" — ahora con 1 fila por animal (registro maestro).
- * Ya no se deduplica. Cada fila es el estado actual del animal.
- *
- * Columnas:
+ * Columnas LosAromos (A:R):
  *   A=Botón  B=Caravana  C=Estado  D=Tiene_caravana  E=Tiene_botón
  *   F=TIPO   G=Color     H=Fecha_última_act  I=Comentario  J=Usuario
  *   K=Fecha_vacuna  L=Aftosa  M=Brucelosis  N=Carbunclo  O=Mancha
@@ -39,10 +38,10 @@ async function obtenerAccessToken() {
   return (await resp.json()).access_token;
 }
 
-// ─── Parsear fila ─────────────────────────────────────────────────────────────
+// ─── Parsear fila de LosAromos ────────────────────────────────────────────────
 function parsearFila(fila, idx) {
   return {
-    _rowIndex:                idx + 2,   // fila real en Sheets (1-indexed, +1 por cabecera)
+    _rowIndex:                idx + 2,
     boton:                    fila[0]  || '',
     caravana:                 fila[1]  || '',
     estado:                   fila[2]  || '',
@@ -53,7 +52,6 @@ function parsearFila(fila, idx) {
     fecha:                    fila[7]  || '',
     comentario:               fila[8]  || '',
     usuario:                  fila[9]  || '',
-    // vacunas — última aplicación de cada una (cols K-R)
     fecha_vacuna:             fila[10] || '',
     vac_aftosa:               fila[11] || '',
     vac_brucelosis:           fila[12] || '',
@@ -74,20 +72,58 @@ export default async function handler(req, res) {
 
   try {
     const token = await obtenerAccessToken();
-    const url   = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(NOMBRE_HOJA + '!A:R')}`;
-    const resp  = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+    const { modo, boton, caravana } = req.query;
+
+    // ── MODO: historial de vacunas (fusionado desde historial-vacunas.js) ────
+    if (modo === 'historial-vacunas') {
+      if (!boton && !caravana) return res.status(400).json({ error: 'Se requiere boton o caravana' });
+
+      const url  = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent('Vacunas!A:F')}`;
+      const resp = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      if (!resp.ok) throw new Error(`Sheets error: ${resp.status}`);
+      const filas = (await resp.json()).values || [];
+
+      const historial = filas.slice(1)
+        .filter(f => {
+          const fb = (f[1] || '').trim().toLowerCase();
+          const fc = (f[2] || '').trim().toLowerCase();
+          return (boton    && fb === boton.trim().toLowerCase()) ||
+                 (caravana && fc === caravana.trim().toLowerCase());
+        })
+        .map(f => ({
+          fecha:     f[0] || '',
+          vacuna:    f[3] || '',
+          comentario: f[4] || '',
+          usuario:   f[5] || '',
+          campo_key: (() => {
+            const MAP = { aftosa:'vac_aftosa', brucelosis:'vac_brucelosis', carbunclo:'vac_carbunclo',
+                          mancha:'vac_mancha', queratoconjuntivitis:'vac_queratoconjuntivitis', otras:'vac_otras' };
+            return MAP[(f[3]||'').toLowerCase().replace(/\s/g,'')] || (f[3]||'').toLowerCase();
+          })(),
+        }));
+
+      const porVacuna = {};
+      historial.forEach(h => {
+        if (!porVacuna[h.campo_key]) porVacuna[h.campo_key] = [];
+        porVacuna[h.campo_key].push({ fecha: h.fecha, comentario: h.comentario, usuario: h.usuario });
+      });
+
+      return res.status(200).json({ historial, porVacuna });
+    }
+
+    // ── MODO: lista de animales (default) ─────────────────────────────────────
+    const url  = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(NOMBRE_HOJA + '!A:R')}`;
+    const resp = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
     if (!resp.ok) throw new Error(`Sheets error: ${resp.status}`);
     const filas = (await resp.json()).values || [];
 
     if (!filas.length) return res.status(200).json({ animales: [], total: 0 });
 
-    // Registro maestro — 1 fila por animal, sin deduplicar
     const animales = filas
-      .slice(1)                                          // saltar cabecera
-      .filter(f => f[0] || f[1])                        // solo filas con Botón o Caravana
+      .slice(1)
+      .filter(f => f[0] || f[1])
       .map((fila, idx) => parsearFila(fila, idx));
 
-    // Ordenar: por tipo luego por botón
     animales.sort((a, b) => {
       if (a.tipo < b.tipo) return -1;
       if (a.tipo > b.tipo) return  1;

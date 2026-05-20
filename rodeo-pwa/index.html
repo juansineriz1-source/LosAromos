@@ -427,6 +427,32 @@
 
     </section>
 
+    <!-- ════════════════════ TAB: AGENDA ════════════════════════ -->
+    <section class="tab-panel" id="tab-agenda" style="display:none;">
+
+      <!-- Header agenda -->
+      <div class="agenda-header">
+        <div>
+          <div class="agenda-titulo">📋 Agenda</div>
+          <div class="agenda-subtitulo" id="agenda-resumen">Cargando tareas...</div>
+        </div>
+        <button id="btn-nueva-tarea" class="btn-nueva-tarea" style="display:none">+ Nueva</button>
+      </div>
+
+      <!-- Filtros -->
+      <div class="agenda-filtros">
+        <button class="agenda-filtro-btn activo" data-filtro="todos">Todas</button>
+        <button class="agenda-filtro-btn" data-filtro="Pendiente">Pendientes</button>
+        <button class="agenda-filtro-btn" data-filtro="Completada">Completadas</button>
+      </div>
+
+      <!-- Lista de tareas -->
+      <div id="agenda-lista">
+        <p class="sin-historial" style="margin:32px 0;">Cargando...</p>
+      </div>
+
+    </section>
+
     <!-- ═══════════════════════ LIGHTBOX ════════════════════════ -->
     <div id="lightbox" class="lightbox-overlay" style="display:none" onclick="cerrarLightbox()">
       <button class="lightbox-cerrar" onclick="cerrarLightbox()" aria-label="Cerrar">✕</button>
@@ -452,6 +478,10 @@
     <button class="nav-item" id="nav-recorrida" data-tab="recorrida">
       <span class="nav-icon">🎙</span>
       <span class="nav-label">Recorrida</span>
+    </button>
+    <button class="nav-item" id="nav-agenda" data-tab="agenda">
+      <span class="nav-icon">📋</span>
+      <span class="nav-label">Agenda</span>
     </button>
   </nav>
 

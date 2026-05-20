@@ -2060,3 +2060,186 @@ body {
   color: #adb5bd;
   font-weight: 500;
 }
+
+/* ══════════════════════════════════════════════════
+   AGENDA / TAREAS
+══════════════════════════════════════════════════ */
+
+.agenda-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px 8px;
+}
+
+.agenda-titulo {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--texto);
+}
+
+.agenda-subtitulo {
+  font-size: 13px;
+  color: var(--gris);
+  margin-top: 2px;
+}
+
+.btn-nueva-tarea {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--verde-oscuro);
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.agenda-filtros {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 12px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.agenda-filtro-btn {
+  flex-shrink: 0;
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 1.5px solid var(--borde);
+  background: var(--bg-card);
+  color: var(--texto-secundario);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.agenda-filtro-btn.activo {
+  background: var(--verde-oscuro);
+  color: #fff;
+  border-color: var(--verde-oscuro);
+}
+
+/* Tarjeta de tarea */
+.agenda-card {
+  background: var(--bg-card);
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin: 0 12px 10px;
+  border: 1.5px solid var(--borde);
+  transition: box-shadow .2s;
+}
+
+.agenda-card-ok {
+  opacity: .75;
+  border-color: #c8e6c9;
+  background: #f1f8f1;
+}
+
+.agenda-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.agenda-card-titulo {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--texto);
+  line-height: 1.3;
+}
+
+.tarea-tachada {
+  text-decoration: line-through;
+  color: var(--gris);
+}
+
+.agenda-prioridad-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 4px;
+}
+
+.agenda-estado-badge {
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 20px;
+  padding: 3px 9px;
+  white-space: nowrap;
+}
+
+.badge-pendiente {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.badge-ok {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.agenda-btn-eliminar {
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: var(--gris);
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+}
+
+.agenda-card-desc {
+  font-size: 13px;
+  color: var(--texto-secundario);
+  margin: 4px 0 6px;
+  line-height: 1.4;
+}
+
+.agenda-card-meta {
+  font-size: 12px;
+  color: var(--gris);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.agenda-prioridad-label {
+  font-weight: 700;
+}
+
+.agenda-card-completada {
+  font-size: 12px;
+  color: #2e7d32;
+  background: #e8f5e9;
+  border-radius: 8px;
+  padding: 6px 10px;
+  margin-bottom: 6px;
+}
+
+.agenda-btn-completar {
+  width: 100%;
+  padding: 10px;
+  background: var(--verde-oscuro);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: opacity .15s;
+}
+
+.agenda-btn-completar:active {
+  opacity: .8;
+}

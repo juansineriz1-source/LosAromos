@@ -439,8 +439,8 @@ async function _cargarHistorialVacuna(a, vacunaId, campoKey) {
   if (!contenedor) return;
 
   try {
-    const qs   = new URLSearchParams({ boton: a.boton || '', caravana: a.caravana || '' });
-    const resp = await fetch(`/api/historial-vacunas?${qs}`);
+    const qs   = new URLSearchParams({ modo: 'historial-vacunas', boton: a.boton || '', caravana: a.caravana || '' });
+    const resp = await fetch(`/api/animales?${qs}`);
     const data = await resp.json();
 
     // El nuevo API devuelve porVacuna: { vac_aftosa: [{fecha, comentario, usuario}], ... }

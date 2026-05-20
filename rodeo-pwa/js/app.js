@@ -17,6 +17,7 @@ import { inicializarVideos, cargarListaVideos } from './videos.js';
 import { inicializarPush } from './push.js';
 import { inicializarCalendario, cargarFeedHoy } from './calendario.js';
 import { inicializarRodeoOficial, cargarRodeoOficial, filtrarRodeo } from './rodeo-oficial.js';
+import { initAgenda, cargarAgenda } from './agenda.js';
 
 // ─── Usuarios y roles ─────────────────────────────────────────────────────────
 const USUARIOS = {
@@ -28,7 +29,7 @@ const USUARIOS = {
   'domingo': { display: 'Domingo', rol: 'operario' },
 };
 
-const TABS_ADMIN    = ['inicio', 'baston', 'rodeo', 'recorrida'];
+const TABS_ADMIN    = ['inicio', 'baston', 'rodeo', 'recorrida', 'agenda'];
 const TABS_OPERARIO = ['recorrida', 'rodeo'];
 
 // Tab inicial por usuario (override del default por rol)
@@ -159,6 +160,9 @@ function aplicarRol(rol) {
 
   // Inicializar módulo del rodeo oficial con el rol actual
   inicializarRodeoOficial(mostrarToast, rol === 'admin');
+
+  // Inicializar módulo de agenda con rol y operador actual
+  initAgenda(rol === 'admin', estado.operador);
 }
 
 
@@ -238,6 +242,7 @@ async function mostrarTab(nombre) {
     manual:     ['Carga Manual', 'Buscar y editar'],
     rodeo:      ['Rodeo', 'Todos los animales'],
     recorrida:  ['Recorrida', 'Grabar el campo'],
+    agenda:     ['Agenda', 'Tareas asignadas'],
   };
   const [titulo, sub] = titulos[nombre] || ['RodeoApp', ''];
   $('header-titulo').textContent = titulo;
@@ -246,6 +251,7 @@ async function mostrarTab(nombre) {
   // Cargar datos según pestaña
   if (nombre === 'inicio')    await cargarInicio();
   if (nombre === 'rodeo')     await cargarRodeoOficial();
+  if (nombre === 'agenda')    await cargarAgenda();
   if (nombre === 'recorrida') {
     await cargarListaRecorridas();
     await cargarListaFotos();
