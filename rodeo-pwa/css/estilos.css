@@ -789,12 +789,6 @@ body {
   font-weight: 700;
   color: var(--gris);
 }
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-}
 
 .modal-body {
   padding: 16px 20px;
@@ -1640,6 +1634,93 @@ body {
 .feed-foto      { border-color: var(--tierra); }
 .feed-video     { border-color: #7c3aed; }
 
+.feed-item-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.feed-icono {
+  font-size: 20px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.feed-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+
+.feed-label {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--texto);
+}
+
+.feed-hora {
+  font-size: 12px;
+  color: var(--gris);
+}
+
+.feed-texto {
+  font-size: 14px;
+  color: var(--texto);
+  line-height: 1.5;
+  white-space: pre-line;
+  margin: 0;
+}
+
+.feed-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.feed-tag {
+  background: var(--gris-claro);
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--texto-secundario);
+}
+
+.feed-tag-ok {
+  background: #e8f5e9;
+  border-color: #a5d6a7;
+  color: #2e7d32;
+}
+
+.feed-audio {
+  width: 100%;
+  border-radius: 8px;
+  margin-top: 6px;
+}
+
+.feed-foto-thumb {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: var(--radio);
+  margin-top: 6px;
+  display: block;
+  cursor: zoom-in;
+  transition: transform 0.15s;
+}
+.feed-foto-thumb:active { transform: scale(0.98); }
+
+.feed-remoto {
+  font-size: 11px;
+  opacity: 0.65;
+  margin-left: 2px;
+}
+
 /* Texto claro dentro de la card de video (fondo oscuro) */
 .feed-item.feed-video .feed-label,
 .feed-item.feed-video .feed-hora,
@@ -1714,7 +1795,7 @@ body {
   line-height: 1.5;
 }
 
-───── */
+
 @media (prefers-color-scheme: dark) {
   body { background: #161b16; }
   .card, .stat-card { background: #222922; }
@@ -1736,8 +1817,7 @@ body {
   .accordion-titulo { background: #2a2f2a; color: #f0f0f0; }
 }
 
-/* === RODEO OFICIAL CSS === */
-.rodeo-of-stats{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.rodeo-stat-total{font-size:15px;font-weight:700;color:var(--texto)}.rodeo-stat-chip{background:var(--verde-claro);color:var(--verde-oscuro);border-radius:20px;padding:3px 10px;font-size:13px;font-weight:600}.rodeo-of-item{background:var(--blanco);border-radius:var(--radio);padding:12px 14px;margin:6px 12px;display:flex;align-items:center;gap:10px;box-shadow:0 1px 4px rgba(0,0,0,.07)}.rodeo-of-ids{flex:1;min-width:0}.rodeo-of-boton{display:block;font-size:15px;font-weight:700;color:var(--texto);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rodeo-of-caravana{display:block;font-size:12px;color:var(--gris);font-weight:500;margin-top:1px}.rodeo-of-info{display:flex;flex-wrap:wrap;gap:4px;align-items:center}.rodeo-of-tipo,.rodeo-of-estado{padding:3px 9px;border-radius:20px;font-size:12px;font-weight:700;background:#f5f5f5;color:#555}.rodeo-tipo-v{background:#e3f2fd;color:#0d47a1}.rodeo-tipo-v1{background:#fff3e0;color:#e65100}.rodeo-tipo-va{background:#e8f5e9;color:#1b5e20}.rodeo-tipo-t{background:#fce4ec;color:#880e4f}.rodeo-tipo-tn{background:#f3e5f5;color:#4a148c}.rodeo-estado-p{background:#e8f5e9;color:#1b5e20}.rodeo-estado-v{background:#fff9c4;color:#f57f17}.rodeo-estado-d{background:#fce4ec;color:#c62828}.rodeo-estado-b{background:#eee;color:#616161}.rodeo-of-badge{padding:2px 7px;border-radius:20px;font-size:11px;font-weight:600;background:#e8f5e9;color:#2e7d32}.rodeo-badge-no{background:#fafafa;color:#9e9e9e;border:1px solid #e0e0e0}.rodeo-of-fecha{font-size:11px;color:var(--gris);white-space:nowrap}.rodeo-of-btn-editar{background:none;border:1.5px solid var(--verde);border-radius:10px;color:var(--verde);font-size:16px;padding:5px 8px;cursor:pointer;flex-shrink:0;font-family:inherit}.rodeo-edit-seccion{margin-bottom:14px}.rodeo-edit-opciones{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.rodeo-edit-chip{padding:6px 14px;border-radius:20px;border:1.5px solid #ddd;background:#f9f9f9;color:var(--texto);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}.rodeo-edit-chip.activo{background:var(--verde);border-color:var(--verde);color:#fff}
+
 /* ════════════════════════════════════════════════════
    LIGHTBOX — ver imagen completa
    ════════════════════════════════════════════════════ */
@@ -2318,4 +2398,216 @@ body {
 
 .agenda-btn-completar:active {
   opacity: .8;
+}
+
+/* ══════════════════════════════════════════════════════
+   MEJORAS APPLE REDESIGN — completado
+══════════════════════════════════════════════════════ */
+
+/* Recorrida items — aspecto iOS */
+.recorrida-item {
+  background: var(--bg-card);
+  border-radius: var(--radio-grande);
+  padding: 14px 16px;
+  margin: 0 12px 10px;
+  box-shadow: var(--sombra-card);
+}
+
+.recorrida-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.recorrida-fecha {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--texto);
+}
+
+.recorrida-duracion {
+  font-size: 12px;
+  color: var(--gris);
+  background: var(--gris-claro);
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.recorrida-operador {
+  font-size: 12px;
+  color: var(--texto-secundario);
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.recorrida-player {
+  width: 100%;
+  border-radius: var(--radio);
+  background: var(--gris-claro);
+}
+
+/* Estado de sincronización en cards */
+.sync-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background: var(--gris-claro);
+  color: var(--gris);
+}
+.sync-badge.sync-ok    { background: #e8f5e9; color: #2e7d32; }
+.sync-badge.sync-local { background: #fff3e0; color: #e65100; }
+
+/* Rodeo stats de inicio — iOS style */
+.rodeo-inicio-stats {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.rodeo-inicio-stat {
+  flex: 1;
+  min-width: 80px;
+  background: var(--gris-claro);
+  border-radius: var(--radio);
+  padding: 10px 12px;
+  text-align: center;
+}
+
+.rodeo-inicio-stat-num {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--verde-oscuro);
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+.rodeo-inicio-stat-num.stat-p { color: #2e7d32; }
+.rodeo-inicio-stat-num.stat-v { color: #e65100; }
+.rodeo-inicio-stat-num.stat-i { color: #1565c0; }
+
+.rodeo-inicio-stat-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--gris);
+  margin-top: 3px;
+}
+
+.rodeo-tipo-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.rodeo-tipo-chip-inicio {
+  background: var(--verde-claro);
+  color: var(--verde-oscuro);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* Botón Update SW — iOS style */
+.btn-update-sw {
+  width: 100%;
+  background: var(--azul);
+  color: #fff;
+  border: none;
+  border-radius: var(--radio);
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 8px;
+  animation: pulse-blue 2s ease-in-out infinite;
+}
+
+@keyframes pulse-blue {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.82; }
+}
+
+/* Agenda — vacío state */
+.agenda-vacio {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--gris);
+}
+.agenda-vacio-icono {
+  font-size: 48px;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+.agenda-vacio-texto {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.agenda-vacio-sub {
+  font-size: 13px;
+  opacity: 0.75;
+}
+
+/* Modal header verde para animales */
+.modal-header-verde {
+  background: var(--verde-oscuro) !important;
+}
+.modal-header-verde .modal-caravana,
+.modal-header-verde * {
+  color: #fff !important;
+}
+.modal-header-verde .modal-cerrar {
+  background: rgba(255,255,255,0.15) !important;
+  color: #fff !important;
+}
+
+/* Feed item — sin actividad */
+.feed-vacio {
+  text-align: center;
+  padding: 24px 0;
+  color: var(--gris);
+  font-size: 14px;
+  font-style: italic;
+}
+
+/* Scroll suave en la app */
+html { scroll-behavior: smooth; }
+
+/* Safe area para iPhone X+ */
+.bottom-nav {
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
+}
+
+/* Animación fadeIn para lightbox */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Mejora dark mode - agenda */
+@media (prefers-color-scheme: dark) {
+  .agenda-card {
+    background: #1e261e;
+    border-color: #2a362a;
+  }
+  .agenda-card-ok {
+    background: #1a261a;
+    border-color: #2a3a2a;
+  }
+  .detalle-card, .det-card { background: #1e261e; }
+  .det-fila { border-bottom-color: #2a362a; }
+  .rodeo-of-item { background: #1e261e; }
+  .vac-chip.vac-pendiente { background: #1e1e1e; border-color: #3a3a3a; }
+  .cal-detalle { background: #1e261e; }
+  .recorrida-item { background: #1e261e; }
 }
