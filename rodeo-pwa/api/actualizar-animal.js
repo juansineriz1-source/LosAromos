@@ -2,6 +2,7 @@
  * api/actualizar-animal.js — Actualiza un animal en Google Sheets
  *
  * POST /api/actualizar-animal
+ * POST /api/actualizar-animal  (body.modo = 'vacunar') — también maneja vacunas
  *
  * ESTRATEGIA DE TRAZABILIDAD:
  * Nunca modifica filas existentes. Agrega una nueva fila al final con los
@@ -20,6 +21,15 @@
 const SHEET_ID             = process.env.GOOGLE_SHEET_ID || '1tEncjxGzwE-7AZLnlmShSSM3lCaNFQR9DNn459AWhSg';
 const SERVICE_ACCOUNT_EMAIL = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || 'bot-n8n@custom-unison-403623.iam.gserviceaccount.com';
 const NOMBRE_HOJA          = 'LosAromos';
+
+const VACUNAS_CAMPO = {
+  aftosa:               'vac_aftosa',
+  brucelosis:           'vac_brucelosis',
+  carbunclo:            'vac_carbunclo',
+  mancha:               'vac_mancha',
+  queratoconjuntivitis: 'vac_queratoconjuntivitis',
+  otras:                'vac_otras',
+};
 
 // ─── Auth JWT ────────────────────────────────────────────────────────────────
 async function obtenerAccessToken() {
@@ -73,8 +83,52 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Body inválido' });
   }
 
+  const hoy = new Date();
+  const fechaHoy = `${hoy.getDate().toString().padStart(2,'0')}/${(hoy.getMonth()+1).toString().padStart(2,'0')}/${hoy.getFullYear()}`;
+
+  // ── MODO VACUNAR ──────────────────────────────────────────────────────────
+  if (body.modo === 'vacunar') {
+    const { vacuna, fecha, usuario, animal_actual: a } = body;
+    if (!a || !vacuna)             return res.status(400).json({ error: 'Faltan campos: vacuna, animal_actual' });
+    if (!VACUNAS_CAMPO[vacuna])    return res.status(400).json({ error: `Vacuna desconocida: ${vacuna}` });
+
+    const fechaVac = fecha || fechaHoy;
+    const vacunas = {
+      fecha_vacuna:             a.fecha_vacuna             || fechaVac,
+      vac_aftosa:               a.vac_aftosa               || '',
+      vac_brucelosis:           a.vac_brucelosis           || '',
+      vac_carbunclo:            a.vac_carbunclo            || '',
+      vac_mancha:               a.vac_mancha               || '',
+      vac_queratoconjuntivitis: a.vac_queratoconjuntivitis || '',
+      vac_otras:                a.vac_otras                || '',
+    };
+    vacunas[VACUNAS_CAMPO[vacuna]] = fechaVac;
+    vacunas.fecha_vacuna = fechaVac;
+
+    const fila = [
+      a.boton || '', a.caravana || '', a.estado || '',
+      a.tiene_caravana || '', a.tiene_boton || '',
+      a.tipo || '', a.color || '', a.fecha || '',
+      a.comentario || '', usuario || a.usuario || '',
+      vacunas.fecha_vacuna, vacunas.vac_aftosa, vacunas.vac_brucelosis,
+      vacunas.vac_carbunclo, vacunas.vac_mancha, vacunas.vac_queratoconjuntivitis,
+      vacunas.vac_otras, '',
+      a.boton_viejo || '', a.caravana_vieja || '', a.estado_viejo || '', a.tipo_viejo || '',
+    ];
+
+    try {
+      const token = await obtenerAccessToken();
+      await appendFila(token, fila);
+      console.log('[vacunar] Vacuna registrada:', vacuna, 'para', a.boton || a.caravana);
+      return res.status(200).json({ ok: true, vacuna, fecha: fechaVac });
+    } catch (err) {
+      console.error('[vacunar]', err.message);
+      return res.status(500).json({ ok: false, error: err.message });
+    }
+  }
+
+  // ── MODO NORMAL: editar datos del animal ─────────────────────────────────
   const {
-    // Nuevos valores de identidad/estado
     boton, caravana, estado, tiene_caravana, tiene_boton,
     tipo, color, comentario, usuario,
     // Vacunas (se preservan desde el animal actual)
@@ -87,10 +141,6 @@ export default async function handler(req, res) {
   if (!boton && !caravana) {
     return res.status(400).json({ error: 'Se requiere Botón o Caravana' });
   }
-
-  // Fecha de hoy en formato DD/MM/YYYY (igual al formato del sheet)
-  const hoy = new Date();
-  const fechaHoy = `${hoy.getDate().toString().padStart(2,'0')}/${(hoy.getMonth()+1).toString().padStart(2,'0')}/${hoy.getFullYear()}`;
 
   // Nueva fila: A-J + vacunas K-Q + R vacío + S-V histórico
   const nuevaFila = [

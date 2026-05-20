@@ -375,10 +375,11 @@ window._vacunarAnimal = async function(idx, vacunaKey) {
     document.getElementById('vac-confirmar').disabled = true;
 
     try {
-      const resp = await fetch('/api/vacunar', {
+      const resp = await fetch('/api/actualizar-animal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          modo:          'vacunar',
           vacuna:        vacunaKey,
           fecha:         fechaFmt,
           usuario:       a.usuario || 'Admin',
