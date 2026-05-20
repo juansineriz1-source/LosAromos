@@ -3110,3 +3110,481 @@ html { scroll-behavior: smooth; }
   .filtro-divisor         { background: #2a362a; }
   .rodeo-btn-filtros      { background: #1e261e; border-color: #2a362a; color: #f0f0f0; }
 }
+
+/* ══════════════════════════════════════════════════
+   STITCH DESIGN SYSTEM — Componentes por tab
+══════════════════════════════════════════════════ */
+
+/* ─── Helpers globales ───────────────────────── */
+.card-stitch {
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid rgba(229,231,235,0.50);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.card-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.card-section-icono {
+  background: #e8f5e9;
+  border-radius: 10px;
+  padding: 8px;
+  font-size: 18px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-section-titulo {
+  font-family: 'Manrope', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+/* ─── Botón primario ─────────────────────────── */
+.btn-stitch-primario {
+  width: 100%;
+  height: 52px;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform 0.1s;
+  margin-bottom: 8px;
+}
+.btn-stitch-primario:active { transform: scale(0.97); }
+
+.btn-stitch-secundario {
+  width: 100%;
+  height: 44px;
+  background: transparent;
+  color: #6b7a6e;
+  border: 2px dashed #d1d5db;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+.btn-stitch-secundario:active { background: #f9fafb; }
+
+/* ─── BASTÓN ───────────────────────────────── */
+.baston-caravana-display {
+  background: #f9fafb;
+  border: 1px solid #f3f4f6;
+  border-radius: 14px;
+  padding: 16px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.baston-num-display {
+  font-family: 'Manrope', sans-serif;
+  font-size: 40px;
+  font-weight: 800;
+  color: #1a5c30;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+}
+
+.peso-stitch {
+  background: #fff7ed !important;
+  border: 1px solid #fed7aa !important;
+  border-radius: 14px !important;
+  padding: 12px 16px !important;
+  font-family: 'Manrope', sans-serif !important;
+  font-size: 30px !important;
+  font-weight: 800 !important;
+  color: #7c5c1e !important;
+  font-variant-numeric: tabular-nums;
+  width: 100% !important;
+  box-sizing: border-box;
+}
+
+.btn-guardar-grande {
+  width: 100%;
+  height: 60px;
+  background: #1a5c30;
+  color: #ffffff;
+  border: none;
+  border-radius: 14px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform 0.1s, background 0.15s;
+  box-shadow: 0 4px 16px rgba(26,92,48,0.25);
+  margin-bottom: 12px;
+}
+.btn-guardar-grande:active { transform: scale(0.97); background: #2e7d52; }
+
+/* ─── RODEO filtros stitch ─────────────────────── */
+.filtros-stitch-card {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  border: 1px solid rgba(229,231,235,0.50);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.rodeo-total-stitch {
+  font-family: 'Manrope', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: #1a5c30;
+  letter-spacing: -0.03em;
+}
+
+.rodeo-mostrando-stitch {
+  font-size: 13px;
+  color: #6b7a6e;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.search-input-stitch {
+  width: 100%;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 12px 16px 12px 42px;
+  font-size: 15px;
+  color: #1a5c30;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  box-sizing: border-box;
+}
+.search-input-stitch::placeholder { color: #9ca3af; }
+.search-input-stitch:focus { outline: none; border-color: #2e7d52; box-shadow: 0 0 0 3px rgba(46,125,82,0.10); }
+
+.search-wrapper {
+  position: relative;
+  margin: 12px 0;
+}
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+/* ─── RECORRIDA ────────────────────────────── */
+.rec-card-principal {
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.rec-card-principal .rec-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  text-align: left;
+}
+.rec-card-titulo {
+  font-family: 'Manrope', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a5c30;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rec-chip-grabando {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 99px;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.rec-chip-grabando-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #dc2626;
+  animation: blink-opacity 1s infinite;
+}
+@keyframes blink-opacity {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.25; }
+}
+
+.rec-timer-stitch {
+  font-family: 'Manrope', sans-serif;
+  font-size: 4rem;
+  font-weight: 800;
+  color: #dc2626;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  margin-bottom: 32px;
+}
+
+.rec-waveform {
+  width: 100%;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 40px;
+  opacity: 0.70;
+}
+.rec-wave-bar {
+  width: 6px;
+  border-radius: 99px;
+  background: #1a5c30;
+  transition: height 0.12s ease;
+  min-height: 4px;
+}
+
+.rec-btn-grabar {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: #1a5c30;
+  border: none;
+  color: white;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform 0.1s;
+  box-shadow: 0 4px 24px rgba(26,92,48,0.30);
+  margin: 0 auto;
+}
+.rec-btn-grabar:active { transform: scale(0.95); }
+.rec-btn-grabar-icono { font-size: 36px; }
+
+.rec-btn-detener {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: #111827;
+  border: 4px solid #ffffff;
+  color: white;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform 0.1s;
+  animation: record-pulse 2s infinite;
+  margin: 0 auto;
+}
+@keyframes record-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(220,38,38,0.40); }
+  70%  { box-shadow: 0 0 0 20px rgba(220,38,38,0); }
+  100% { box-shadow: 0 0 0 0 rgba(220,38,38,0); }
+}
+.rec-btn-detener-cuadrado {
+  width: 32px;
+  height: 32px;
+  background: #ffffff;
+  border-radius: 4px;
+}
+.rec-btn-detener:active { transform: scale(0.95); }
+
+/* Item de recorrida grabada */
+.recorrida-item-stitch {
+  background: #f9fafb;
+  border: 1px solid #f3f4f6;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.recorrida-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.recorrida-fecha-stitch {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111827;
+}
+.recorrida-badges {
+  display: flex;
+  gap: 6px;
+}
+.recorrida-badge {
+  background: #e5e7eb;
+  color: #374151;
+  border-radius: 99px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.rec-mini-player {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #ffffff;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+}
+.rec-mini-play-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #1a5c30;
+  border: none;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 18px;
+  transition: transform 0.1s;
+}
+.rec-mini-play-btn:active { transform: scale(0.90); }
+.rec-mini-progress {
+  flex: 1;
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 99px;
+  overflow: hidden;
+}
+.rec-mini-progress-fill {
+  height: 100%;
+  background: #1a5c30;
+  border-radius: 99px;
+  width: 0%;
+  transition: width 0.5s;
+}
+.rec-mini-tiempo {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7a6e;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── INICIO ───────────────────────────────── */
+.stat-icono-stitch {
+  width: 32px;
+  height: 32px;
+  background: #e8f5e9;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  margin: 0 auto 8px;
+}
+
+.textarea-stitch {
+  width: 100% !important;
+  background: #f4f6f4 !important;
+  border: none !important;
+  border-radius: 14px !important;
+  padding: 14px 16px !important;
+  font-size: 14px !important;
+  color: #6b7a6e !important;
+  resize: none !important;
+  font-family: 'Inter', sans-serif !important;
+  min-height: 120px;
+  box-sizing: border-box;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+}
+.textarea-stitch:focus {
+  outline: none;
+  box-shadow: inset 0 0 0 2px rgba(26,92,48,0.20);
+}
+
+.btn-guardar-stitch {
+  width: 100%;
+  height: 52px;
+  background: #1a5c30;
+  color: #ffffff;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform 0.1s, background 0.15s;
+  margin-top: 12px;
+  box-shadow: 0 2px 8px rgba(26,92,48,0.20);
+}
+.btn-guardar-stitch:active { transform: scale(0.97); background: #2e7d52; }
+
+/* Rodeo breakdown (inicio) */
+.rodeo-breakdown-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  font-weight: 600;
+  font-size: 14px;
+}
+.rodeo-breakdown-p { background: #e8f5e9; color: #1a5c30; }
+.rodeo-breakdown-v { background: #fff7ed; color: #c2410c; }
+.rodeo-breakdown-i { background: #eff6ff; color: #1d4ed8; }
+.rodeo-breakdown-num {
+  font-family: 'Manrope', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}

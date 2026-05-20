@@ -48,25 +48,29 @@
       <!-- Stats del día -->
       <div class="stats-grid">
         <div class="stat-card">
+          <div class="stat-icono-stitch">📄</div>
           <div class="stat-numero" id="stat-registros">0</div>
           <div class="stat-label">Registros hoy</div>
         </div>
         <div class="stat-card">
+          <div class="stat-icono-stitch">🐮</div>
           <div class="stat-numero" id="stat-animales">0</div>
           <div class="stat-label">Animales distintos</div>
         </div>
         <div class="stat-card">
+          <div class="stat-icono-stitch">🔄</div>
           <div class="stat-numero" id="stat-pendientes">0</div>
           <div class="stat-label">Por sincronizar</div>
         </div>
         <div class="stat-card">
+          <div class="stat-icono-stitch">🔧</div>
           <div class="stat-numero" id="stat-peso-prom">—</div>
           <div class="stat-label">Peso promedio</div>
         </div>
       </div>
 
       <!-- Stats del rodeo (desde Sheets) -->
-      <div class="card" id="card-rodeo-stats" style="padding: 14px 16px;">
+      <div class="card card-stitch" id="card-rodeo-stats" style="padding: 14px 16px;">
         <div class="card-titulo">🐄 Rodeo</div>
         <div id="rodeo-stats-inicio" style="margin-top: 8px;">
           <p class="sin-historial" style="font-size:13px;">Cargando...</p>
@@ -78,11 +82,11 @@
         <div class="card-titulo">📝 Novedades del día</div>
         <textarea
           id="comentario-dia"
-          class="campo-textarea"
+          class="campo-textarea textarea-stitch"
           placeholder="Ej: Se peló el potrero norte. Animal 3421 con cojera. Llegó el veterinario a las 10hs..."
           rows="4"
         ></textarea>
-        <button class="btn btn-secundario" id="btn-guardar-comentario" style="margin-top: 8px; min-height: 48px; font-size: 16px;">
+        <button class="btn btn-secundario btn-guardar-stitch" id="btn-guardar-comentario" style="margin-top: 8px;">
           💾 Guardar novedad
         </button>
       </div>
@@ -144,16 +148,35 @@
     <section class="tab-panel oculto" id="tab-recorrida">
 
       <!-- Grabar -->
-      <div class="card recorrida-card">
-        <div class="card-titulo">🎙 Recorrida del día</div>
+      <div class="card card-stitch rec-card-principal recorrida-card">
+        <div class="rec-card-header">
+          <div class="rec-card-titulo">🎙 Recorrida del día</div>
+          <div class="rec-chip-grabando" id="rec-chip-grabando" style="display:none">
+            <div class="rec-chip-grabando-dot"></div> GRABANDO
+          </div>
+        </div>
 
         <!-- Estado del micrófono -->
         <div class="rec-estado" id="rec-estado">Listo para grabar</div>
-        <div class="rec-timer" id="rec-timer">0:00</div>
+        <div class="rec-timer rec-timer-stitch" id="rec-timer">0:00</div>
+
+        <!-- Waveform visual -->
+        <div class="rec-waveform" id="rec-waveform">
+          <div class="rec-wave-bar" style="height:8px"></div>
+          <div class="rec-wave-bar" style="height:20px"></div>
+          <div class="rec-wave-bar" style="height:32px"></div>
+          <div class="rec-wave-bar" style="height:16px"></div>
+          <div class="rec-wave-bar" style="height:40px"></div>
+          <div class="rec-wave-bar" style="height:24px"></div>
+          <div class="rec-wave-bar" style="height:12px"></div>
+          <div class="rec-wave-bar" style="height:36px"></div>
+          <div class="rec-wave-bar" style="height:28px"></div>
+          <div class="rec-wave-bar" style="height:16px"></div>
+        </div>
 
         <!-- Botón principal de grabación -->
-        <button class="btn-rec" id="btn-rec">
-          <span class="btn-rec-icono" id="btn-rec-icono">🎙</span>
+        <button class="btn-rec rec-btn-grabar" id="btn-rec">
+          <span class="btn-rec-icono rec-btn-grabar-icono" id="btn-rec-icono">🎙</span>
           <span id="btn-rec-texto">Iniciar recorrida</span>
         </button>
 
@@ -175,8 +198,11 @@
       </div>
 
       <!-- Historial de recorridas -->
-      <div class="card">
-        <div class="card-titulo">📼 Recorridas grabadas</div>
+      <div class="card card-stitch">
+        <div class="card-section-header">
+          <span class="card-section-icono">📼</span>
+          <h2 class="card-section-titulo">Recorridas grabadas</h2>
+        </div>
         <div id="lista-recorridas">
           <p class="sin-historial">Sin recorridas grabadas</p>
         </div>
@@ -286,22 +312,28 @@
     <!-- ──────────── TAB: BASTÓN ──────────── -->
     <section class="tab-panel oculto" id="tab-baston">
 
-      <!-- Bluetooth -->
-      <div class="card">
-        <div class="card-titulo">📡 Bastón Lector BLE</div>
-        <button class="btn btn-bluetooth" id="btn-bluetooth">
+      <!-- Card BLE -->
+      <div class="card card-stitch">
+        <div class="card-section-header">
+          <span class="card-section-icono">🟢</span>
+          <h2 class="card-section-titulo">Bastón Lector BLE</h2>
+        </div>
+        <button class="btn btn-bluetooth btn-stitch-primario" id="btn-bluetooth">
           📡 Conectar Bastón
         </button>
-        <button class="btn btn-simular" id="btn-simular">
-          ⌨ Simular lectura de caravana (dev)
+        <button class="btn btn-simular btn-stitch-secundario" id="btn-simular">
+          ⌨ Simular lectura (dev)
         </button>
       </div>
 
-      <!-- Caravana leída -->
-      <div class="card">
-        <div class="card-titulo">🏷 Caravana del Animal</div>
-        <div class="grupo-campo">
-          <label class="campo-label" for="input-caravana">Número de Caravana</label>
+      <!-- Card Caravana -->
+      <div class="card card-stitch">
+        <div class="card-section-header">
+          <span class="card-section-icono">🏷</span>
+          <h2 class="card-section-titulo">Caravana del Animal</h2>
+        </div>
+        <div class="baston-caravana-display">
+          <label class="campo-label">Número de Caravana</label>
           <input
             type="text"
             id="input-caravana"
@@ -319,16 +351,19 @@
         </div>
       </div>
 
-      <!-- Datos de manga -->
-      <div class="card">
-        <div class="card-titulo">⚖ Datos de Manga</div>
+      <!-- Card Datos de Manga -->
+      <div class="card card-stitch">
+        <div class="card-section-header">
+          <span class="card-section-icono">⚖️</span>
+          <h2 class="card-section-titulo">Datos de Manga</h2>
+        </div>
 
         <div class="grupo-campo">
           <label class="campo-label" for="input-peso">Peso</label>
           <input
             type="number"
             id="input-peso"
-            class="campo-input"
+            class="campo-input peso-stitch"
             placeholder="0"
             min="1" max="1500" step="0.5"
             inputmode="decimal"
@@ -364,12 +399,11 @@
       </div>
 
       <!-- Acciones -->
-      <div class="card">
-        <button class="btn btn-primario" id="btn-guardar">
+      <div class="card card-stitch">
+        <button class="btn btn-guardar-grande" id="btn-guardar">
           💾 GUARDAR
         </button>
-        <div style="height: 10px;"></div>
-        <button class="btn btn-secundario" id="btn-limpiar">
+        <button class="btn btn-stitch-secundario" id="btn-limpiar">
           🔄 Limpiar / Siguiente animal
         </button>
       </div>
@@ -381,11 +415,11 @@
     <section class="tab-panel oculto" id="tab-rodeo">
 
       <!-- Stats + barra de filtros avanzados -->
-      <div class="card rodeo-filtros-card" style="padding: 12px 16px;">
+      <div class="card rodeo-filtros-card filtros-stitch-card" style="padding: 12px 16px;">
 
         <!-- Resumen: total + chips activos -->
         <div class="rodeo-filtros-top">
-          <div class="rodeo-stat-total" id="rodeo-oficial-resumen">Cargando...</div>
+          <div class="rodeo-stat-total rodeo-total-stitch" id="rodeo-oficial-resumen">Cargando...</div>
           <div class="rodeo-filtros-acciones">
             <button class="rodeo-btn-filtros" id="btn-toggle-filtros">
               ⚙ Filtros <span id="filtros-badge" class="filtros-badge" style="display:none">0</span>
@@ -473,13 +507,13 @@
         </div><!-- /panel-filtros -->
 
         <!-- Buscador siempre visible -->
-        <div style="margin-top: 10px;">
+        <div class="search-wrapper">
+          <span class="search-icon">🔍</span>
           <input
             type="text"
             id="rodeo-of-buscar"
-            class="campo-input"
-            placeholder="🔍  Buscar por botón, caravana..."
-            style="min-height: 48px; font-size: 16px;"
+            class="campo-input search-input-stitch"
+            placeholder="Buscar por botón, caravana..."
             autocomplete="off"
           >
         </div>
