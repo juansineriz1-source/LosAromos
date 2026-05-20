@@ -3,13 +3,15 @@
  *
  * GET /api/historial-vacunas?boton=XXX&caravana=YYY
  *
- * Lee TODAS las filas del sheet para un animal (sin deduplicar)
- * y devuelve el historial completo de vacunaciones.
+ * Lee la hoja "Vacunas" (log de aplicaciones) y devuelve el historial
+ * de vacunaciones para un animal específico.
+ *
+ * Columnas Vacunas:
+ *   A=Fecha  B=Botón  C=Caravana  D=Vacuna  E=Comentario  F=Usuario
  */
 
 const SHEET_ID              = process.env.GOOGLE_SHEET_ID || '1tEncjxGzwE-7AZLnlmShSSM3lCaNFQR9DNn459AWhSg';
 const SERVICE_ACCOUNT_EMAIL = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || 'bot-n8n@custom-unison-403623.iam.gserviceaccount.com';
-const NOMBRE_HOJA           = 'LosAromos';
 
 async function obtenerAccessToken() {
   const privateKey = (process.env.GOOGLE_PRIVATE_KEY || '').replace(/\\n/g, '\n');
@@ -43,33 +45,44 @@ export default async function handler(req, res) {
 
   try {
     const token = await obtenerAccessToken();
-    const url   = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(NOMBRE_HOJA + '!A:R')}`;
+    const url   = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent('Vacunas!A:F')}`;
     const resp  = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
     if (!resp.ok) throw new Error(`Sheets error: ${resp.status}`);
     const filas = (await resp.json()).values || [];
 
-    // Filtrar filas que pertenecen a este animal y tienen alguna vacuna
+    // Filtrar por botón o caravana del animal
     const historial = filas.slice(1)
       .filter(f => {
-        const fBoton    = (f[0] || '').trim().toLowerCase();
-        const fCaravana = (f[1] || '').trim().toLowerCase();
-        const coincide  = (boton    && fBoton    === boton.trim().toLowerCase()) ||
-                          (caravana && fCaravana === caravana.trim().toLowerCase());
-        const tieneVacuna = f[11] || f[12] || f[13] || f[14] || f[15] || f[16];
-        return coincide && tieneVacuna;
+        const fBoton    = (f[1] || '').trim().toLowerCase();
+        const fCaravana = (f[2] || '').trim().toLowerCase();
+        return (boton    && fBoton    === boton.trim().toLowerCase()) ||
+               (caravana && fCaravana === caravana.trim().toLowerCase());
       })
       .map(f => ({
-        fecha_vacuna:             f[10] || '',
-        vac_aftosa:               f[11] || '',
-        vac_brucelosis:           f[12] || '',
-        vac_carbunclo:            f[13] || '',
-        vac_mancha:               f[14] || '',
-        vac_queratoconjuntivitis: f[15] || '',
-        vac_otras:                f[16] || '',
-        vac_comentario_otras:     f[17] || '',
+        fecha:          f[0] || '',
+        vacuna:         f[3] || '',
+        comentario:     f[4] || '',
+        usuario:        f[5] || '',
+        // mapeamos vacuna → campo del animal para que el frontend sepa a qué chip corresponde
+        campo_key: (() => {
+          const v = (f[3] || '').toLowerCase().replace(/\s/g,'');
+          const MAP = {
+            aftosa: 'vac_aftosa', brucelosis: 'vac_brucelosis',
+            carbunclo: 'vac_carbunclo', mancha: 'vac_mancha',
+            queratoconjuntivitis: 'vac_queratoconjuntivitis', otras: 'vac_otras',
+          };
+          return MAP[v] || v;
+        })(),
       }));
 
-    return res.status(200).json({ historial });
+    // Agrupar por vacuna (más fácil para el frontend)
+    const porVacuna = {};
+    historial.forEach(h => {
+      if (!porVacuna[h.campo_key]) porVacuna[h.campo_key] = [];
+      porVacuna[h.campo_key].push({ fecha: h.fecha, comentario: h.comentario, usuario: h.usuario });
+    });
+
+    return res.status(200).json({ historial, porVacuna });
   } catch (err) {
     console.error('[historial-vacunas]', err.message);
     return res.status(500).json({ error: err.message });

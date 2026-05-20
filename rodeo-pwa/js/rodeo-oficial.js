@@ -636,6 +636,9 @@ async function guardarEdicionAnimal(animal_viejo, cerrarModal) {
   btn.textContent = '⏳ Guardando...';
 
   const payload = {
+    // Identificación del animal en el maestro
+    row_index:      animal_viejo._rowIndex,
+    // Nuevos valores
     boton:          document.getElementById('edit-boton').value.trim(),
     caravana:       document.getElementById('edit-caravana').value.trim(),
     estado:         document.getElementById('edit-estado').value,
@@ -645,11 +648,22 @@ async function guardarEdicionAnimal(animal_viejo, cerrarModal) {
     color:          document.getElementById('edit-color').value,
     comentario:     document.getElementById('edit-comentario').value.trim(),
     usuario:        localStorage.getItem('rodeo_operador') || 'Admin',
-    // Historial columnas L-O
-    boton_viejo:    animal_viejo.boton,
-    caravana_vieja: animal_viejo.caravana,
-    estado_viejo:   animal_viejo.estado,
-    tipo_viejo:     animal_viejo.tipo,
+    // Vacunas — se preservan tal cual
+    fecha_vacuna:             animal_viejo.fecha_vacuna             || '',
+    vac_aftosa:               animal_viejo.vac_aftosa               || '',
+    vac_brucelosis:           animal_viejo.vac_brucelosis           || '',
+    vac_carbunclo:            animal_viejo.vac_carbunclo            || '',
+    vac_mancha:               animal_viejo.vac_mancha               || '',
+    vac_queratoconjuntivitis: animal_viejo.vac_queratoconjuntivitis || '',
+    vac_otras:                animal_viejo.vac_otras                || '',
+    vac_comentario_otras:     animal_viejo.vac_comentario_otras     || '',
+    // Valores anteriores para el Historial
+    boton_viejo:       animal_viejo.boton,
+    caravana_vieja:    animal_viejo.caravana,
+    estado_viejo:      animal_viejo.estado,
+    tipo_viejo:        animal_viejo.tipo,
+    color_viejo:       animal_viejo.color,
+    comentario_viejo:  animal_viejo.comentario,
   };
 
   if (!payload.boton && !payload.caravana) {
@@ -762,9 +776,10 @@ function abrirModalAgregarAnimal() {
       const hora  = new Date().toLocaleTimeString('es-AR', { timeZone: TZ, hour: '2-digit', minute: '2-digit' });
 
       const payload = {
+        modo: 'nuevo',   // alta nueva → el API hace APPEND en LosAromos
         boton, caravana, estado, tipo, color, comentario,
         fecha, hora,
-        operador: localStorage.getItem('rodeo_operador') || 'Admin',
+        usuario: localStorage.getItem('rodeo_operador') || 'Admin',
         tiene_boton:    boton    ? 'si' : 'no',
         tiene_caravana: caravana ? 'si' : 'no',
       };
