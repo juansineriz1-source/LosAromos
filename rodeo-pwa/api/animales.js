@@ -9,8 +9,9 @@
  * Columnas:
  *   A=Botón  B=Caravana  C=Estado  D=Tiene_caravana  E=Tiene_botón
  *   F=TIPO   G=Color     H=Fecha   I=Comentario       J=Usuario
- *   K=(vacía)
- *   L=Botón_viejo  M=Caravana_vieja  N=Estado_viejo  O=TIPO_viejo
+ *   K=FechaVacuna  L=Aftosa  M=Brucelosis  N=Carbunclo  O=Mancha
+ *   P=Queratoconjuntivitis  Q=Otras
+ *   S=Botón_viejo  T=Caravana_vieja  U=Estado_viejo  V=TIPO_viejo
  */
 
 const SHEET_ID             = process.env.GOOGLE_SHEET_ID || '1tEncjxGzwE-7AZLnlmShSSM3lCaNFQR9DNn459AWhSg';
@@ -44,7 +45,7 @@ async function obtenerAccessToken(scope = 'https://www.googleapis.com/auth/sprea
 
 // ─── Leer hoja ────────────────────────────────────────────────────────────────
 async function leerHoja(token) {
-  const url  = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(NOMBRE_HOJA + '!A:O')}`;
+  const url  = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(NOMBRE_HOJA + '!A:V')}`;  // A→V cubre vacunas + historico
   const resp = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
   if (!resp.ok) throw new Error(`Sheets error: ${resp.status}`);
   return (await resp.json()).values || [];
@@ -64,11 +65,19 @@ function parsearFila(fila, idx) {
     fecha:           fila[7]  || '',
     comentario:      fila[8]  || '',
     usuario:         fila[9]  || '',
-    // historico (columnas L-O)
-    boton_viejo:     fila[11] || '',
-    caravana_vieja:  fila[12] || '',
-    estado_viejo:    fila[13] || '',
-    tipo_viejo:      fila[14] || '',
+    // vacunas (columnas K-Q)
+    fecha_vacuna:              fila[10] || '',
+    vac_aftosa:                fila[11] || '',
+    vac_brucelosis:            fila[12] || '',
+    vac_carbunclo:             fila[13] || '',
+    vac_mancha:                fila[14] || '',
+    vac_queratoconjuntivitis:  fila[15] || '',
+    vac_otras:                 fila[16] || '',
+    // historico (columnas S-V, índices 18-21)
+    boton_viejo:     fila[18] || '',
+    caravana_vieja:  fila[19] || '',
+    estado_viejo:    fila[20] || '',
+    tipo_viejo:      fila[21] || '',
   };
 }
 

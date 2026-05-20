@@ -12,8 +12,9 @@
  *   A=Botón nuevo    B=Caravana nueva    C=Estado nuevo
  *   D=Tiene_caravana E=Tiene_botón      F=TIPO nuevo
  *   G=Color          H=Fecha_hoy        I=Comentario
- *   J=Usuario        K=(vacío)
- *   L=Botón viejo    M=Caravana vieja   N=Estado viejo   O=TIPO viejo
+ *   J=Usuario        K=Fecha_vacuna (se preserva) L=Aftosa  M=Brucelosis
+ *   N=Carbunclo  O=Mancha  P=Queratoconjuntivitis  Q=Otras
+ *   R=(vacía)   S=Botón viejo  T=Caravana vieja  U=Estado viejo  V=TIPO viejo
  */
 
 const SHEET_ID             = process.env.GOOGLE_SHEET_ID || '1tEncjxGzwE-7AZLnlmShSSM3lCaNFQR9DNn459AWhSg';
@@ -73,10 +74,13 @@ export default async function handler(req, res) {
   }
 
   const {
-    // Nuevos valores
+    // Nuevos valores de identidad/estado
     boton, caravana, estado, tiene_caravana, tiene_boton,
     tipo, color, comentario, usuario,
-    // Valores anteriores (para historial en cols L-O)
+    // Vacunas (se preservan desde el animal actual)
+    fecha_vacuna, vac_aftosa, vac_brucelosis, vac_carbunclo,
+    vac_mancha, vac_queratoconjuntivitis, vac_otras,
+    // Valores anteriores (para historial en cols S-V)
     boton_viejo, caravana_vieja, estado_viejo, tipo_viejo,
   } = body;
 
@@ -88,7 +92,7 @@ export default async function handler(req, res) {
   const hoy = new Date();
   const fechaHoy = `${hoy.getDate().toString().padStart(2,'0')}/${(hoy.getMonth()+1).toString().padStart(2,'0')}/${hoy.getFullYear()}`;
 
-  // Nueva fila: A-J + K vacío + L-O (histórico)
+  // Nueva fila: A-J + vacunas K-Q + R vacío + S-V histórico
   const nuevaFila = [
     boton           || '',   // A — Botón nuevo
     caravana        || '',   // B — Caravana nueva
@@ -100,11 +104,18 @@ export default async function handler(req, res) {
     fechaHoy,               // H — Fecha de actualización
     comentario      || '',   // I — Comentario
     usuario         || '',   // J — Usuario que actualizó
-    '',                     // K — (vacío, igual que original)
-    boton_viejo     || '',   // L — Botón viejo
-    caravana_vieja  || '',   // M — Caravana vieja
-    estado_viejo    || '',   // N — Estado viejo
-    tipo_viejo      || '',   // O — TIPO viejo
+    fecha_vacuna              || '',   // K — Fecha vacuna (preservada)
+    vac_aftosa                || '',   // L — Aftosa
+    vac_brucelosis            || '',   // M — Brucelosis
+    vac_carbunclo             || '',   // N — Carbunclo
+    vac_mancha                || '',   // O — Mancha
+    vac_queratoconjuntivitis  || '',   // P — Queratoconjuntivitis
+    vac_otras                 || '',   // Q — Otras
+    '',                     // R — (vacío)
+    boton_viejo     || '',   // S — Botón viejo
+    caravana_vieja  || '',   // T — Caravana vieja
+    estado_viejo    || '',   // U — Estado viejo
+    tipo_viejo      || '',   // V — TIPO viejo
   ];
 
   try {
