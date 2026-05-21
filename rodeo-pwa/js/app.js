@@ -389,40 +389,47 @@ async function cargarStatsRodeoInicio() {
     if (!resp.ok) throw new Error('no disponible');
     const { animales } = await resp.json();
 
-    // Conteos por estado
-    const porEstado = { P: 0, V: 0, I: 0 };
-    animales.forEach(a => { if (porEstado[a.estado] !== undefined) porEstado[a.estado]++; });
+    // Conteos por tipo — mapeamos claves conocidas a nombres legibles
+    const TIPO_LABELS = {
+      'V':   'Vacas',
+      'VQ':  'Vaquillonas',
+      'TN':  'Terneros',
+      'T':   'Toros',
+      'TH':  'Toritos',
+      'VA':  'Vaquillonas A',
+    };
 
-    // Conteos por tipo
     const porTipo = {};
-    animales.forEach(a => { if (a.tipo) porTipo[a.tipo] = (porTipo[a.tipo] || 0) + 1; });
+    animales.forEach(a => {
+      if (!a.tipo) return;
+      const clave = a.tipo.toUpperCase().trim();
+      porTipo[clave] = (porTipo[clave] || 0) + 1;
+    });
+
+    // Ordenar de mayor a menor
     const tiposOrdenados = Object.entries(porTipo).sort((a, b) => b[1] - a[1]);
 
-    const ESTADO_LABELS = { P: 'Preñadas', V: 'Vacías', I: 'Inseminadas' };
-    const ESTADO_COLORS = { P: '#1b5e20', V: '#e65100', I: '#0d47a1' };
+    const tipoHTML = tiposOrdenados.map(([clave, n]) => `
+      <div class="inicio-tipo-card">
+        <div class="inicio-tipo-label">${TIPO_LABELS[clave] || clave}</div>
+        <div class="inicio-tipo-numero">${n}</div>
+      </div>
+    `).join('');
 
     contenedor.innerHTML = `
-      <div style="margin-bottom: 10px;">
-        <div style="font-size:12px; font-weight:600; color:var(--texto-secundario); text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px;">Total: <b style="color:var(--texto);font-size:15px;">${animales.length}</b></div>
-        <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;">
-          ${Object.entries(porEstado).map(([e, n]) => `
-            <div style="flex:1; min-width:80px; background:#f8f9fa; border-radius:10px; padding:8px 10px; text-align:center; border-left:3px solid ${ESTADO_COLORS[e]};">
-              <div style="font-size:20px; font-weight:800; color:${ESTADO_COLORS[e]};">${n}</div>
-              <div style="font-size:11px; color:var(--texto-secundario); font-weight:600;">${ESTADO_LABELS[e]}</div>
-            </div>
-          `).join('')}
-        </div>
-        <div style="display:flex; flex-wrap:wrap; gap:5px;">
-          ${tiposOrdenados.map(([t, n]) => `
-            <span style="background:var(--verde-claro);color:var(--verde-oscuro);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:700;">${t} <b>${n}</b></span>
-          `).join('')}
-        </div>
+      <div class="inicio-poblacion-wrap">
+        <div class="inicio-poblacion-label">POBLACIÓN TOTAL</div>
+        <div class="inicio-poblacion-total">${animales.length} animales</div>
+      </div>
+      <div class="inicio-tipos-grid">
+        ${tipoHTML}
       </div>
     `;
   } catch {
     contenedor.innerHTML = '<p class="sin-historial" style="font-size:12px;">Sin conexión al rodeo</p>';
   }
 }
+
 
 async function cargarListaNovedades() {
   const novedades = await obtenerNovedades();

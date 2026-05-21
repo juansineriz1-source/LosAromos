@@ -3588,3 +3588,60 @@ html { scroll-behavior: smooth; }
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
+
+/* ─── INICIO: Indicadores de población por tipo ─────────────────────────────── */
+
+.inicio-poblacion-wrap {
+  margin-bottom: 16px;
+}
+
+.inicio-poblacion-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #6b7a6e;
+  margin-bottom: 4px;
+}
+
+.inicio-poblacion-total {
+  font-family: 'Manrope', sans-serif;
+  font-size: 32px;
+  font-weight: 800;
+  color: #1a5c30;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+/* Grid 2 columnas — como la imagen */
+.inicio-tipos-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.inicio-tipo-card {
+  background: #f4f6f4;
+  border-radius: 14px;
+  padding: 14px 16px;
+  border: 1px solid rgba(229,231,235,0.60);
+}
+
+.inicio-tipo-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #6b7a6e;
+  margin-bottom: 6px;
+}
+
+.inicio-tipo-numero {
+  font-family: 'Manrope', sans-serif;
+  font-size: 36px;
+  font-weight: 800;
+  color: #1a5c30;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
