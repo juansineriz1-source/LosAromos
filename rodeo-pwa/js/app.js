@@ -125,23 +125,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-// ─── Pantalla de login (diseño Stitch Pro — usuarios desde Sheets) ────────────
+// ─── Pantalla de login (diseño Stitch Pro — solo input de nombre) ─────────────
 function mostrarPantallaLogin() {
   return new Promise(resolve => {
     const overlay = document.createElement('div');
     overlay.id = 'login-overlay';
 
-    // Generar botones desde USUARIOS_LISTA (ya cargado o fallback)
-    const botonesHTML = USUARIOS_LISTA.map(u => `
-      <button class="login-usuario-btn" data-nombre="${u.nombre}" data-rol="${u.rol}">
-        ${u.nombre}
-      </button>
-    `).join('');
-
     overlay.innerHTML = `
       <div class="login-screen">
 
-        <!-- Hero background -->
+        <!-- Hero background: vaca colorada -->
         <div class="login-hero-bg">
           <div class="login-hero-img-wrap">
             <img
@@ -164,27 +157,35 @@ function mostrarPantallaLogin() {
             <p class="login-subtitulo-app">Los Aromos • Gestión Ganadera</p>
           </div>
 
-          <!-- Card de selección -->
+          <!-- Card con input -->
           <div class="login-glass-card">
-            <h2 class="login-card-titulo">Seleccionar Perfil</h2>
-
-            <!-- Grid dinámico de usuarios desde Sheets -->
-            <div class="login-usuarios-grid" id="login-usuarios-grid">
-              ${botonesHTML}
-            </div>
+            <form class="login-form" onsubmit="event.preventDefault();">
+              <input
+                type="text"
+                id="login-input"
+                class="login-input"
+                placeholder="Nombre del operador"
+                autocomplete="off"
+                autocorrect="off"
+                spellcheck="false"
+                autocapitalize="words"
+              >
+              <button class="login-btn-entrar" id="login-btn-entrar" type="submit">
+                Ingresar <span class="login-arrow">→</span>
+              </button>
+            </form>
           </div>
 
-          <p class="login-footer-texto">Los Aromos • Sistema de Gestión Rural</p>
+          <p class="login-footer-texto">Sistema Profesional de Administración Rural</p>
         </main>
       </div>
     `;
     document.body.appendChild(overlay);
 
-    const entrar = (nombre, rol) => {
-      // Si viene el rol directo del botón, lo usamos; si no, buscamos en el mapa
-      const usuario = rol
-        ? { display: nombre, rol }
-        : detectarRol(nombre);
+    const entrar = nombre => {
+      const n = (nombre || '').trim();
+      if (!n) return;
+      const usuario = detectarRol(n);
       estado.operador = usuario.display;
       estado.rol      = usuario.rol;
       localStorage.setItem('rodeo_operador', usuario.display);
@@ -201,14 +202,20 @@ function mostrarPantallaLogin() {
       }, 350);
     };
 
-    // Tap en cualquier botón de usuario
-    overlay.querySelectorAll('.login-usuario-btn').forEach(btn => {
-      btn.addEventListener('click', () =>
-        entrar(btn.dataset.nombre, btn.dataset.rol)
-      );
+    const input  = overlay.querySelector('#login-input');
+    const btnEnt = overlay.querySelector('#login-btn-entrar');
+
+    btnEnt.addEventListener('click', () => entrar(input.value));
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') entrar(input.value);
     });
+
+    // Focus automático al aparecer
+    setTimeout(() => input.focus(), 400);
   });
 }
+
+
 
 // ─── Aplicar rol: muestra/oculta tabs según permisos ─────────────────────────
 function aplicarRol(rol) {

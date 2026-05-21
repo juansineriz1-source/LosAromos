@@ -220,7 +220,7 @@ function renderizarRodeo(animales, total) {
       <div class="rodeo-of-item rodeo-of-item-tap" data-idx="${idx}" onclick="abrirDetalleAnimal(${idx})">
         <div class="rodeo-of-ids">
           <div class="rodeo-of-ids-row">
-            ${a.boton    ? `<span class="rodeo-of-boton">🔖 ${a.boton}</span>`    : ''}
+            ${a.boton    ? `<span class="rodeo-of-boton">🐄 ${a.boton}</span>`    : ''}
             ${a.caravana ? `<span class="rodeo-of-caravana">🏷 ${a.caravana}</span>` : ''}
           </div>
           <div class="rodeo-of-badges-row">
