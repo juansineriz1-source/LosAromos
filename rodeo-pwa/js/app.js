@@ -1353,7 +1353,7 @@ function generarPDFManualVacunacion() {
 
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(9);
-    doc.setTextColor(esO ? ...ROJO : ...VERDE);
+    if (esO) doc.setTextColor(...ROJO); else doc.setTextColor(...VERDE);
     doc.text(row.mes, 22, y + 6);
 
     doc.setTextColor(...NEGRO);
@@ -1437,7 +1437,7 @@ function generarPDFManualVacunacion() {
       doc.text(row[0], 22, y + 4);
       doc.setFont('helvetica', 'normal');
       doc.text(row[1], 56, y + 4);
-      doc.setTextColor(esO ? ...ROJO : 100, esO ? ...[] : 130, esO ? ...[] : 100);
+      if (esO) doc.setTextColor(...ROJO); else doc.setTextColor(100, 130, 100);
       if (!esO) doc.setTextColor(100, 130, 100);
       doc.setFont('helvetica', 'bold');
       doc.text(row[2], W - 36, y + 4, { align: 'right' });
