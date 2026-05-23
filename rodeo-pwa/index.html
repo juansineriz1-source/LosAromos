@@ -646,7 +646,12 @@
     <div class="vac-modal-card">
       <div class="vac-modal-header">
         <h2>💉 Manual de Vacunación</h2>
-        <button id="btn-cerrar-modal-vac">✕</button>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button id="btn-descargar-pdf-vac" class="vac-btn-pdf" title="Descargar PDF">
+            📄 PDF
+          </button>
+          <button id="btn-cerrar-modal-vac">✕</button>
+        </div>
       </div>
       <div class="vac-modal-body" id="vac-modal-body-contenido">
         <!-- Se llena dinámicamente -->
@@ -698,6 +703,8 @@
   </div>
 
   <!-- ═══════════════════════ SCRIPTS ══════════════════════════════ -->
+  <!-- jsPDF para generacion de PDF del manual -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script type="module" src="/js/app.js"></script>
 
 </body>

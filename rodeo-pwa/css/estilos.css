@@ -3947,3 +3947,26 @@ html { scroll-behavior: smooth; }
 }
 .vac-badge-obligatoria { background: #ffebee; color: #b71c1c; }
 .vac-badge-recomendada { background: #fff3e0; color: #e65100; }
+
+/* PDF download button */
+.vac-btn-pdf {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1.5px solid #1a5c30;
+  background: #fff;
+  color: #1a5c30;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  transition: background .15s, color .15s;
+}
+.vac-btn-pdf:active {
+  background: #1a5c30;
+  color: #fff;
+}

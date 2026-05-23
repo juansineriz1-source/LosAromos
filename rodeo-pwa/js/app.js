@@ -1187,3 +1187,434 @@ function construirManualHTML() {
       </div>
     </div>`;
 }
+
+// ──────────────────────────────────────────────────────────────────────────────
+// GENERACION DE PDF — Manual de Vacunacion Bovina
+// ──────────────────────────────────────────────────────────────────────────────
+function generarPDFManualVacunacion() {
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    mostrarToast('Cargando PDF... intenta en un momento');
+    return;
+  }
+  const { jsPDF } = window.jspdf;
+
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const W = 210;
+
+  // ─── Paleta ───
+  const VERDE   = [26, 92, 48];
+  const VERDE_C = [232, 245, 233];
+  const ROJO    = [183, 28, 28];
+  const NARANJA = [230, 81, 0];
+  const GRIS    = [107, 122, 110];
+  const NEGRO   = [17, 24, 39];
+
+  let y = 0;
+
+  // ─── PAGINA 1 — Portada ────────────────────────────────────────
+  doc.setFillColor(...VERDE);
+  doc.rect(0, 0, W, 65, 'F');
+
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(22);
+  doc.text('Manual de Vacunacion Bovina', 18, 28);
+
+  doc.setFontSize(13);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Los Aromos \u2014 Gestion Ganadera', 18, 40);
+
+  doc.setFontSize(10);
+  doc.text('Version Mayo 2026 \u00b7 Buenos Aires / Pampa Huemeda', 18, 52);
+
+  doc.setFillColor(255, 255, 255);
+  doc.setTextColor(...VERDE);
+  doc.roundedRect(18, 57, 50, 8, 2, 2, 'F');
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Basado en SENASA Res. 711/2025', 20, 62.5);
+
+  // Subtitulo
+  y = 78;
+  doc.setTextColor(...GRIS);
+  doc.setFont('helvetica', 'italic');
+  doc.setFontSize(9);
+  doc.text('Basado en normativa SENASA vigente y buenas practicas para la region pampeana bonaerense.', 18, y, { maxWidth: 174 });
+
+  // ─── Seccion: Obligatorias ─────────────────────────────────────
+  y = 92;
+  sectionHeader(doc, 'VACUNAS OBLIGATORIAS', y, VERDE);
+  y += 8;
+
+  const OBLIG = [
+    { nombre: 'Aftosa (Campana 1)', oblig: 'SI \u2014 SENASA', cat: 'Todo el rodeo', frec: 'Anual', nota: 'Registro SIGSA obligatorio. Sin excepcion.' },
+    { nombre: 'Aftosa (Campana 2)', oblig: 'SI \u2014 SENASA', cat: 'Solo terneros/as', frec: 'Anual', nota: 'Desde 2026 solo refuerzo en terneros.' },
+    { nombre: 'Brucelosis \u2014 Cepa 19', oblig: 'SI \u2014 SENASA', cat: 'Solo terneras 3\u20138 meses', frec: 'UNA SOLA VEZ EN LA VIDA', nota: 'Ventana NO recuperable. Vet. autorizado. Caravana oficial.' },
+    { nombre: 'Carbunclo \u2014 Antrax', oblig: 'SI \u2014 Prov. BA', cat: 'Todo >6 meses', frec: 'Anual (Oct\u2013Nov)', nota: 'Zoonosis. Denuncia obligatoria ante SENASA.' },
+  ];
+
+  OBLIG.forEach(v => {
+    if (y > 265) { doc.addPage(); y = 18; }
+    doc.setFillColor(255, 235, 238);
+    doc.roundedRect(18, y, W - 36, 22, 2, 2, 'F');
+    doc.setTextColor(...ROJO);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.text('OBLIGATORIA', W - 36, y + 5, { align: 'right' });
+    doc.setTextColor(...NEGRO);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.text(v.nombre, 22, y + 6);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(...GRIS);
+    doc.text('Cat.: ' + v.cat + ' | Frecuencia: ' + v.frec, 22, y + 12);
+    doc.setTextColor(...NEGRO);
+    doc.text(v.nota, 22, y + 18, { maxWidth: W - 50 });
+    y += 25;
+  });
+
+  // ─── Brucelosis alerta especial ───────────────────────────────
+  if (y > 255) { doc.addPage(); y = 18; }
+  doc.setFillColor(255, 243, 224);
+  doc.roundedRect(18, y, W - 36, 14, 2, 2, 'F');
+  doc.setTextColor(...NARANJA);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.text('IMPORTANTE: La ventana de Brucelosis (3\u20138 meses de edad) NO se puede recuperar.', 22, y + 6, { maxWidth: W - 44 });
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.text('Si la ternera llega a los 8 meses sin vacunar, ya no puede recibir la vacuna oficial. Impacta en comercializacion.', 22, y + 11, { maxWidth: W - 44 });
+  y += 20;
+
+  // ─── Seccion: Recomendadas ─────────────────────────────────────
+  if (y > 240) { doc.addPage(); y = 18; }
+  sectionHeader(doc, 'VACUNAS RECOMENDADAS', y, [100, 130, 100]);
+  y += 8;
+
+  const RECOM = [
+    { nombre: 'Clostridiales', cat: 'Todo el rodeo', frec: '2 dosis + anual', nota: 'Mancha, gangrena, enterotoxemia. No vacunar junto al destete.' },
+    { nombre: 'Diarrea Neonatal (Preparto)', cat: 'Vacas/vaquillonas gestantes', frec: '2 dosis ano 1 + anual', nota: 'Se aplica a la MADRE. Ternero recibe via calostro en primeras 6h.' },
+    { nombre: 'Reproductivas (IBR+DVB+Lepto+Campy)', cat: 'Vacas, vaquillonas, toros', frec: '2 dosis + anual', nota: '60\u201390 dias antes del servicio. Critica para reproductivas.' },
+    { nombre: 'Queratoconjuntivitis', cat: 'Todo el rodeo', frec: '2 dosis + anual', nota: 'Pre-verano (Oct\u2013Nov). Control de moscas complementario.' },
+    { nombre: 'Pasteurella / Mannheimia', cat: 'Terneros bajo estres', frec: '2 dosis + anual', nota: 'Complejo respiratorio bovino. Especialmente destete y feedlot.' },
+  ];
+
+  RECOM.forEach(v => {
+    if (y > 265) { doc.addPage(); y = 18; }
+    doc.setFillColor(...VERDE_C);
+    doc.roundedRect(18, y, W - 36, 20, 2, 2, 'F');
+    doc.setTextColor(100, 130, 100);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.text('Recomendada', W - 36, y + 5, { align: 'right' });
+    doc.setTextColor(...NEGRO);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.text(v.nombre, 22, y + 6);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(...GRIS);
+    doc.text('Cat.: ' + v.cat + ' | Frecuencia: ' + v.frec, 22, y + 11);
+    doc.setTextColor(...NEGRO);
+    doc.text(v.nota, 22, y + 17, { maxWidth: W - 44 });
+    y += 24;
+  });
+
+  // ─── NUEVA PAGINA: Calendario ─────────────────────────────────
+  doc.addPage();
+  y = 18;
+  sectionHeader(doc, 'CALENDARIO ANUAL \u2014 PAMPA HUEMEDA (Servicio Nov\u2013Ene)', y, VERDE);
+  y += 10;
+
+  const CALENDARIO = [
+    { mes: 'Ene\u2013Feb', actividad: 'Pre-parto (8\u00b0 mes)', cat: 'Vacas y vaquillonas gestantes', vac: 'Diarrea Neonatal' },
+    { mes: 'Marzo',    actividad: 'CAMPANA AFTOSA 1', cat: 'TODO EL RODEO', vac: 'AFTOSA \u2014 OBLIGATORIA' },
+    { mes: 'Mar\u2013Abr', actividad: 'Destete', cat: 'Terneros/as', vac: 'Clostridiales 1\u00aa dosis + Queratoconjuntivitis' },
+    { mes: 'Abril',    actividad: '30 dias post-destete', cat: 'Terneros/as', vac: 'Clostridiales 2\u00aa dosis (refuerzo)' },
+    { mes: 'Abr\u2013May', actividad: 'Ventana brucelosis', cat: 'Terneras 3\u20138 meses', vac: 'BRUCELOSIS (Cepa 19) \u2014 OBLIGATORIA' },
+    { mes: 'May\u2013Jun', actividad: 'Pre-servicio', cat: 'Vaquillonas y Toros', vac: 'Reproductivas 1\u00aa dosis' },
+    { mes: 'Junio',    actividad: 'CAMPANA AFTOSA 2', cat: 'Solo terneros/as', vac: 'AFTOSA \u2014 OBLIGATORIA (refuerzo)' },
+    { mes: 'Jun\u2013Jul', actividad: 'Pre-servicio refuerzo', cat: 'Vacas, vaquillonas, toros', vac: 'Reproductivas (anual)' },
+    { mes: 'Julio',    actividad: 'Evaluacion reproductiva', cat: 'Toros', vac: 'Examen andrologico + raspajes venereas' },
+    { mes: 'Oct\u2013Nov', actividad: 'Pre-verano', cat: 'Todo el rodeo >6 meses', vac: 'CARBUNCLO \u2014 OBLIGATORIO Prov. BA' },
+    { mes: 'Oct\u2013Nov', actividad: 'Pre-temporada moscas', cat: 'Terneros y adultos', vac: 'Queratoconjuntivitis (refuerzo anual)' },
+    { mes: 'Nov',      actividad: 'Inicio servicio', cat: '\u2014', vac: '\u2014' },
+    { mes: 'Todo el ano', actividad: 'Ventana brucelosis abierta', cat: 'Terneras que lleguen a 3 meses', vac: 'BRUCELOSIS \u2014 no esperar a la campana' },
+  ];
+
+  const esOblig = txt => txt.includes('OBLIGATOR') || txt.includes('CAMPANA') || txt.includes('BRUCELOSIS');
+
+  CALENDARIO.forEach(row => {
+    if (y > 268) { doc.addPage(); y = 18; }
+    const esO = esOblig(row.vac);
+    doc.setFillColor(esO ? 255 : 244, esO ? 235 : 246, esO ? 238 : 244);
+    doc.roundedRect(18, y, W - 36, 16, 1.5, 1.5, 'F');
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(esO ? ...ROJO : ...VERDE);
+    doc.text(row.mes, 22, y + 6);
+
+    doc.setTextColor(...NEGRO);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8.5);
+    doc.text(row.vac, 22, y + 12, { maxWidth: 120 });
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
+    doc.setTextColor(...GRIS);
+    doc.text(row.cat, W - 36, y + 7, { align: 'right', maxWidth: 60 });
+    doc.text(row.actividad, W - 36, y + 12, { align: 'right', maxWidth: 60 });
+    y += 18;
+  });
+
+  // ─── NUEVA PAGINA: Esquema por categoria ─────────────────────
+  doc.addPage();
+  y = 18;
+  sectionHeader(doc, 'ESQUEMA POR CATEGORIA', y, VERDE);
+  y += 10;
+
+  const CATEGORIAS = [
+    {
+      titulo: 'TERNEROS Y TERNERAS (0 a 12 meses)',
+      rows: [
+        ['Al nacer', 'Calostrado', '\u2014', 'Asegurar calostro en primeras 6h'],
+        ['2\u20133 meses', 'Clostridiales 1\u00aa dosis', 'Recomendada', 'Con refuerzo a las 3\u20134 semanas'],
+        ['3\u20138 meses', 'BRUCELOSIS (solo terneras)', 'OBLIGATORIA', 'Unica vez en la vida. Vet. autorizado.'],
+        ['3\u20134 meses', 'Aftosa (Campana 1 si cae)', 'OBLIGATORIA', ''],
+        ['6\u20138 meses', 'Aftosa Campana 2 (refuerzo)', 'OBLIGATORIA', 'Segun calendario SENASA'],
+        ['Al destete', 'Clostridiales refuerzo', 'Recomendada', 'No vacunar el mismo dia del destete'],
+      ]
+    },
+    {
+      titulo: 'VAQUILLONAS',
+      rows: [
+        ['Pre-servicio', 'IBR + DVB + Leptospira + Campy', 'Recomendada', '60\u201390 dias antes del servicio'],
+        ['Pre-servicio', 'Clostridiales (anual)', 'Recomendada', ''],
+        ['Campana', 'Aftosa', 'OBLIGATORIA', ''],
+        ['Pre-parto', 'Clostridiales + Reproductivas', 'Recomendada', '60\u201330 dias antes del parto'],
+      ]
+    },
+    {
+      titulo: 'VACAS',
+      rows: [
+        ['Ene\u2013Abr', 'Aftosa Campana 1', 'OBLIGATORIA', ''],
+        ['Pre-servicio', 'IBR + DVB + Lepto', 'Recomendada', '60\u201390 dias antes'],
+        ['8\u00b0 mes gestacion', 'Diarrea Neonatal + Clostridiales', 'Recomendada', 'Protege al ternero via calostro'],
+        ['Anual', 'Queratoconjuntivitis', 'Recomendada', 'Si hay historia de brotes'],
+      ]
+    },
+    {
+      titulo: 'TOROS',
+      rows: [
+        ['Campana 1', 'Aftosa', 'OBLIGATORIA', ''],
+        ['60 dias antes del servicio', 'IBR + DVB + Lepto + Campy', 'CRITICA', 'Puede transmitir por semen'],
+        ['60 dias antes del servicio', 'Clostridiales (anual)', 'Recomendada', ''],
+        ['Anual Jul', 'Examen andrologico + raspajes', 'Diagnostico', 'Tricomoniasis y Campylobacter'],
+      ]
+    },
+  ];
+
+  CATEGORIAS.forEach(cat => {
+    if (y > 240) { doc.addPage(); y = 18; }
+    doc.setFillColor(...VERDE);
+    doc.roundedRect(18, y, W - 36, 8, 2, 2, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.text(cat.titulo, 22, y + 5.5);
+    y += 10;
+
+    cat.rows.forEach(row => {
+      if (y > 272) { doc.addPage(); y = 18; }
+      const esO = row[2].includes('OBLIGAT') || row[2].includes('CRIT');
+      doc.setFillColor(esO ? 255 : 249, esO ? 243 : 250, esO ? 224 : 249);
+      doc.rect(18, y, W - 36, 10, 'F');
+      doc.setTextColor(...NEGRO);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.5);
+      doc.text(row[0], 22, y + 4);
+      doc.setFont('helvetica', 'normal');
+      doc.text(row[1], 56, y + 4);
+      doc.setTextColor(esO ? ...ROJO : 100, esO ? ...[] : 130, esO ? ...[] : 100);
+      if (!esO) doc.setTextColor(100, 130, 100);
+      doc.setFont('helvetica', 'bold');
+      doc.text(row[2], W - 36, y + 4, { align: 'right' });
+      if (row[3]) {
+        doc.setTextColor(...GRIS);
+        doc.setFont('helvetica', 'italic');
+        doc.setFontSize(6.5);
+        doc.text(row[3], 22, y + 8.5, { maxWidth: 140 });
+      }
+      y += 11;
+    });
+    y += 4;
+  });
+
+  // ─── NUEVA PAGINA: Antiparasitarios + Reglas ─────────────────
+  doc.addPage();
+  y = 18;
+  sectionHeader(doc, 'ANTIPARASITARIOS \u2014 Complemento del Plan Sanitario', y, [100, 130, 100]);
+  y += 10;
+
+  doc.setFillColor(255, 243, 224);
+  doc.roundedRect(18, y, W - 36, 14, 2, 2, 'F');
+  doc.setTextColor(...NARANJA);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8.5);
+  doc.text('ALERTA INTA 2025\u20132026:', 22, y + 5.5);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(...NEGRO);
+  doc.text('Resistencia documentada a ivermectina y doramectina. No desparasitar de rutina sin diagnostico previo (HPG).', 22, y + 11, { maxWidth: W - 44 });
+  y += 18;
+
+  const ANTIPAR = [
+    ['Avermectinas (ivermectina, doramectina)', 'Segun HPG', 'Riesgo de resistencia \u2014 no usar rutinariamente'],
+    ['Levamisol', 'Segun HPG', 'Mantiene eficacia >98% donde hay resistencia a avermectinas'],
+    ['Albendazol / Fenbendazol', 'Segun HPG', 'Para fasciola hepatica en zonas de banados'],
+    ['Garrapaticidas (piretroides)', 'Segun infestacion', 'Mas frecuente en verano / zona norte BA'],
+    ['Vitaminas A, D, E', '1\u20132 veces/ano', 'Pre-invierno y preparto'],
+    ['Minerales (selenio, cobre, zinc)', 'Semestral o anual', 'Critico en suelos pampeanos'],
+  ];
+
+  ANTIPAR.forEach(row => {
+    if (y > 270) { doc.addPage(); y = 18; }
+    doc.setFillColor(...VERDE_C);
+    doc.rect(18, y, W - 36, 10, 'F');
+    doc.setTextColor(...NEGRO);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.text(row[0], 22, y + 4);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
+    doc.setTextColor(...GRIS);
+    doc.text(row[1] + ' \u2014 ' + row[2], 22, y + 8.5, { maxWidth: W - 44 });
+    y += 11;
+  });
+
+  y += 6;
+  if (y > 240) { doc.addPage(); y = 18; }
+  sectionHeader(doc, 'REGLAS GENERALES DE APLICACION', y, VERDE);
+  y += 10;
+
+  const REGLAS = [
+    '1. Cadena de frio: 2\u20138 \u00b0C siempre. Nunca congelar ni exponer al sol.',
+    '2. No vacunar animales enfermos, estresados o debilitados.',
+    '3. No vacunar junto al destete \u2014 esperar 15\u201330 dias antes o despues.',
+    '4. Via SC (subcutanea): tabla del cuello o post-paleta \u2014 no en la pierna.',
+    '5. Intervalo minimo entre vacunas distintas: 15 dias.',
+    '6. Registrar siempre: fecha, marca comercial, lote y vencimiento.',
+  ];
+
+  REGLAS.forEach(r => {
+    if (y > 275) { doc.addPage(); y = 18; }
+    doc.setTextColor(...NEGRO);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.text(r, 22, y);
+    y += 7;
+  });
+
+  // ─── NUEVA PAGINA: Registros SENASA ──────────────────────────
+  doc.addPage();
+  y = 18;
+  sectionHeader(doc, 'REGISTROS Y SENASA \u2014 SIGSA', y, VERDE);
+  y += 10;
+
+  const DOCS = [
+    'Actas de vacunacion aftosa (ultima campana)',
+    'Certificados de brucelosis de TODAS las terneras vacunadas',
+    'Registro del veterinario acreditado asignado al establecimiento',
+    'Historial de carbunclo del campo',
+  ];
+
+  doc.setTextColor(...NEGRO);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.text('Documentos que debe tener el campo:', 18, y);
+  y += 6;
+
+  DOCS.forEach(d => {
+    doc.setFillColor(...VERDE_C);
+    doc.roundedRect(18, y, W - 36, 8, 1.5, 1.5, 'F');
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+    doc.setTextColor(...NEGRO);
+    doc.text('[ ] ' + d, 22, y + 5.5);
+    y += 10;
+  });
+
+  y += 4;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.text('Obligaciones del productor (Res. SENASA 201/2026):', 18, y);
+  y += 7;
+
+  const OBLIG_PROD = [
+    '1. Designar un veterinario acreditado ante SENASA.',
+    '2. Actas de vacunacion: el vet. emite el acta despues de cada campana.',
+    '3. Recategorizacion en SIGSA: actualizar datos de terneros antes de cada campana.',
+    '4. Certificados de brucelosis: imprescindible para comercializacion de terneras.',
+  ];
+
+  OBLIG_PROD.forEach(o => {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+    doc.setTextColor(...NEGRO);
+    doc.text(o, 18, y, { maxWidth: W - 36 });
+    y += 7;
+  });
+
+  // ─── PIE DE PAGINA en todas las paginas ─────────────────────
+  const totalPag = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= totalPag; i++) {
+    doc.setPage(i);
+    doc.setFillColor(...VERDE);
+    doc.rect(0, 288, W, 9, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.text('Manual de Vacunacion Bovina \u2014 Los Aromos \u00b7 RodeoApp \u00b7 Mayo 2026 \u00b7 SENASA Res. 711/2025', 18, 293.5);
+    doc.text('Pagina ' + i + ' de ' + totalPag, W - 18, 293.5, { align: 'right' });
+  }
+
+  // ─── Descargar ────────────────────────────────────────────────
+  const fecha = new Date().toLocaleDateString('es-AR').replace(/\//g,'-');
+  doc.save('manual-vacunacion-los-aromos-' + fecha + '.pdf');
+  mostrarToast('📄 PDF descargado correctamente');
+}
+
+// Helper: dibuja el encabezado de seccion
+function sectionHeader(doc, texto, y, color) {
+  doc.setFillColor(...color);
+  doc.rect(18, y, 210 - 36, 7, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.text(texto, 22, y + 5);
+  doc.setTextColor(17, 24, 39);
+}
+
+// Conectar boton PDF al evento
+document.addEventListener('DOMContentLoaded', () => {
+  const btnPDF = document.getElementById('btn-descargar-pdf-vac');
+  if (btnPDF) {
+    btnPDF.addEventListener('click', () => {
+      btnPDF.textContent = 'Generando...';
+      btnPDF.disabled = true;
+      setTimeout(() => {
+        try {
+          generarPDFManualVacunacion();
+        } catch(e) {
+          console.error('[PDF]', e);
+          mostrarToast('Error generando PDF');
+        } finally {
+          btnPDF.textContent = '📄 PDF';
+          btnPDF.disabled = false;
+        }
+      }, 100);
+    });
+  }
+});
