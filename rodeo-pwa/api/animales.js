@@ -67,13 +67,85 @@ function parsearFila(fila, idx) {
 // ─── Handler ──────────────────────────────────────────────────────────────────
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin',  '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'GET')    return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== 'GET' && req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
     const token = await obtenerAccessToken();
+
+    // ── POST: registro de vacuna ──────────────────────────────────────────────
+    if (req.method === 'POST') {
+      const body = req.body || {};
+      if (body.modo === 'registro-vacuna') {
+        // Leer hoja Vacunacion
+        const urlVacH = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent('Vacunacion!A1:A1')}`;
+        const chkResp = await fetch(urlVacH, { headers: { Authorization: `Bearer ${token}` } });
+        if (!chkResp.ok) return res.status(404).json({ error: 'Hoja Vacunacion no encontrada' });
+
+        const newRow = [
+          body.caravana         || '',
+          body.boton            || '',
+          body.categoria        || '',
+          body.vacuna           || '',
+          body.tipo_frecuencia  || 'anual',
+          body.fecha_aplicacion || new Date().toLocaleDateString('es-AR'),
+          body.fecha_proxima    || '',
+          body.dias_alerta      || '30',
+          'aplicada',
+          body.lote             || '',
+          body.veterinario      || '',
+          body.operador         || '',
+          body.observaciones    || '',
+          new Date().toLocaleString('es-AR'),
+          body.uuid_animal      || '',
+        ];
+
+        // Append row
+        const appendUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent('Vacunacion!A:O')}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
+        const appendResp = await fetch(appendUrl, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ values: [newRow] }),
+        });
+        if (!appendResp.ok) throw new Error(`Sheets append error: ${appendResp.status}`);
+        return res.status(200).json({ ok: true });
+      }
+      return res.status(400).json({ error: 'modo no reconocido' });
+    }
+
     const { modo, boton, caravana } = req.query;
+
+    // ── MODO: lista de vacunas desde hoja Vacunacion ────────────────────────
+    if (modo === 'vacunas') {
+      const urlVac  = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent('Vacunacion!A:O')}`;
+      const respVac = await fetch(urlVac, { headers: { Authorization: `Bearer ${token}` } });
+      if (!respVac.ok) return res.status(200).json({ vacunas: [] });
+      const filasVac = (await respVac.json()).values || [];
+      if (filasVac.length <= 1) return res.status(200).json({ vacunas: [] });
+
+      const headers = filasVac[0].map(h => (h || '').toLowerCase().trim());
+      const getCol  = (fila, nombre) => fila[headers.indexOf(nombre)] || '';
+
+      const vacunas = filasVac.slice(1).map(fila => ({
+        caravana:         getCol(fila, 'caravana'),
+        boton:            getCol(fila, 'boton'),
+        categoria:        getCol(fila, 'categoria'),
+        vacuna:           getCol(fila, 'vacuna'),
+        tipo_frecuencia:  getCol(fila, 'tipo_frecuencia'),
+        fecha_aplicacion: getCol(fila, 'fecha_aplicacion'),
+        fecha_proxima:    getCol(fila, 'fecha_proxima'),
+        estado:           getCol(fila, 'estado') || 'aplicada',
+        dias_alerta:      getCol(fila, 'dias_alerta') || '30',
+        lote:             getCol(fila, 'lote'),
+        veterinario:      getCol(fila, 'veterinario'),
+        operador:         getCol(fila, 'operador'),
+        observaciones:    getCol(fila, 'observaciones'),
+        timestamp:        getCol(fila, 'timestamp'),
+      }));
+      return res.status(200).json({ vacunas });
+    }
 
     // ── MODO: historial de vacunas (fusionado desde historial-vacunas.js) ────
     if (modo === 'historial-vacunas') {

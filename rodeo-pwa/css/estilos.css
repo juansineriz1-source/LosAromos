@@ -3645,3 +3645,305 @@ html { scroll-behavior: smooth; }
   letter-spacing: -0.02em;
   line-height: 1;
 }
+
+/* ─── VACUNACION ──────────────────────────────────────────────────────────── */
+
+.vac-btn-acceso {
+  flex: 1;
+  height: 44px;
+  background: #1a5c30;
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: transform .1s;
+}
+.vac-btn-acceso:active { transform: scale(0.97); }
+
+.vac-btn-info {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: 2px solid #e8f5e9;
+  background: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Panel vacunacion */
+.vac-panel {
+  background: #f4f6f4;
+  min-height: 100%;
+  padding-bottom: 80px;
+}
+.vac-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px 12px;
+  background: #1a5c30;
+  color: #fff;
+}
+.vac-titulo {
+  font-family: 'Manrope', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+}
+.vac-btn-cerrar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.20);
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* Alertas */
+.vac-alertas-wrap {
+  padding: 12px 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.vac-alerta-card {
+  border-radius: 14px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+}
+.vac-alerta-rojo    { background: #ffebee; color: #b71c1c; border: 1px solid #ffcdd2; }
+.vac-alerta-naranja { background: #fff3e0; color: #e65100; border: 1px solid #ffe0b2; }
+.vac-alerta-amarillo{ background: #fffde7; color: #f57f17; border: 1px solid #fff9c4; }
+.vac-alerta-icono   { font-size: 20px; flex-shrink: 0; }
+
+/* Chips de categoria */
+.vac-cat-chips {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.vac-cat-chips::-webkit-scrollbar { display: none; }
+.vac-cat-chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1.5px solid #d1d5db;
+  background: #fff;
+  color: #6b7a6e;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all .15s;
+}
+.vac-cat-chip.activo { background: #1a5c30; border-color: #1a5c30; color: #fff; }
+
+/* Lista de animales */
+.vac-lista-wrap {
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vac-animal-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 14px 16px;
+  border: 1px solid rgba(229,231,235,0.5);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.vac-animal-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.vac-animal-nombre {
+  font-family: 'Manrope', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: #1a5c30;
+}
+.vac-animal-sub {
+  font-size: 12px;
+  color: #6b7a6e;
+  margin-top: 2px;
+}
+.vac-btn-registrar {
+  height: 36px;
+  padding: 0 14px;
+  background: #e8f5e9;
+  color: #1a5c30;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Dots de vacunas */
+.vac-dots-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.vac-dot-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.vac-dot-item.aplicada  { background: #e8f5e9; color: #1a5c30; }
+.vac-dot-item.pendiente { background: #fff3e0; color: #e65100; }
+.vac-dot-item.vencida   { background: #ffebee; color: #b71c1c; }
+.vac-dot-item.no_aplica { background: #f5f5f5; color: #9e9e9e; }
+.vac-dot-item.por_vencer{ background: #fff8e1; color: #f57f17; }
+.vac-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* Modal vacunas */
+.vac-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 9999;
+  display: flex;
+  align-items: flex-end;
+  padding: 0;
+  backdrop-filter: blur(4px);
+}
+.vac-modal-card {
+  background: #fff;
+  border-radius: 24px 24px 0 0;
+  width: 100%;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.vac-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 20px 14px;
+  border-bottom: 1px solid #f3f4f6;
+  flex-shrink: 0;
+}
+.vac-modal-header h2 {
+  font-family: 'Manrope', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: #111827;
+}
+.vac-modal-header button {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: #f4f6f4;
+  font-size: 18px;
+  cursor: pointer;
+}
+.vac-modal-body {
+  padding: 16px 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Formulario registro */
+.vac-select, .vac-input {
+  width: 100%;
+  height: 48px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 0 16px;
+  font-size: 15px;
+  font-family: 'Inter', sans-serif;
+  color: #111827;
+  box-sizing: border-box;
+  margin-top: 6px;
+}
+.vac-select:focus, .vac-input:focus {
+  outline: none;
+  border-color: #2e7d52;
+  box-shadow: 0 0 0 3px rgba(46,125,82,0.10);
+}
+.vac-textarea {
+  width: 100%;
+  height: 80px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  color: #6b7a6e;
+  resize: none;
+  box-sizing: border-box;
+  margin-top: 6px;
+}
+
+/* Tabla manual dentro del modal */
+.vac-manual-seccion {
+  margin-bottom: 20px;
+}
+.vac-manual-titulo {
+  font-family: 'Manrope', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  color: #1a5c30;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+.vac-manual-fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 13px;
+}
+.vac-manual-fila:last-child { border-bottom: none; }
+.vac-manual-nombre { font-weight: 700; color: #111827; flex: 1; }
+.vac-manual-detalle { color: #6b7a6e; flex: 2; text-align: right; font-size: 12px; }
+.vac-manual-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.vac-badge-obligatoria { background: #ffebee; color: #b71c1c; }
+.vac-badge-recomendada { background: #fff3e0; color: #e65100; }

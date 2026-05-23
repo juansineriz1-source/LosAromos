@@ -16,8 +16,9 @@ import { inicializarFotos, cargarListaFotos } from './fotos.js';
 import { inicializarVideos, cargarListaVideos } from './videos.js';
 import { inicializarPush } from './push.js';
 import { inicializarCalendario, cargarFeedHoy } from './calendario.js';
-import { inicializarRodeoOficial, cargarRodeoOficial, filtrarRodeo } from './rodeo-oficial.js';
+import { inicializarRodeoOficial, cargarRodeoOficial, filtrarRodeo, getAnimales } from './rodeo-oficial.js';
 import { initAgenda, cargarAgenda } from './agenda.js';
+import { cargarVacunas, calcularAlertasGlobales, estadoVacunasAnimal, registrarVacunacion, getVacunasData } from './vacunas.js';
 
 // ─── Usuarios y roles ─────────────────────────────────────────────────────────
 // Mapa base (se sobreescribe con datos de la hoja "Usuarios" al iniciar)
@@ -110,6 +111,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   inicializarPush();
   await inicializarCalendario();
   await actualizarContadorPendientes();
+  inicializarVacunacion();
 
   // Login: mostrar pantalla de selección si no hay operador guardado
   if (!estado.operador) {
@@ -968,4 +970,220 @@ function mostrarToast(mensaje, tipo = 'info', duracion = 3000) {
       setTimeout(() => toast.remove(), 300);
     }, duracion);
   }
+}
+
+// ─── VACUNACIÓN ──────────────────────────────────────────────────────────────────────────
+let _animalParaVacunar = null;
+
+function inicializarVacunacion() {
+  const btnAbrir   = document.getElementById('btn-abrir-vacunacion');
+  const btnCerrar  = document.getElementById('btn-cerrar-vacunacion');
+  const btnInfo    = document.getElementById('btn-info-vacunas');
+  const btnCerrarM = document.getElementById('btn-cerrar-modal-vac');
+  const btnCerrarR = document.getElementById('btn-cerrar-modal-reg');
+  const btnGuardar = document.getElementById('btn-guardar-reg-vac');
+  const panel      = document.getElementById('panel-vacunacion');
+  const modalInfo  = document.getElementById('modal-info-vacunas');
+  const modalReg   = document.getElementById('modal-registrar-vac');
+
+  if (!btnAbrir) return;
+
+  btnAbrir.addEventListener('click', async () => {
+    panel.classList.remove('oculto');
+    await cargarVacunas();
+    renderizarPanelVacunacion();
+  });
+
+  btnCerrar.addEventListener('click', () => panel.classList.add('oculto'));
+
+  btnInfo.addEventListener('click', () => {
+    document.getElementById('vac-modal-body-contenido').innerHTML = construirManualHTML();
+    modalInfo.classList.remove('oculto');
+  });
+  btnCerrarM.addEventListener('click', () => modalInfo.classList.add('oculto'));
+  modalInfo.addEventListener('click', e => { if (e.target === modalInfo) modalInfo.classList.add('oculto'); });
+
+  btnCerrarR.addEventListener('click', () => modalReg.classList.add('oculto'));
+  modalReg.addEventListener('click', e => { if (e.target === modalReg) modalReg.classList.add('oculto'); });
+
+  btnGuardar.addEventListener('click', async () => {
+    if (!_animalParaVacunar) return;
+    const vacuna = document.getElementById('reg-vac-select').value;
+    const fecha  = document.getElementById('reg-vac-fecha').value;
+    if (!vacuna || !fecha) { mostrarToast('Selecciona vacuna y fecha'); return; }
+
+    btnGuardar.textContent = 'Guardando...';
+    btnGuardar.disabled = true;
+    try {
+      await registrarVacunacion({
+        caravana:         _animalParaVacunar.caravana || '',
+        boton:            _animalParaVacunar.boton    || '',
+        categoria:        _animalParaVacunar.tipo     || '',
+        vacuna,
+        fecha_aplicacion: fecha.split('-').reverse().join('/'),
+        lote:             document.getElementById('reg-vac-lote').value,
+        veterinario:      document.getElementById('reg-vac-vet').value,
+        observaciones:    document.getElementById('reg-vac-obs').value,
+      }, estado.operador || 'sistema');
+      mostrarToast('✅ Vacunación registrada');
+      modalReg.classList.add('oculto');
+      await cargarVacunas();
+      renderizarPanelVacunacion();
+    } catch (e) {
+      mostrarToast('Error al guardar — intentá de nuevo');
+    } finally {
+      btnGuardar.textContent = '💾 Guardar Vacunación';
+      btnGuardar.disabled = false;
+    }
+  });
+
+  // Chips de categoria
+  document.querySelectorAll('.vac-cat-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.vac-cat-chip').forEach(c => c.classList.remove('activo'));
+      chip.classList.add('activo');
+      renderizarPanelVacunacion(chip.dataset.cat || '');
+    });
+  });
+}
+
+function tipoCategoriaVacLocal(tipo) {
+  const t = (tipo || '').toUpperCase().trim();
+  if (t === 'T')  return 'Toro';
+  if (t === 'TH') return 'Torito';
+  if (t === 'TN') return 'Ternero';
+  if (t === 'V')  return 'Vaca';
+  if (t === 'VQ') return 'Vaquillona';
+  return null;
+}
+
+function renderizarPanelVacunacion(filtroCategoria = '') {
+  const _animales = getAnimales();
+  if (!_animales || !_animales.length) return;
+  const vacunasData = getVacunasData();
+
+  // Alertas globales
+  const alertas = calcularAlertasGlobales(_animales, vacunasData);
+  const contAlerta = document.getElementById('vac-alertas-container');
+  if (contAlerta) {
+    contAlerta.innerHTML = alertas.length
+      ? alertas.map(a => `
+        <div class="vac-alerta-card vac-alerta-${a.nivel}">
+          <span class="vac-alerta-icono">${a.icono}</span>
+          <span>${a.texto}</span>
+        </div>`).join('')
+      : '<div class="vac-alerta-card" style="background:#e8f5e9;color:#1a5c30;border:1px solid #c8e6c9;"><span class="vac-alerta-icono">✅</span><span>Sin alertas urgentes al día de hoy</span></div>';
+  }
+
+  // Lista de animales
+  const lista = document.getElementById('vac-lista-animales');
+  if (!lista) return;
+
+  let animalesFiltrados = _animales;
+  if (filtroCategoria) {
+    animalesFiltrados = _animales.filter(a => tipoCategoriaVacLocal(a.tipo) === filtroCategoria);
+  }
+
+  if (!animalesFiltrados.length) {
+    lista.innerHTML = '<p class="sin-historial">Sin animales en esta categoría</p>';
+    return;
+  }
+
+  lista.innerHTML = animalesFiltrados.slice(0, 80).map((a, idx) => {
+    // idx relativo al array completo para la funcion global
+    const idxGlobal = _animales.indexOf(a);
+    const estados   = estadoVacunasAnimal(a, vacunasData);
+    const hayUrgente = estados.some(e => e.urgente);
+    const dotsHtml   = estados.map(e => `
+      <div class="vac-dot-item ${e.estado}">
+        <div class="vac-dot"></div>
+        ${e.vacuna.split(' ')[0].replace('(Campana', '').replace(')', '').trim()}
+      </div>`).join('');
+
+    return `
+      <div class="vac-animal-card" style="${hayUrgente ? 'border-color:#ffcdd2;' : ''}">
+        <div class="vac-animal-card-header">
+          <div>
+            <div class="vac-animal-nombre">🐄 ${a.boton || a.caravana || '—'}</div>
+            <div class="vac-animal-sub">${a.caravana ? 'CAR: ' + a.caravana + ' · ' : ''}${a.tipo || '—'} · ${a.estado || '—'}</div>
+          </div>
+          <button class="vac-btn-registrar" onclick="abrirRegistroVacuna(${idxGlobal})">
+            + Registrar
+          </button>
+        </div>
+        <div class="vac-dots-row">${dotsHtml || '<span style="color:#9ca3af;font-size:12px;">Sin datos registrados</span>'}</div>
+      </div>`;
+  }).join('');
+}
+
+function abrirRegistroVacuna(idx) {
+  const a = getAnimales()[idx];
+  if (!a) return;
+  _animalParaVacunar = a;
+  document.getElementById('reg-vac-animal-label').textContent =
+    `Animal: ${a.boton || a.caravana || '—'} · Tipo: ${a.tipo || '—'}`;
+  const hoy = new Date().toISOString().split('T')[0];
+  document.getElementById('reg-vac-fecha').value   = hoy;
+  document.getElementById('reg-vac-select').value  = '';
+  document.getElementById('reg-vac-lote').value    = '';
+  document.getElementById('reg-vac-vet').value     = '';
+  document.getElementById('reg-vac-obs').value     = '';
+  document.getElementById('modal-registrar-vac').classList.remove('oculto');
+}
+window.abrirRegistroVacuna = abrirRegistroVacuna;
+
+function construirManualHTML() {
+  const VACUNAS_INFO = [
+    { nombre: 'Aftosa (Campaña 1)',       oblig: true,  frecuencia: 'Anual',              cat: 'Todo el rodeo',            nota: 'Obligatoria SENASA. Registro SIGSA.' },
+    { nombre: 'Aftosa (Campaña 2)',       oblig: true,  frecuencia: 'Anual',              cat: 'Solo terneros/as',         nota: 'Solo refuerzo en terneros desde 2026.' },
+    { nombre: 'Brucelosis (Cepa 19)',     oblig: true,  frecuencia: 'UNA VEZ EN LA VIDA', cat: 'Solo terneras 3-8 meses', nota: 'VENTANA NO RECUPERABLE. Vet. autorizado.' },
+    { nombre: 'Carbunclo (Antrax)',       oblig: true,  frecuencia: 'Anual (Oct-Nov)',    cat: 'Todo > 6 meses',          nota: 'Obligatorio Prov. BA. Zoonosis.' },
+    { nombre: 'Clostridiales',           oblig: false, frecuencia: '2 dosis + anual',    cat: 'Todo el rodeo',           nota: 'No vacunar junto al destete.' },
+    { nombre: 'Diarrea Neonatal',        oblig: false, frecuencia: '2 dosis + anual',    cat: 'Vacas/vaquillonas gest.', nota: 'A la madre, 7 y 8 mes gestación.' },
+    { nombre: 'Reproductivas (IBR+DVB)', oblig: false, frecuencia: '2 dosis + anual',    cat: 'Vacas, vaquillonas, toros', nota: '60-90 días antes del servicio.' },
+    { nombre: 'Queratoconjuntivitis',    oblig: false, frecuencia: '2 dosis + anual',    cat: 'Todo el rodeo',           nota: 'Pre-verano. Controlar moscas.' },
+  ];
+
+  return `
+    <div class="vac-manual-seccion">
+      <div class="vac-manual-titulo">Vacunas Obligatorias</div>
+      ${VACUNAS_INFO.filter(v => v.oblig).map(v => `
+        <div class="vac-manual-fila">
+          <div>
+            <div class="vac-manual-nombre">${v.nombre}</div>
+            <div style="font-size:11px;color:#6b7a6e;margin-top:3px;">${v.cat}</div>
+          </div>
+          <div class="vac-manual-detalle">
+            <span class="vac-manual-badge vac-badge-obligatoria">OBLIGATORIA</span><br>
+            <span style="font-size:11px;">${v.frecuencia}</span><br>
+            <span style="font-size:11px;color:#9ca3af;">${v.nota}</span>
+          </div>
+        </div>`).join('')}
+    </div>
+    <div class="vac-manual-seccion">
+      <div class="vac-manual-titulo">Vacunas Recomendadas</div>
+      ${VACUNAS_INFO.filter(v => !v.oblig).map(v => `
+        <div class="vac-manual-fila">
+          <div>
+            <div class="vac-manual-nombre">${v.nombre}</div>
+            <div style="font-size:11px;color:#6b7a6e;margin-top:3px;">${v.cat}</div>
+          </div>
+          <div class="vac-manual-detalle">
+            <span class="vac-manual-badge vac-badge-recomendada">Recomendada</span><br>
+            <span style="font-size:11px;">${v.frecuencia}</span><br>
+            <span style="font-size:11px;color:#9ca3af;">${v.nota}</span>
+          </div>
+        </div>`).join('')}
+    </div>
+    <div class="vac-manual-seccion">
+      <div class="vac-manual-titulo">Reglas de Aplicación</div>
+      <div style="font-size:13px;color:#374151;line-height:1.8;">
+        1. <strong>Cadena de frío:</strong> 2-8°C siempre. Nunca congelar ni exponer al sol.<br>
+        2. <strong>No vacunar</strong> animales enfermos o estresados.<br>
+        3. <strong>No vacunar junto al destete</strong> — esperar 15-30 días antes o después.<br>
+        4. <strong>Vía SC</strong> (subcutánea): tabla del cuello o post-paleta.<br>
+        5. <strong>Intervalo mínimo</strong> entre vacunas distintas: 15 días.<br>
+        6. <strong>Registrar siempre</strong>: fecha, marca, lote, vencimiento.
+      </div>
+    </div>`;
 }

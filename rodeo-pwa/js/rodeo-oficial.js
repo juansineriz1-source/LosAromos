@@ -902,6 +902,9 @@ async function guardarEdicionAnimal(animal_viejo, cerrarModal) {
 }
 
 // ─── Filtro de búsqueda (llamado desde app.js al tipear) ──────────────────────
+// ─── Getter público para módulo de vacunación ────────────────────────────────
+export function getAnimales() { return _animales; }
+
 export function filtrarRodeo(texto) {
   aplicarFiltros(); // usa el texto del input + chip activo
 }

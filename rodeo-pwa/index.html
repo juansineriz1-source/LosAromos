@@ -414,6 +414,47 @@
     <!-- ──────────── TAB: RODEO ──────────── -->
     <section class="tab-panel oculto" id="tab-rodeo">
 
+
+      <!-- Acceso a vacunación -->
+      <div style="padding: 12px 16px 0; display:flex; gap:10px; align-items:center; justify-content:space-between;">
+        <button class="vac-btn-acceso" id="btn-abrir-vacunacion">
+          💉 Ver Vacunación
+        </button>
+        <button class="vac-btn-info" id="btn-info-vacunas" title="Manual de vacunas">
+          ℹ️
+        </button>
+      </div>
+
+      <!-- ═══════════ PANEL VACUNACION ═══════════ -->
+      <div id="panel-vacunacion" class="vac-panel oculto">
+
+        <!-- Header -->
+        <div class="vac-panel-header">
+          <h2 class="vac-titulo">💉 Vacunación</h2>
+          <button class="vac-btn-cerrar" id="btn-cerrar-vacunacion">✕</button>
+        </div>
+
+        <!-- Alertas globales -->
+        <div id="vac-alertas-container" class="vac-alertas-wrap"></div>
+
+        <!-- Filtro por categoría -->
+        <div class="vac-cat-chips">
+          <button class="vac-cat-chip activo" data-cat="">Todos</button>
+          <button class="vac-cat-chip" data-cat="Ternero">Terneros</button>
+          <button class="vac-cat-chip" data-cat="Ternera">Terneras</button>
+          <button class="vac-cat-chip" data-cat="Vaquillona">Vaquillonas</button>
+          <button class="vac-cat-chip" data-cat="Vaca">Vacas</button>
+          <button class="vac-cat-chip" data-cat="Toro">Toros</button>
+        </div>
+
+        <!-- Lista de animales con estado -->
+        <div id="vac-lista-animales" class="vac-lista-wrap">
+          <p class="sin-historial">Cargando...</p>
+        </div>
+
+      </div>
+      <!-- ═══════════ FIN PANEL VACUNACION ═══════════ -->
+
       <!-- Stats + barra de filtros avanzados -->
       <div class="card rodeo-filtros-card filtros-stitch-card" style="padding: 12px 16px;">
 
@@ -599,6 +640,62 @@
       <span class="nav-label">Agenda</span>
     </button>
   </nav>
+
+  <!-- Modal info vacunas -->
+  <div id="modal-info-vacunas" class="vac-modal-overlay oculto">
+    <div class="vac-modal-card">
+      <div class="vac-modal-header">
+        <h2>💉 Manual de Vacunación</h2>
+        <button id="btn-cerrar-modal-vac">✕</button>
+      </div>
+      <div class="vac-modal-body" id="vac-modal-body-contenido">
+        <!-- Se llena dinámicamente -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal registrar vacunación -->
+  <div id="modal-registrar-vac" class="vac-modal-overlay oculto">
+    <div class="vac-modal-card">
+      <div class="vac-modal-header">
+        <h2>Registrar Vacunación</h2>
+        <button id="btn-cerrar-modal-reg">✕</button>
+      </div>
+      <div class="vac-modal-body">
+        <p id="reg-vac-animal-label" style="font-weight:700; color:#1a5c30; margin-bottom:12px;"></p>
+
+        <label class="campo-label">Vacuna aplicada</label>
+        <select id="reg-vac-select" class="vac-select">
+          <option value="">-- Seleccionar --</option>
+          <option>Aftosa (Campana 1)</option>
+          <option>Aftosa (Campana 2)</option>
+          <option>Brucelosis (Cepa 19) - unica en la vida</option>
+          <option>Carbunclo Bacteridiano (Antrax)</option>
+          <option>Clostridiales</option>
+          <option>Diarrea Neonatal (Preparto - a la madre)</option>
+          <option>Reproductivas (IBR+DVB+Lepto+Campy)</option>
+          <option>Queratoconjuntivitis</option>
+          <option>Antiparasitario interno</option>
+          <option>Vitaminas / Minerales</option>
+          <option>Otra</option>
+        </select>
+
+        <label class="campo-label" style="margin-top:14px;">Fecha de aplicación</label>
+        <input type="date" id="reg-vac-fecha" class="vac-input">
+
+        <label class="campo-label" style="margin-top:14px;">Lote / Producto (opcional)</label>
+        <input type="text" id="reg-vac-lote" class="vac-input" placeholder="Ej: BGO-2024-88">
+
+        <label class="campo-label" style="margin-top:14px;">Veterinario (opcional)</label>
+        <input type="text" id="reg-vac-vet" class="vac-input" placeholder="Nombre del veterinario">
+
+        <label class="campo-label" style="margin-top:14px;">Observaciones</label>
+        <textarea id="reg-vac-obs" class="vac-textarea" placeholder="Notas adicionales..."></textarea>
+
+        <button id="btn-guardar-reg-vac" class="btn-guardar-grande" style="margin-top:20px;">💾 Guardar Vacunación</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ═══════════════════════ SCRIPTS ══════════════════════════════ -->
   <script type="module" src="/js/app.js"></script>

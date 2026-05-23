@@ -19,19 +19,20 @@ const { core, precaching, routing, strategies, backgroundSync, expiration } = wo
 // ─── Configuración base ─────────────────────────────────────────────────────
 core.setCacheNameDetails({
   prefix: 'rodeo-pwa',
-  suffix: 'v14',
+  suffix: 'v15',
 });
 
 core.skipWaiting();
 core.clientsClaim();
 
 // ─── Pre-caché ───────────────────────────────────────────────────────────────
-// Revisión 6 — Stitch design aplicado a todas las pestañas
+// Revisión 10 — Módulo de vacunación integrado
 precaching.precacheAndRoute([
-  { url: '/', revision: '9' },
-  { url: '/index.html', revision: '9' },
-  { url: '/css/estilos.css', revision: '9' },
-  { url: '/js/app.js', revision: '9' },
+  { url: '/', revision: '10' },
+  { url: '/index.html', revision: '10' },
+  { url: '/css/estilos.css', revision: '10' },
+  { url: '/js/app.js', revision: '10' },
+  { url: '/js/vacunas.js', revision: '1' },
   { url: '/js/db.js', revision: '9' },
   { url: '/js/bluetooth.js', revision: '9' },
   { url: '/js/sync.js', revision: '9' },
