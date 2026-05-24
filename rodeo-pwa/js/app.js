@@ -1657,6 +1657,7 @@ window.abrirRegistroCastracion = abrirRegistroCastracion;
   }
 })();
 
+function construirManualHTML() {
   const VACUNAS_INFO = [
     { nombre: 'Aftosa (Campaña 1)',       oblig: true,  frecuencia: 'Anual',              cat: 'Todo el rodeo',            nota: 'Obligatoria SENASA. Registro SIGSA.' },
     { nombre: 'Aftosa (Campaña 2)',       oblig: true,  frecuencia: 'Anual',              cat: 'Solo terneros/as',         nota: 'Solo refuerzo en terneros desde 2026.' },
