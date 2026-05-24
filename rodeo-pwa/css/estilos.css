@@ -4275,3 +4275,96 @@ html { scroll-behavior: smooth; }
   color: #4a148c;
   line-height: 1.6;
 }
+
+/* --- CASTRACION (terneros machos TN) --------------------------------------- */
+
+.vac-btn-cast {
+  height: 36px;
+  padding: 0 10px;
+  background: #fff3e0;
+  color: #e65100;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.cast-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.cast-badge.castrado   { background: #e8f5e9; color: #1a5c30; }
+.cast-badge.no-castrado{ background: #fff3e0; color: #e65100; }
+
+/* Botones de metodo en el modal */
+.cast-metodo-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.cast-met-btn {
+  flex: 1;
+  min-width: 90px;
+  height: 40px;
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+  background: #f9fafb;
+  color: #6b7a6e;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all .15s;
+}
+.cast-met-btn.activo {
+  border-color: #e65100;
+  background: #fff3e0;
+  color: #e65100;
+}
+
+/* Card informativa de metodos */
+.cast-info-card {
+  background: #fff3e0;
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-top: 16px;
+  border: 1px solid #ffe0b2;
+}
+.cast-info-titulo {
+  font-size: 12px;
+  font-weight: 700;
+  color: #e65100;
+  margin-bottom: 10px;
+}
+.cast-info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cast-met-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cast-met-info strong {
+  font-size: 12px;
+  color: #bf360c;
+}
+.cast-met-info span {
+  font-size: 11px;
+  color: #795548;
+  line-height: 1.4;
+}

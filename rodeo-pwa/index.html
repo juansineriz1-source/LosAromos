@@ -867,6 +867,58 @@
     </div>
   </div>
 
+  <!-- Modal castracion (solo terneros machos TN) -->
+  <div id="modal-registrar-castracion" class="vac-modal-overlay oculto">
+    <div class="vac-modal-card">
+      <div class="vac-modal-header">
+        <h2>✂️ Registrar Castración</h2>
+        <button id="btn-cerrar-modal-cast">✕</button>
+      </div>
+      <div class="vac-modal-body">
+        <p id="reg-cast-animal-label" style="font-weight:700; color:#1a5c30; margin-bottom:4px;"></p>
+        <p style="font-size:12px;color:#6b7a6e;margin-bottom:16px;">Evento único — quedará registrado permanentemente</p>
+
+        <label class="campo-label">Fecha de castración *</label>
+        <input type="date" id="reg-cast-fecha" class="vac-input">
+
+        <label class="campo-label" style="margin-top:14px;">Método</label>
+        <div class="cast-metodo-row">
+          <button class="cast-met-btn activo" data-met="Quirurgica">🔪 Quirúrgica</button>
+          <button class="cast-met-btn" data-met="Burdizzo">🦴 Burdizzo</button>
+          <button class="cast-met-btn" data-met="Bandas elastradoras">💍 Bandas</button>
+        </div>
+        <input type="hidden" id="reg-cast-metodo" value="Quirurgica">
+
+        <label class="campo-label" style="margin-top:14px;">Veterinario / Operario</label>
+        <input type="text" id="reg-cast-vet" class="vac-input" placeholder="Nombre (opcional)">
+
+        <label class="campo-label" style="margin-top:14px;">Observaciones</label>
+        <textarea id="reg-cast-obs" class="vac-textarea" placeholder="Ej: sin complicaciones, animal en buen estado..."></textarea>
+
+        <!-- Info de métodos -->
+        <div class="cast-info-card">
+          <div class="cast-info-titulo">ℹ️ Métodos de castración</div>
+          <div class="cast-info-grid">
+            <div class="cast-met-info">
+              <strong>🔪 Quirúrgica</strong>
+              <span>Corte y extirpación. La más usada. Cualquier edad, mejor antes de los 6 meses.</span>
+            </div>
+            <div class="cast-met-info">
+              <strong>🦴 Burdizzo</strong>
+              <span>Sin sangre, aplasta el cordón espermático. Requiere precisión. Menos dolor post-op.</span>
+            </div>
+            <div class="cast-met-info">
+              <strong>💍 Bandas elastradoras</strong>
+              <span>Solo en terneros muy jóvenes (menos de 2 semanas). Riesgo de tétanos.</span>
+            </div>
+          </div>
+        </div>
+
+        <button id="btn-guardar-reg-cast" class="btn-guardar-grande" style="margin-top:20px;">💾 Guardar Castración</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ═══════════════════════ SCRIPTS ══════════════════════════════ -->
   <!-- jsPDF para generacion de PDF del manual -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>

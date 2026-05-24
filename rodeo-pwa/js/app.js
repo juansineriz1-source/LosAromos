@@ -1391,7 +1391,20 @@ function renderizarPanelVacunacion(filtroCategoria = '') {
       }
     }
 
-    // Barra de gestacion
+    // Detectar si es ternero macho → castración
+    const sTernero = tipoUp === 'TN';
+    let castBadge = '';
+    if (sTernero) {
+      const castRegistros = vacunasData.filter(v =>
+        v.vacuna === 'Castracion' &&
+        ((v.boton && v.boton === a.boton) || (v.caravana && v.caravana === a.caravana))
+      ).sort((x, y) => new Date(y.timestamp) - new Date(x.timestamp));
+      const ultCast = castRegistros[0];
+      castBadge = ultCast
+        ? `<div class="cast-badge castrado">✂️ Castrado — ${ultCast.fecha_aplicacion || ''} · ${ultCast.observaciones ? ultCast.observaciones.substring(0,30) : ''}</div>`
+        : `<div class="cast-badge no-castrado">✂️ Sin castrar</div>`;
+    }
+
     const barraGest = gest ? `
       <div class="vac-gest-wrap">
         <div class="vac-gest-header">
@@ -1406,7 +1419,7 @@ function renderizarPanelVacunacion(filtroCategoria = '') {
       </div>` : '';
 
     const dotsHtml = estados
-      .filter(e => e.vacuna !== 'Raspado Prepucial (Tricomoniasis/Campylobacter)')
+      .filter(e => e.vacuna !== 'Raspado Prepucial (Tricomoniasis/Campylobacter)' && e.vacuna !== 'Castracion')
       .map(e => `
       <div class="vac-dot-item ${e.estado}">
         <div class="vac-dot"></div>
@@ -1417,15 +1430,20 @@ function renderizarPanelVacunacion(filtroCategoria = '') {
       <div class="vac-animal-card" style="${(hayUrgente || hayAlertaParto) ? 'border-color:#ffcdd2;' : ''}">
         <div class="vac-animal-card-header">
           <div>
-            <div class="vac-animal-nombre">${esToro ? '🐂' : '🐄'} ${a.boton || a.caravana || '—'}</div>
+            <div class="vac-animal-nombre">${esToro ? '🐂' : sTernero ? '🐃' : '🐄'} ${a.boton || a.caravana || '—'}</div>
             <div class="vac-animal-sub">${a.caravana ? 'CAR: ' + a.caravana + ' · ' : ''}${a.tipo || '—'} · ${a.estado || '—'}</div>
           </div>
           <div style="display:flex;gap:6px;">
-            ${esToro ? `<button class="vac-btn-rasp" onclick="abrirRegistroRaspado(${idxGlobal})" title="Registrar raspado prepucial">🧫</button>` : `<button class="vac-btn-ins" onclick="abrirRegistroInseminacion(${idxGlobal})" title="Registrar inseminacion">🐄+</button>`}
+            ${esToro
+              ? `<button class="vac-btn-rasp" onclick="abrirRegistroRaspado(${idxGlobal})" title="Raspado prepucial">🧫</button>`
+              : sTernero
+                ? `<button class="vac-btn-cast" onclick="abrirRegistroCastracion(${idxGlobal})" title="Registrar castracion">✂️</button>`
+                : `<button class="vac-btn-ins" onclick="abrirRegistroInseminacion(${idxGlobal})" title="Registrar inseminacion">🐄+</button>`
+            }
             <button class="vac-btn-registrar" onclick="abrirRegistroVacuna(${idxGlobal})">+ Vacuna</button>
           </div>
         </div>
-        ${esToro ? raspBadge : barraGest}
+        ${esToro ? raspBadge : sTernero ? castBadge : barraGest}
         <div class="vac-dots-row">${dotsHtml || '<span style="color:#9ca3af;font-size:12px;">Sin datos registrados</span>'}</div>
       </div>`;
   }).join('');
@@ -1552,6 +1570,88 @@ window.abrirRegistroRaspado = abrirRegistroRaspado;
       } finally {
         btnGuardarR.textContent = '💾 Guardar Raspado';
         btnGuardarR.disabled = false;
+      }
+    });
+  }
+})();
+
+// ─── CASTRACIÓN ───────────────────────────────────────────────────────────────
+function abrirRegistroCastracion(idx) {
+  const a = getAnimales()[idx];
+  if (!a) return;
+  _animalParaVacunar = a;
+  document.getElementById('reg-cast-animal-label').textContent =
+    `🐃 ${a.boton || a.caravana || '—'} · ${a.tipo || '—'} · ${a.estado || '—'}`;
+  const hoy = new Date().toISOString().split('T')[0];
+  document.getElementById('reg-cast-fecha').value  = hoy;
+  document.getElementById('reg-cast-obs').value    = '';
+  document.getElementById('reg-cast-vet').value    = '';
+  // Resetear metodo buttons
+  document.querySelectorAll('.cast-met-btn').forEach(b => b.classList.remove('activo'));
+  document.querySelector('.cast-met-btn[data-met="Quirurgica"]')?.classList.add('activo');
+  document.getElementById('reg-cast-metodo').value = 'Quirurgica';
+  document.getElementById('modal-registrar-castracion').classList.remove('oculto');
+}
+window.abrirRegistroCastracion = abrirRegistroCastracion;
+
+(function inicializarCastracion() {
+  const modalCast   = document.getElementById('modal-registrar-castracion');
+  const btnCerrarC  = document.getElementById('btn-cerrar-modal-cast');
+  const btnGuardarC = document.getElementById('btn-guardar-reg-cast');
+
+  if (btnCerrarC) btnCerrarC.addEventListener('click', () => modalCast?.classList.add('oculto'));
+  if (modalCast)  modalCast.addEventListener('click', e => { if (e.target === modalCast) modalCast.classList.add('oculto'); });
+
+  // Botones de método
+  document.querySelectorAll('.cast-met-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.cast-met-btn').forEach(b => b.classList.remove('activo'));
+      btn.classList.add('activo');
+      const inp = document.getElementById('reg-cast-metodo');
+      if (inp) inp.value = btn.dataset.met || 'Quirurgica';
+    });
+  });
+
+  if (btnGuardarC) {
+    btnGuardarC.addEventListener('click', async () => {
+      if (!_animalParaVacunar) return;
+      const fecha   = document.getElementById('reg-cast-fecha').value;
+      const metodo  = document.getElementById('reg-cast-metodo').value || 'Quirurgica';
+      const vet     = document.getElementById('reg-cast-vet').value;
+      const obs     = document.getElementById('reg-cast-obs').value;
+
+      if (!fecha) { mostrarToast('Ingresá la fecha de castración'); return; }
+
+      btnGuardarC.textContent = 'Guardando...';
+      btnGuardarC.disabled = true;
+
+      try {
+        const operadorActual = (typeof estado !== 'undefined' && estado?.operador) ? estado.operador : 'sistema';
+        const fechaAR = fecha.split('-').reverse().join('/');
+        const obsCompleta = `Método: ${metodo}${vet ? ' | Vet: ' + vet : ''}${obs ? ' | ' + obs : ''}`;
+
+        await registrarVacunacion({
+          caravana:         _animalParaVacunar.caravana || '',
+          boton:            _animalParaVacunar.boton    || '',
+          categoria:        _animalParaVacunar.tipo     || '',
+          vacuna:           'Castracion',
+          tipo_frecuencia:  'unica',
+          fecha_aplicacion: fechaAR,
+          estado:           'aplicada',
+          veterinario:      vet,
+          observaciones:    obsCompleta,
+        }, operadorActual);
+
+        mostrarToast('✅ Castración registrada correctamente');
+        modalCast?.classList.add('oculto');
+        await cargarVacunas();
+        renderizarPanelVacunacion();
+      } catch(e) {
+        mostrarToast('Error al guardar — intentá de nuevo');
+        console.error('[castracion]', e);
+      } finally {
+        btnGuardarC.textContent = '💾 Guardar Castración';
+        btnGuardarC.disabled = false;
       }
     });
   }
