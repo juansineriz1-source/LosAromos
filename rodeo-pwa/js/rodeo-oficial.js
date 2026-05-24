@@ -23,13 +23,20 @@ let _filtros = {
 };
 let _panelFiltrosAbierto = false;
 
-// ─── Opciones de campo (actualizadas) ────────────────────────────────────────
-const ESTADOS = ['P', 'V', 'I'];
+// ─── Opciones de campo ────────────────────────────────────────────────────────
+const ESTADOS          = ['P', 'V', 'I'];          // hembras
+const ESTADOS_MACHO    = ['S', 'F', 'E', 'R'];     // machos
 const ETIQUETAS_ESTADO = {
-  P: 'Preñada', V: 'Vacía', I: 'Inseminada',
+  P: 'Preñada', V: 'Vacía', I: 'Inseminada',          // hembras
+  S: 'En servicio', F: 'Fuera servicio', E: 'En engorde', R: 'Retirado',  // machos
 };
+// Tipos macho
+const TIPOS_MACHO = new Set(['T', 'TH', 'TN']);
+const isMacho = tipo => TIPOS_MACHO.has((tipo || '').toUpperCase().trim());
+// Estados según sexo
+const estadosPorTipo = tipo => isMacho(tipo) ? ESTADOS_MACHO : ESTADOS;
 
-const TIPOS = ['V', 'VQ', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'V CUT', 'TH', 'TM', 'T'];
+const TIPOS = ['V', 'VQ', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'V CUT', 'TH', 'TM', 'TN', 'T'];
 
 const COLORES = ['Negra', 'Colorada'];
 
@@ -275,7 +282,10 @@ function _actualizarBarraFiltros() {
     vac_aftosa: 'Aftosa', vac_brucelosis: 'Brucelosis', vac_carbunclo: 'Carbunclo',
     vac_mancha: 'Mancha', vac_queratoconjuntivitis: 'Querato.', vac_otras: 'Otras',
   };
-  const ETIQ_ESTADO = { P: 'Preñada', V: 'Vacía', I: 'Inseminada' };
+  const ETIQ_ESTADO = {
+    P: 'Preñada', V: 'Vacía', I: 'Inseminada',
+    S: 'En servicio', F: 'Fuera servicio', E: 'En engorde', R: 'Retirado',
+  };
 
   const chips = [];
   _filtros.tipos.forEach(t   => chips.push(t));
@@ -715,11 +725,11 @@ window.abrirEditorAnimal = function(idx) {
           <input class="campo-input" id="edit-caravana" value="${a.caravana || ''}" placeholder="Ej: E627">
         </div>
 
-        <!-- Estado: P / V / I -->
-        <div class="rodeo-edit-seccion">
+        <!-- Estado: diferente según si es macho o hembra -->
+        <div class="rodeo-edit-seccion" id="seccion-estado-edit">
           <div class="campo-label">Estado</div>
-          <div class="rodeo-edit-opciones">
-            ${ESTADOS.map(e => `
+          <div class="rodeo-edit-opciones" id="edit-estado-opciones">
+            ${estadosPorTipo(a.tipo).map(e => `
               <button class="rodeo-edit-chip rodeo-chip-estado-${e.toLowerCase()} ${a.estado === e ? 'activo' : ''}"
                 onclick="seleccionarEstado('${e}', this)" data-valor="${e}">
                 <span class="chip-codigo">${e}</span>
@@ -824,6 +834,21 @@ window.seleccionarTipo = function(val, btn) {
   btn.closest('.rodeo-edit-opciones').querySelectorAll('.rodeo-edit-chip').forEach(b => b.classList.remove('activo'));
   btn.classList.add('activo');
   document.getElementById('edit-tipo').value = val;
+  // Actualizar opciones de estado según el nuevo tipo
+  const opciones = document.getElementById('edit-estado-opciones');
+  const estadoInput = document.getElementById('edit-estado');
+  if (opciones) {
+    const estados = estadosPorTipo(val);
+    opciones.innerHTML = estados.map(e => `
+      <button class="rodeo-edit-chip rodeo-chip-estado-${e.toLowerCase()}"
+        onclick="seleccionarEstado('${e}', this)" data-valor="${e}">
+        <span class="chip-codigo">${e}</span>
+        <span class="chip-label">${ETIQUETAS_ESTADO[e]}</span>
+      </button>
+    `).join('');
+    // Limpiar estado seleccionado ya que puede no ser válido
+    if (estadoInput) estadoInput.value = '';
+  }
 };
 
 window.seleccionarColor = function(val, btn) {
@@ -964,6 +989,20 @@ function abrirModalAgregarAnimal() {
   document.body.appendChild(modal);
   // Cerrar al tocar el fondo
   modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+
+  // Listener dinámico: al cambiar Tipo, actualizar opciones de Estado
+  const selectTipo   = modal.querySelector('#nuevo-tipo');
+  const selectEstado = modal.querySelector('#nuevo-estado');
+  function actualizarOpcionesEstado() {
+    const tipo = selectTipo.value;
+    const estados = estadosPorTipo(tipo);
+    selectEstado.innerHTML = estados
+      .map(e => `<option value="${e}">${e} — ${ETIQUETAS_ESTADO[e]}</option>`)
+      .join('');
+  }
+  selectTipo.addEventListener('change', actualizarOpcionesEstado);
+  // Disparar al abrir (por defecto el primer tipo del select)
+  actualizarOpcionesEstado();
 
   modal.querySelector('#btn-guardar-nuevo-animal').addEventListener('click', async () => {
     const btn      = modal.querySelector('#btn-guardar-nuevo-animal');
