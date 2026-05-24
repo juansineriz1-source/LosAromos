@@ -195,65 +195,6 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true, registrados: filas.length });
       }
 
-      // ── POST: registro de peso individual ──────────────────────────────────
-      if (body.modo === 'registro-peso') {
-        // Verificar hoja
-        const urlPesosH = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent('Pesos!A1:A1')}`;
-        const chkPesos  = await fetch(urlPesosH, { headers: { Authorization: `Bearer ${token}` } });
-        if (!chkPesos.ok) return res.status(404).json({ error: 'Hoja Pesos no encontrada. Ejecutá el Apps Script primero.' });
-
-        const pesoRow = [
-          body.caravana     || '',
-          body.boton        || '',
-          body.tipo         || '',
-          body.fecha        || new Date().toLocaleDateString('es-AR'),
-          body.peso_kg      || '',
-          body.observaciones|| '',
-          body.operador     || '',
-          new Date().toISOString(),
-        ];
-
-        const appendPesoUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent('Pesos!A:H')}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
-        const appendPesoResp = await fetch(appendPesoUrl, {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ values: [pesoRow] }),
-        });
-        if (!appendPesoResp.ok) throw new Error(`Sheets append peso error: ${appendPesoResp.status}`);
-        return res.status(200).json({ ok: true });
-      }
-
-      // ── POST: registro de pesos masivo ─────────────────────────────────────
-      if (body.modo === 'registro-peso-masivo') {
-        const registros = Array.isArray(body.registros) ? body.registros : [];
-        if (!registros.length) return res.status(400).json({ error: 'Sin registros de peso' });
-
-        const urlPesosH2 = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent('Pesos!A1:A1')}`;
-        const chkPesos2  = await fetch(urlPesosH2, { headers: { Authorization: `Bearer ${token}` } });
-        if (!chkPesos2.ok) return res.status(404).json({ error: 'Hoja Pesos no encontrada. Ejecutá el Apps Script primero.' });
-
-        const tsIso = new Date().toISOString();
-        const filasPeso = registros.map(r => [
-          r.caravana      || '',
-          r.boton         || '',
-          r.tipo          || '',
-          r.fecha         || new Date().toLocaleDateString('es-AR'),
-          r.peso_kg       || '',
-          r.observaciones || '',
-          r.operador      || '',
-          tsIso,
-        ]);
-
-        const appendMasivoUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent('Pesos!A:H')}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
-        const appendMasivoResp = await fetch(appendMasivoUrl, {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ values: filasPeso }),
-        });
-        if (!appendMasivoResp.ok) throw new Error(`Sheets batch peso error: ${appendMasivoResp.status}`);
-        return res.status(200).json({ ok: true, registrados: filasPeso.length });
-      }
-
       return res.status(400).json({ error: 'modo no reconocido' });
     }
 
@@ -382,30 +323,6 @@ export default async function handler(req, res) {
         ]);
       }
       return res.status(200).json(usuarios);
-    }
-
-    // ── MODO: lista de pesos desde hoja Pesos ────────────────────────────────
-    if (modo === 'pesos') {
-      const urlPesos  = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent('Pesos!A:H')}`;
-      const respPesos = await fetch(urlPesos, { headers: { Authorization: `Bearer ${token}` } });
-      if (!respPesos.ok) return res.status(200).json({ pesos: [] });
-      const filasPesos = (await respPesos.json()).values || [];
-      if (filasPesos.length <= 1) return res.status(200).json({ pesos: [] });
-
-      const hdrsP = filasPesos[0].map(h => (h || '').toLowerCase().trim());
-      const gcP   = (fila, nombre) => fila[hdrsP.indexOf(nombre)] || '';
-
-      const pesos = filasPesos.slice(1).map(fila => ({
-        caravana:     gcP(fila, 'caravana'),
-        boton:        gcP(fila, 'boton'),
-        tipo:         gcP(fila, 'tipo'),
-        fecha:        gcP(fila, 'fecha'),
-        peso_kg:      gcP(fila, 'peso_kg'),
-        observaciones:gcP(fila, 'observaciones'),
-        operador:     gcP(fila, 'operador'),
-        timestamp:    gcP(fila, 'timestamp'),
-      }));
-      return res.status(200).json({ pesos });
     }
 
     // ── MODO: lista de animales (default) ─────────────────────────────────────
