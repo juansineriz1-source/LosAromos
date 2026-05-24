@@ -1312,14 +1312,15 @@ function inicializarVacunacion() {
   // Inicializar modales de raspado y castracion (necesitan DOM listo)
   inicializarRaspado();
   inicializarCastracion();
+  inicializarInsMasiva();
 }
 
 
 function tipoCategoriaVacLocal(tipo) {
   const t = (tipo || '').toUpperCase().trim();
   if (t === 'T')  return 'Toro';
-  if (t === 'TH') return 'Torito';
-  if (t === 'TN') return 'Ternero';
+  if (t === 'TH') return 'Ternera';  // TH = Ternera Hembra
+  if (t === 'TM') return 'Ternero';  // TM = Ternero Macho
   if (t === 'V')  return 'Vaca';
   if (t === 'VQ') return 'Vaquillona';
   return null;
@@ -1658,6 +1659,187 @@ function inicializarCastracion() {
       }
     });
   }
+}
+
+// ─── Inseminación Masiva ───────────────────────────────────────────────────────
+function inicializarInsMasiva() {
+  const modal       = document.getElementById('modal-ins-masiva');
+  const btnAbrir    = document.getElementById('btn-abrir-ins-masiva');
+  const btnCerrar   = document.getElementById('btn-cerrar-ins-masiva');
+  const btnGuardar  = document.getElementById('btn-guardar-ins-masiva');
+  const btnSelTodos = document.getElementById('ins-masiva-sel-todos');
+  const btnDeselTodos = document.getElementById('ins-masiva-desel-todos');
+  const lista       = document.getElementById('ins-masiva-lista');
+  const contador    = document.getElementById('ins-masiva-contador');
+  const inputFecha  = document.getElementById('ins-masiva-fecha');
+  const partoPreview = document.getElementById('ins-masiva-parto-preview');
+  const partoFecha  = document.getElementById('ins-masiva-parto-fecha');
+
+  if (!btnAbrir || !modal) return;
+
+  // Solo hembras
+  const esFembraIns = tipo => {
+    const t = (tipo || '').toUpperCase().trim();
+    return ['V','VQ','V1','V2','V3','V4','V5','V6','V CUT','TH'].includes(t);
+  };
+
+  let _selIns = new Set();
+  let _catActualIns = '';
+
+  // Fecha hoy por defecto
+  const hoyISO = new Date().toISOString().slice(0,10);
+  if (inputFecha) inputFecha.value = hoyISO;
+
+  // Calcular parto +283 días
+  function calcPartoPreview() {
+    if (!inputFecha?.value) { partoPreview.style.display='none'; return; }
+    const [y,m,d] = inputFecha.value.split('-').map(Number);
+    const parto = new Date(y, m-1, d);
+    parto.setDate(parto.getDate() + 283);
+    partoFecha.textContent = parto.toLocaleDateString('es-AR');
+    partoPreview.style.display = 'block';
+  }
+  inputFecha?.addEventListener('change', calcPartoPreview);
+  calcPartoPreview();
+
+  function actualizarContadorIns() {
+    if (contador) contador.textContent = `${_selIns.size} seleccionadas`;
+  }
+
+  function renderListaIns() {
+    if (!lista) return;
+    const animales = getAnimales().filter(a => esFembraIns(a.tipo));
+    const filtrados = _catActualIns
+      ? animales.filter(a => (a.tipo||'').toUpperCase().trim() === _catActualIns)
+      : animales;
+
+    lista.innerHTML = filtrados.length === 0
+      ? '<p style="color:#9ca3af;font-size:13px;text-align:center;padding:20px 0;">Sin animales en esta categoría</p>'
+      : filtrados.map(a => {
+          const id = a.boton || a.caravana || a._rowIndex;
+          const sel = _selIns.has(String(id));
+          return `<label class="masiva-animal-row ${sel ? 'seleccionado' : ''}">
+            <input type="checkbox" class="ins-masiva-check" data-id="${id}"
+              data-boton="${a.boton||''}" data-caravana="${a.caravana||''}" data-tipo="${a.tipo||''}"
+              ${sel ? 'checked' : ''}>
+            <span class="masiva-animal-info">
+              <span class="masiva-animal-id">${a.boton ? '🔖 '+a.boton : '🏷 '+a.caravana}</span>
+              <span class="masiva-animal-tipo">${a.tipo||'—'} · ${a.estado||'—'}</span>
+            </span>
+          </label>`;
+        }).join('');
+
+    lista.querySelectorAll('.ins-masiva-check').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const id = cb.dataset.id;
+        if (cb.checked) _selIns.add(id); else _selIns.delete(id);
+        cb.closest('label').classList.toggle('seleccionado', cb.checked);
+        actualizarContadorIns();
+      });
+    });
+    actualizarContadorIns();
+  }
+
+  // Filtros de categoría
+  document.querySelectorAll('[data-cat-ins]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-cat-ins]').forEach(b => b.classList.remove('activo'));
+      btn.classList.add('activo');
+      _catActualIns = btn.dataset.catIns || '';
+      renderListaIns();
+    });
+  });
+
+  btnSelTodos?.addEventListener('click', () => {
+    lista.querySelectorAll('.ins-masiva-check').forEach(cb => {
+      cb.checked = true; _selIns.add(cb.dataset.id);
+      cb.closest('label').classList.add('seleccionado');
+    });
+    actualizarContadorIns();
+  });
+
+  btnDeselTodos?.addEventListener('click', () => {
+    lista.querySelectorAll('.ins-masiva-check').forEach(cb => {
+      cb.checked = false; _selIns.delete(cb.dataset.id);
+      cb.closest('label').classList.remove('seleccionado');
+    });
+    actualizarContadorIns();
+  });
+
+  btnAbrir?.addEventListener('click', () => {
+    _selIns.clear();
+    _catActualIns = '';
+    document.querySelectorAll('[data-cat-ins]').forEach(b => b.classList.remove('activo'));
+    document.querySelector('[data-cat-ins=""]')?.classList.add('activo');
+    calcPartoPreview();
+    renderListaIns();
+    modal.classList.remove('oculto');
+  });
+
+  btnCerrar?.addEventListener('click', () => modal.classList.add('oculto'));
+  modal?.addEventListener('click', e => { if (e.target === modal) modal.classList.add('oculto'); });
+
+  // Guardar
+  btnGuardar?.addEventListener('click', async () => {
+    const fecha  = inputFecha?.value;
+    const semen  = document.getElementById('ins-masiva-semen')?.value.trim();
+    const metodo = document.getElementById('ins-masiva-metodo')?.value || 'IA';
+    const obs    = document.getElementById('ins-masiva-obs')?.value.trim() || '';
+
+    if (!fecha) { mostrarToast('Ingresá la fecha de inseminación'); return; }
+    if (!semen) { mostrarToast('Ingresá el toro o semen utilizado'); return; }
+    if (_selIns.size === 0) { mostrarToast('Seleccioná al menos un animal'); return; }
+
+    // Calcular fecha parto
+    const [fy,fm,fd] = fecha.split('-').map(Number);
+    const parto = new Date(fy, fm-1, fd);
+    parto.setDate(parto.getDate() + 283);
+    const fechaAR = `${String(fd).padStart(2,'0')}/${String(fm).padStart(2,'0')}/${fy}`;
+    const partoAR = parto.toLocaleDateString('es-AR').replace(/\//g,'/');
+    const operador = localStorage.getItem('rodeo_operador') || 'Admin';
+
+    btnGuardar.disabled = true;
+    btnGuardar.textContent = 'Registrando...';
+    const progreso = document.getElementById('ins-masiva-progreso');
+    if (progreso) { progreso.classList.remove('oculto'); progreso.textContent = 'Preparando...'; }
+
+    // Buscar animales seleccionados
+    const animalesSelec = getAnimales().filter(a => {
+      const id = a.boton || a.caravana || a._rowIndex;
+      return _selIns.has(String(id)) && esFembraIns(a.tipo);
+    });
+
+    let ok = 0, errores = 0;
+    for (const a of animalesSelec) {
+      try {
+        if (progreso) progreso.textContent = `Registrando ${ok+1}/${animalesSelec.length}...`;
+        await registrarInseminacion({
+          caravana:             a.caravana || '',
+          boton:                a.boton    || '',
+          fecha_inseminacion:   fechaAR,
+          semen_toro:           semen,
+          metodo,
+          fecha_parto_esperada: partoAR,
+          observaciones:        obs,
+        }, operador);
+        ok++;
+      } catch(e) {
+        console.error('[ins-masiva]', a.boton || a.caravana, e);
+        errores++;
+      }
+    }
+
+    if (progreso) progreso.classList.add('oculto');
+    btnGuardar.disabled = false;
+    btnGuardar.textContent = '🐄 Registrar inseminación masiva';
+
+    mostrarToast(`✅ ${ok} inseminaciones registradas${errores ? ` (${errores} errores)` : ''}`);
+    if (ok > 0) {
+      modal.classList.add('oculto');
+      await cargarInseminaciones();
+      renderizarPanelVacunacion();
+    }
+  });
 }
 
 function construirManualHTML() {

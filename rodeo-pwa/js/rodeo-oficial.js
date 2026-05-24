@@ -58,10 +58,10 @@ export function inicializarRodeoOficial(onToast, esAdmin) {
   const panel      = document.getElementById('panel-filtros');
 
   // Toggle abrir/cerrar panel
-  if (btnToggle) {
+  if (btnToggle && panel) {
     btnToggle.addEventListener('click', () => {
       _panelFiltrosAbierto = !_panelFiltrosAbierto;
-      panel.style.display   = _panelFiltrosAbierto ? 'block' : 'none';
+      panel.classList.toggle('panel-filtros-visible', _panelFiltrosAbierto);
       btnToggle.classList.toggle('activo', _panelFiltrosAbierto);
     });
   }

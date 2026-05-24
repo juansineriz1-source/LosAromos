@@ -2967,11 +2967,15 @@ html { scroll-behavior: smooth; }
 
 /* Panel contenedor (desplegable) */
 .panel-filtros {
+  display: none;        /* oculto por defecto */
   margin-top: 12px;
   border: 1.5px solid var(--borde);
   border-radius: var(--radio-grande);
   overflow: hidden;
   animation: fadeIn .18s ease;
+}
+.panel-filtros-visible {
+  display: block !important;
 }
 
 /* Divisor entre secciones */
