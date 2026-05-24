@@ -1154,14 +1154,21 @@ function inicializarVacunacion() {
     return '';
   }
 
+  let _busquedaMasiva = '';
+
   function renderListaMasiva() {
     const animalesRef = typeof getAnimales === 'function' ? getAnimales() : [];
     const lista = document.getElementById('masiva-lista-animales');
     const contador = document.getElementById('masiva-contador');
     if (!lista) return;
-    const filtrados = _catMasiva
-      ? animalesRef.filter(a => tipoCatMasiva(a.tipo) === _catMasiva)
-      : animalesRef;
+    const q = _busquedaMasiva.toLowerCase();
+    const filtrados = animalesRef.filter(a => {
+      const catOk = !_catMasiva || tipoCatMasiva(a.tipo) === _catMasiva;
+      const busOk = !q ||
+        (a.boton    || '').toLowerCase().includes(q) ||
+        (a.caravana || '').toLowerCase().includes(q);
+      return catOk && busOk;
+    });
     lista.innerHTML = filtrados.map((a) => {
       const globalIdx = animalesRef.indexOf(a);
       const selec = _selMasiva.has(globalIdx);
@@ -1191,11 +1198,14 @@ function inicializarVacunacion() {
       const mLote    = document.getElementById('masiva-lote');
       const mVet     = document.getElementById('masiva-vet');
       const mProg    = document.getElementById('masiva-progreso');
+      const mBuscar  = document.getElementById('masiva-buscar');
       if (mFecha)  mFecha.value  = hoy;
       if (mVacuna) mVacuna.value = '';
       if (mLote)   mLote.value   = '';
       if (mVet)    mVet.value    = '';
       if (mProg)   mProg.classList.add('oculto');
+      if (mBuscar) mBuscar.value = '';
+      _busquedaMasiva = '';
       _catMasiva = '';
       const animalesRef = typeof getAnimales === 'function' ? getAnimales() : [];
       _selMasiva = new Set(animalesRef.map((_, i) => i));
@@ -1204,6 +1214,10 @@ function inicializarVacunacion() {
       if (todosBtn) todosBtn.classList.add('activo');
       renderListaMasiva();
       if (modalMasiva) modalMasiva.classList.remove('oculto');
+      // Wire search input
+      if (mBuscar) {
+        mBuscar.oninput = () => { _busquedaMasiva = mBuscar.value.trim(); renderListaMasiva(); };
+      }
     });
   }
 
@@ -1215,11 +1229,7 @@ function inicializarVacunacion() {
       document.querySelectorAll('.masiva-cat-btn').forEach(b => b.classList.remove('activo'));
       btn.classList.add('activo');
       _catMasiva = btn.dataset.cat || '';
-      const animalesRef = typeof getAnimales === 'function' ? getAnimales() : [];
-      animalesRef
-        .map((a, i) => ({ a, i }))
-        .filter(({ a }) => !_catMasiva || tipoCatMasiva(a.tipo) === _catMasiva)
-        .forEach(({ i }) => _selMasiva.add(i));
+      // Solo filtra la vista — NO agrega/quita selecciones automáticamente
       renderListaMasiva();
     });
   });
@@ -1685,6 +1695,7 @@ function inicializarInsMasiva() {
 
   let _selIns = new Set();
   let _catActualIns = '';
+  let _busquedaIns  = '';
 
   // Fecha hoy por defecto
   const hoyISO = new Date().toISOString().slice(0,10);
@@ -1708,10 +1719,15 @@ function inicializarInsMasiva() {
 
   function renderListaIns() {
     if (!lista) return;
+    const q = _busquedaIns.toLowerCase();
     const animales = getAnimales().filter(a => esFembraIns(a.tipo));
-    const filtrados = _catActualIns
-      ? animales.filter(a => (a.tipo||'').toUpperCase().trim() === _catActualIns)
-      : animales;
+    const filtrados = animales.filter(a => {
+      const catOk = !_catActualIns || (a.tipo||'').toUpperCase().trim() === _catActualIns;
+      const busOk = !q ||
+        (a.boton    || '').toLowerCase().includes(q) ||
+        (a.caravana || '').toLowerCase().includes(q);
+      return catOk && busOk;
+    });
 
     lista.innerHTML = filtrados.length === 0
       ? '<p style="color:#9ca3af;font-size:13px;text-align:center;padding:20px 0;">Sin animales en esta categoría</p>'
@@ -1776,6 +1792,12 @@ function inicializarInsMasiva() {
   btnAbrir?.addEventListener('click', () => {
     _selIns.clear();
     _catActualIns = '';
+    _busquedaIns  = '';
+    const buscarInp = document.getElementById('ins-masiva-buscar');
+    if (buscarInp) {
+      buscarInp.value = '';
+      buscarInp.oninput = () => { _busquedaIns = buscarInp.value.trim(); renderListaIns(); };
+    }
     document.querySelectorAll('[data-cat-ins]').forEach(b => b.classList.remove('activo'));
     document.querySelector('[data-cat-ins=""]')?.classList.add('activo');
     calcPartoPreview();
