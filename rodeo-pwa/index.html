@@ -659,6 +659,46 @@
     </div>
   </div>
 
+<!-- Modal registrar inseminacion -->
+<div id="modal-registrar-ins" class="vac-modal-overlay oculto">
+  <div class="vac-modal-card">
+    <div class="vac-modal-header">
+      <h2>🐄 Registrar Inseminación</h2>
+      <button id="btn-cerrar-modal-ins">✕</button>
+    </div>
+    <div class="vac-modal-body">
+      <p id="reg-ins-animal-label" style="font-weight:700; color:#1a5c30; margin-bottom:12px;"></p>
+
+      <label class="campo-label">Fecha de inseminación</label>
+      <input type="date" id="reg-ins-fecha" class="vac-input">
+
+      <label class="campo-label" style="margin-top:14px;">Toro / Código de semen</label>
+      <input type="text" id="reg-ins-semen" class="vac-input" placeholder="Ej: Angus XA-2024 / Nombre del toro">
+
+      <label class="campo-label" style="margin-top:14px;">Método</label>
+      <select id="reg-ins-metodo" class="vac-select">
+        <option value="Inseminacion Artificial">Inseminación Artificial</option>
+        <option value="Servicio Natural">Servicio Natural</option>
+        <option value="IATF">IATF (Inseminación a Tiempo Fijo)</option>
+      </select>
+
+      <label class="campo-label" style="margin-top:14px;">Observaciones</label>
+      <textarea id="reg-ins-obs" class="vac-textarea" placeholder="Notas adicionales..."></textarea>
+
+      <!-- Calculadora de parto (se actualiza al cambiar fecha) -->
+      <div id="reg-ins-calc" class="vac-ins-calc oculto">
+        <div class="vac-ins-calc-titulo">📅 Fecha estimada de parto</div>
+        <div class="vac-ins-calc-fecha" id="reg-ins-fecha-parto"></div>
+        <div class="vac-ins-calc-sub" id="reg-ins-dias-parto"></div>
+        <div class="vac-ins-vacunas-titulo">💉 Ventanas de vacunación preparto</div>
+        <div id="reg-ins-vacunas-list" class="vac-ins-vacunas-list"></div>
+      </div>
+
+      <button id="btn-guardar-reg-ins" class="btn-guardar-grande" style="margin-top:20px;">💾 Guardar Inseminación</button>
+    </div>
+  </div>
+</div>
+
   <!-- Modal registrar vacunación -->
   <div id="modal-registrar-vac" class="vac-modal-overlay oculto">
     <div class="vac-modal-card">

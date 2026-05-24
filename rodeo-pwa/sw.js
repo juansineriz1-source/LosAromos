@@ -19,7 +19,7 @@ const { core, precaching, routing, strategies, backgroundSync, expiration } = wo
 // ─── Configuración base ─────────────────────────────────────────────────────
 core.setCacheNameDetails({
   prefix: 'rodeo-pwa',
-  suffix: 'v17',
+  suffix: 'v18',
 });
 
 core.skipWaiting();
@@ -31,8 +31,9 @@ precaching.precacheAndRoute([
   { url: '/', revision: '10' },
   { url: '/index.html', revision: '10' },
   { url: '/css/estilos.css', revision: '10' },
-  { url: '/js/app.js', revision: '10' },
+  { url: '/js/app.js', revision: '11' },
   { url: '/js/vacunas.js', revision: '1' },
+  { url: '/js/inseminaciones.js', revision: '1' },
   { url: '/js/db.js', revision: '9' },
   { url: '/js/bluetooth.js', revision: '9' },
   { url: '/js/sync.js', revision: '9' },

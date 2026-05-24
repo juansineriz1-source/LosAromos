@@ -19,6 +19,7 @@ import { inicializarCalendario, cargarFeedHoy } from './calendario.js';
 import { inicializarRodeoOficial, cargarRodeoOficial, filtrarRodeo, getAnimales } from './rodeo-oficial.js';
 import { initAgenda, cargarAgenda } from './agenda.js';
 import { cargarVacunas, calcularAlertasGlobales, estadoVacunasAnimal, registrarVacunacion, getVacunasData } from './vacunas.js';
+import { cargarInseminaciones, getInseminacionesData, getInseminacionAnimal, calcularGestacion, alertasPrepartoAnimal, alertasInseminacionGlobales, registrarInseminacion } from './inseminaciones.js';
 
 // ─── Usuarios y roles ─────────────────────────────────────────────────────────
 // Mapa base (se sobreescribe con datos de la hoja "Usuarios" al iniciar)
@@ -991,6 +992,7 @@ function inicializarVacunacion() {
   btnAbrir.addEventListener('click', async () => {
     panel.classList.remove('oculto');
     await cargarVacunas();
+    await cargarInseminaciones();
     renderizarPanelVacunacion();
   });
 
@@ -1028,6 +1030,7 @@ function inicializarVacunacion() {
       mostrarToast('✅ Vacunación registrada');
       modalReg.classList.add('oculto');
       await cargarVacunas();
+      await cargarInseminaciones();
       renderizarPanelVacunacion();
     } catch (e) {
       mostrarToast('Error al guardar — intentá de nuevo');
@@ -1045,6 +1048,92 @@ function inicializarVacunacion() {
       renderizarPanelVacunacion(chip.dataset.cat || '');
     });
   });
+
+  // Modal inseminacion
+  const modalIns    = document.getElementById('modal-registrar-ins');
+  const btnCerrarI  = document.getElementById('btn-cerrar-modal-ins');
+  const btnGuardarI = document.getElementById('btn-guardar-reg-ins');
+  const fechaInput  = document.getElementById('reg-ins-fecha');
+
+  if (btnCerrarI)  btnCerrarI.addEventListener('click', () => modalIns.classList.add('oculto'));
+  if (modalIns)    modalIns.addEventListener('click', e => { if (e.target === modalIns) modalIns.classList.add('oculto'); });
+
+  // Calculadora de parto en tiempo real
+  if (fechaInput) {
+    fechaInput.addEventListener('change', () => {
+      const calc  = document.getElementById('reg-ins-calc');
+      const fParto= document.getElementById('reg-ins-fecha-parto');
+      const dParto= document.getElementById('reg-ins-dias-parto');
+      const vList = document.getElementById('reg-ins-vacunas-list');
+
+      if (!fechaInput.value) { calc.classList.add('oculto'); return; }
+      const fechaIns  = new Date(fechaInput.value);
+      const fechaParto= new Date(fechaIns.getTime() + 283 * 86400000);
+      const diasParto = Math.floor((fechaParto - new Date()) / 86400000);
+
+      fParto.textContent = fechaParto.toLocaleDateString('es-AR');
+      dParto.textContent = diasParto > 0 ? `Faltan ${diasParto} días` : diasParto === 0 ? '¡HOY!' : 'Fecha pasada';
+
+      // Calcular ventanas de vacunacion
+      const GESTACION = 283;
+      const diasDesde = Math.floor((new Date() - fechaIns) / 86400000);
+      const VENTANAS = [
+        { label: 'Diarrea Neonatal 1ª dosis', dia: 210 },
+        { label: 'Diarrea Neonatal 2ª + Clostridiales', dia: 240 },
+        { label: 'IBR+DVB+Lepto (preparto)', dia: GESTACION - 60 },
+        { label: 'Clostridiales refuerzo final', dia: GESTACION - 30 },
+      ];
+      vList.innerHTML = VENTANAS.map(v => {
+        const fechaV = new Date(fechaIns.getTime() + v.dia * 86400000);
+        const diasV  = Math.floor((fechaV - new Date()) / 86400000);
+        const estado = diasV < 0 ? 'pasado' : diasV <= 10 ? 'urgente' : 'proximo';
+        const color  = estado === 'urgente' ? '#e65100' : estado === 'pasado' ? '#9ca3af' : '#1a5c30';
+        return `<div class="vac-ins-vacuna-row">
+          <span class="vac-ins-vacuna-nombre" style="color:${estado==='pasado'?'#9ca3af':''}">${v.label}</span>
+          <span class="vac-ins-vacuna-fecha" style="color:${color}">${fechaV.toLocaleDateString('es-AR')} ${diasV<0?'(pasado)':diasV<=10?'(PRONTO!)':''}</span>
+        </div>`;
+      }).join('');
+
+      calc.classList.remove('oculto');
+    });
+  }
+
+  if (btnGuardarI) {
+    btnGuardarI.addEventListener('click', async () => {
+      if (!_animalParaVacunar) return;
+      const fecha = document.getElementById('reg-ins-fecha').value;
+      if (!fecha) { mostrarToast('Ingresa la fecha de inseminacion'); return; }
+
+      btnGuardarI.textContent = 'Guardando...';
+      btnGuardarI.disabled = true;
+      try {
+        const fechaAR = fecha.split('-').reverse().join('/');
+        const result = await registrarInseminacion({
+          caravana:           _animalParaVacunar.caravana || '',
+          boton:              _animalParaVacunar.boton    || '',
+          fecha_inseminacion: fechaAR,
+          semen_toro:         document.getElementById('reg-ins-semen').value,
+          metodo:             document.getElementById('reg-ins-metodo').value,
+          observaciones:      document.getElementById('reg-ins-obs').value,
+          estado:             'en_servicio',
+        }, typeof estado !== 'undefined' ? estado.operador : 'sistema');
+
+        if (result.fecha_parto_esperada) {
+          mostrarToast(`✅ Guardado. Parto estimado: ${result.fecha_parto_esperada}`);
+        } else {
+          mostrarToast('✅ Inseminacion registrada');
+        }
+        modalIns.classList.add('oculto');
+        await cargarInseminaciones();
+        renderizarPanelVacunacion();
+      } catch(e) {
+        mostrarToast('Error al guardar — intenta de nuevo');
+      } finally {
+        btnGuardarI.textContent = '💾 Guardar Inseminación';
+        btnGuardarI.disabled = false;
+      }
+    });
+  }
 }
 
 function tipoCategoriaVacLocal(tipo) {
@@ -1061,18 +1150,23 @@ function renderizarPanelVacunacion(filtroCategoria = '') {
   const _animales = getAnimales();
   if (!_animales || !_animales.length) return;
   const vacunasData = getVacunasData();
+  const insData = getInseminacionesData();
 
-  // Alertas globales
+  // Alertas de inseminacion/parto
+  const alertasIns = alertasInseminacionGlobales(_animales || [], insData);
+
+  // Alertas globales de vacunas
   const alertas = calcularAlertasGlobales(_animales, vacunasData);
   const contAlerta = document.getElementById('vac-alertas-container');
   if (contAlerta) {
-    contAlerta.innerHTML = alertas.length
-      ? alertas.map(a => `
+    const todasAlertas = [...alertas, ...alertasIns];
+    contAlerta.innerHTML = todasAlertas.length
+      ? todasAlertas.map(a => `
         <div class="vac-alerta-card vac-alerta-${a.nivel}">
           <span class="vac-alerta-icono">${a.icono}</span>
           <span>${a.texto}</span>
         </div>`).join('')
-      : '<div class="vac-alerta-card" style="background:#e8f5e9;color:#1a5c30;border:1px solid #c8e6c9;"><span class="vac-alerta-icono">✅</span><span>Sin alertas urgentes al día de hoy</span></div>';
+      : '<div class="vac-alerta-card" style="background:#e8f5e9;color:#1a5c30;border:1px solid #c8e6c9;"><span class="vac-alerta-icono">✅</span><span>Sin alertas urgentes al dia de hoy</span></div>';
   }
 
   // Lista de animales
@@ -1092,25 +1186,46 @@ function renderizarPanelVacunacion(filtroCategoria = '') {
   lista.innerHTML = animalesFiltrados.slice(0, 80).map((a, idx) => {
     // idx relativo al array completo para la funcion global
     const idxGlobal = _animales.indexOf(a);
-    const estados   = estadoVacunasAnimal(a, vacunasData);
+    const estados = estadoVacunasAnimal(a, vacunasData);
     const hayUrgente = estados.some(e => e.urgente);
-    const dotsHtml   = estados.map(e => `
+    const ins = getInseminacionAnimal(a, insData);
+    const gest = ins ? calcularGestacion(ins) : null;
+    const alertasPrep = ins ? alertasPrepartoAnimal(ins).filter(v => v.nivel === 'urgente') : [];
+    const hayAlertaParto = alertasPrep.length > 0;
+
+    // Barra de gestacion
+    const barraGest = gest ? `
+      <div class="vac-gest-wrap">
+        <div class="vac-gest-header">
+          <span class="vac-gest-label">🐄 Gest. mes ${gest.mesGestacion} de 9</span>
+          <span class="vac-gest-parto">Parto: ${gest.fechaParto ? gest.fechaParto.toLocaleDateString('es-AR') : '—'} ${gest.diasParaParto !== null ? '(' + gest.diasParaParto + 'd)' : ''}</span>
+        </div>
+        <div class="vac-gest-bar-bg">
+          <div class="vac-gest-bar-fill" style="width:${gest.pct}%"></div>
+        </div>
+        ${gest.semen_toro ? `<div class="vac-gest-semen">🧬 ${gest.semen_toro}</div>` : ''}
+        ${alertasPrep.length ? `<div class="vac-gest-alerta">💉 ${alertasPrep[0].texto}</div>` : ''}
+      </div>` : '';
+
+    const dotsHtml = estados.map(e => `
       <div class="vac-dot-item ${e.estado}">
         <div class="vac-dot"></div>
-        ${e.vacuna.split(' ')[0].replace('(Campana', '').replace(')', '').trim()}
+        ${e.vacuna.split(' ')[0].replace('(Campana','').replace(')','').trim()}
       </div>`).join('');
 
     return `
-      <div class="vac-animal-card" style="${hayUrgente ? 'border-color:#ffcdd2;' : ''}">
+      <div class="vac-animal-card" style="${(hayUrgente || hayAlertaParto) ? 'border-color:#ffcdd2;' : ''}">
         <div class="vac-animal-card-header">
           <div>
             <div class="vac-animal-nombre">🐄 ${a.boton || a.caravana || '—'}</div>
             <div class="vac-animal-sub">${a.caravana ? 'CAR: ' + a.caravana + ' · ' : ''}${a.tipo || '—'} · ${a.estado || '—'}</div>
           </div>
-          <button class="vac-btn-registrar" onclick="abrirRegistroVacuna(${idxGlobal})">
-            + Registrar
-          </button>
+          <div style="display:flex;gap:6px;">
+            <button class="vac-btn-ins" onclick="abrirRegistroInseminacion(${idxGlobal})" title="Registrar inseminacion">🐄+</button>
+            <button class="vac-btn-registrar" onclick="abrirRegistroVacuna(${idxGlobal})">+ Vacuna</button>
+          </div>
         </div>
+        ${barraGest}
         <div class="vac-dots-row">${dotsHtml || '<span style="color:#9ca3af;font-size:12px;">Sin datos registrados</span>'}</div>
       </div>`;
   }).join('');
@@ -1131,6 +1246,24 @@ function abrirRegistroVacuna(idx) {
   document.getElementById('modal-registrar-vac').classList.remove('oculto');
 }
 window.abrirRegistroVacuna = abrirRegistroVacuna;
+
+function abrirRegistroInseminacion(idx) {
+  const animalesRef = typeof getAnimales === 'function' ? getAnimales() : [];
+  const a = animalesRef[idx];
+  if (!a) return;
+  _animalParaVacunar = a;
+  document.getElementById('reg-ins-animal-label').textContent =
+    `Animal: ${a.boton || a.caravana || '—'} · Tipo: ${a.tipo || '—'} · Estado: ${a.estado || '—'}`;
+  const hoy = new Date().toISOString().split('T')[0];
+  document.getElementById('reg-ins-fecha').value = hoy;
+  document.getElementById('reg-ins-semen').value = '';
+  document.getElementById('reg-ins-obs').value = '';
+  document.getElementById('reg-ins-calc').classList.add('oculto');
+  document.getElementById('modal-registrar-ins').classList.remove('oculto');
+  // Trigger el calculo
+  document.getElementById('reg-ins-fecha').dispatchEvent(new Event('change'));
+}
+window.abrirRegistroInseminacion = abrirRegistroInseminacion;
 
 function construirManualHTML() {
   const VACUNAS_INFO = [

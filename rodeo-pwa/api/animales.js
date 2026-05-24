@@ -112,6 +112,45 @@ export default async function handler(req, res) {
         if (!appendResp.ok) throw new Error(`Sheets append error: ${appendResp.status}`);
         return res.status(200).json({ ok: true });
       }
+
+      if (body.modo === 'registro-inseminacion') {
+        // Verificar que exista la hoja
+        const urlInsH = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent('Inseminaciones!A1:A1')}`;
+        const chkIns = await fetch(urlInsH, { headers: { Authorization: `Bearer ${token}` } });
+        if (!chkIns.ok) return res.status(404).json({ error: 'Hoja Inseminaciones no encontrada. Corre el Apps Script primero.' });
+
+        // Calcular fecha de parto esperada
+        const fechaIns = body.fecha_inseminacion ? new Date(body.fecha_inseminacion.split('/').reverse().join('-')) : new Date();
+        const fechaParto = new Date(fechaIns.getTime() + 283 * 86400000);
+        const fmt = d => d.toLocaleDateString('es-AR');
+
+        const newRow = [
+          body.caravana            || '',
+          body.boton               || '',
+          body.fecha_inseminacion  || fmt(new Date()),
+          body.semen_toro          || '',
+          body.metodo              || 'Inseminacion Artificial',
+          fmt(fechaParto),           // fecha_parto_esperada calculada automaticamente
+          '',                        // dias_para_parto (calculado en el cliente)
+          '',                        // mes_gestacion (calculado en el cliente)
+          body.estado              || 'en_servicio',
+          body.fecha_tacto         || '',
+          '',                        // fecha_parto_real
+          body.operador            || '',
+          body.observaciones       || '',
+          new Date().toLocaleString('es-AR'),
+        ];
+
+        const appendUrlIns = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent('Inseminaciones!A:N')}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
+        const appendRespIns = await fetch(appendUrlIns, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ values: [newRow] }),
+        });
+        if (!appendRespIns.ok) throw new Error(`Sheets append error inseminacion: ${appendRespIns.status}`);
+        return res.status(200).json({ ok: true, fecha_parto_esperada: fmt(fechaParto) });
+      }
+
       return res.status(400).json({ error: 'modo no reconocido' });
     }
 
@@ -182,6 +221,34 @@ export default async function handler(req, res) {
       });
 
       return res.status(200).json({ historial, porVacuna });
+    }
+
+    // ── MODO: lista de inseminaciones ──────────────────────────────────────────
+    if (modo === 'inseminaciones') {
+      const urlIns  = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent('Inseminaciones!A:N')}`;
+      const respIns = await fetch(urlIns, { headers: { Authorization: `Bearer ${token}` } });
+      if (!respIns.ok) return res.status(200).json({ inseminaciones: [] });
+      const filasIns = (await respIns.json()).values || [];
+      if (filasIns.length <= 1) return res.status(200).json({ inseminaciones: [] });
+
+      const hdrs = filasIns[0].map(h => (h || '').toLowerCase().trim());
+      const gc   = (fila, nombre) => fila[hdrs.indexOf(nombre)] || '';
+
+      const inseminaciones = filasIns.slice(1).map(fila => ({
+        caravana:            gc(fila, 'caravana'),
+        boton:               gc(fila, 'boton'),
+        fecha_inseminacion:  gc(fila, 'fecha_inseminacion'),
+        semen_toro:          gc(fila, 'semen_toro'),
+        metodo:              gc(fila, 'metodo'),
+        fecha_parto_esperada:gc(fila, 'fecha_parto_esperada'),
+        estado:              gc(fila, 'estado') || 'en_servicio',
+        fecha_tacto:         gc(fila, 'fecha_tacto'),
+        fecha_parto_real:    gc(fila, 'fecha_parto_real'),
+        operador:            gc(fila, 'operador'),
+        observaciones:       gc(fila, 'observaciones'),
+        timestamp:           gc(fila, 'timestamp'),
+      }));
+      return res.status(200).json({ inseminaciones });
     }
 
     // ── MODO: lista de usuarios desde hoja Usuarios ───────────────────────────

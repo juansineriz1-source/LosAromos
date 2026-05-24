@@ -3970,3 +3970,122 @@ html { scroll-behavior: smooth; }
   background: #1a5c30;
   color: #fff;
 }
+
+/* ─── INSEMINACION / GESTACION ────────────────────────────────────────────── */
+
+.vac-btn-ins {
+  height: 36px;
+  padding: 0 10px;
+  background: #e8f5e9;
+  color: #1a5c30;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Bloque de gestacion en cada animal card */
+.vac-gest-wrap {
+  background: linear-gradient(135deg, #e8f5e9, #f1f8f3);
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin: 10px 0 8px;
+  border: 1px solid #c8e6c9;
+}
+.vac-gest-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.vac-gest-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1a5c30;
+}
+.vac-gest-parto {
+  font-size: 11px;
+  font-weight: 700;
+  color: #2e7d52;
+}
+.vac-gest-bar-bg {
+  width: 100%;
+  height: 6px;
+  background: #c8e6c9;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.vac-gest-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #2e7d52, #4caf50);
+  border-radius: 10px;
+  transition: width 0.5s ease;
+}
+.vac-gest-semen {
+  font-size: 11px;
+  color: #6b7a6e;
+  margin-top: 5px;
+}
+.vac-gest-alerta {
+  font-size: 11px;
+  color: #e65100;
+  font-weight: 700;
+  margin-top: 5px;
+  background: #fff3e0;
+  border-radius: 6px;
+  padding: 3px 8px;
+}
+
+/* Calculadora de parto en el modal */
+.vac-ins-calc {
+  background: #e8f5e9;
+  border-radius: 14px;
+  padding: 16px;
+  margin-top: 16px;
+  border: 1px solid #c8e6c9;
+}
+.vac-ins-calc-titulo {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6b7a6e;
+  margin-bottom: 6px;
+}
+.vac-ins-calc-fecha {
+  font-family: 'Manrope', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: #1a5c30;
+}
+.vac-ins-calc-sub {
+  font-size: 12px;
+  color: #6b7a6e;
+  margin-bottom: 12px;
+}
+.vac-ins-vacunas-titulo {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #6b7a6e;
+  margin-bottom: 6px;
+  border-top: 1px solid #c8e6c9;
+  padding-top: 10px;
+}
+.vac-ins-vacunas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.vac-ins-vacuna-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  padding: 5px 8px;
+  background: #fff;
+  border-radius: 8px;
+}
+.vac-ins-vacuna-nombre { font-weight: 600; color: #111827; }
+.vac-ins-vacuna-fecha  { color: #2e7d52; font-weight: 700; }
+
