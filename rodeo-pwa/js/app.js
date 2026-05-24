@@ -1308,6 +1308,10 @@ function inicializarVacunacion() {
       }
     });
   }
+
+  // Inicializar modales de raspado y castracion (necesitan DOM listo)
+  inicializarRaspado();
+  inicializarCastracion();
 }
 
 
@@ -1504,7 +1508,7 @@ function abrirRegistroRaspado(idx) {
 window.abrirRegistroRaspado = abrirRegistroRaspado;
 
 // Inicializar listeners del modal de raspado
-(function inicializarRaspado() {
+function inicializarRaspado() {
   const modalRasp    = document.getElementById('modal-registrar-raspado');
   const btnCerrarR   = document.getElementById('btn-cerrar-modal-rasp');
   const btnGuardarR  = document.getElementById('btn-guardar-reg-rasp');
@@ -1573,7 +1577,7 @@ window.abrirRegistroRaspado = abrirRegistroRaspado;
       }
     });
   }
-})();
+}
 
 // ─── CASTRACIÓN ───────────────────────────────────────────────────────────────
 function abrirRegistroCastracion(idx) {
@@ -1594,7 +1598,7 @@ function abrirRegistroCastracion(idx) {
 }
 window.abrirRegistroCastracion = abrirRegistroCastracion;
 
-(function inicializarCastracion() {
+function inicializarCastracion() {
   const modalCast   = document.getElementById('modal-registrar-castracion');
   const btnCerrarC  = document.getElementById('btn-cerrar-modal-cast');
   const btnGuardarC = document.getElementById('btn-guardar-reg-cast');
