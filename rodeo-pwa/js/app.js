@@ -1374,7 +1374,8 @@ function renderizarPanelVacunacion(filtroCategoria = '') {
 
     // Detectar si es toro o torito
     const tipoUp = (a.tipo || '').toUpperCase().trim();
-    const esToro = tipoUp === 'T' || tipoUp === 'TH';
+    const esToro    = tipoUp === 'T';           // solo Toro (T)
+    const sTernero  = tipoUp === 'TM';          // Ternero Macho
 
     // Último raspado para toros
     let raspBadge = '';
@@ -1395,8 +1396,6 @@ function renderizarPanelVacunacion(filtroCategoria = '') {
       }
     }
 
-    // Detectar si es ternero macho → castración
-    const sTernero = tipoUp === 'TN';
     let castBadge = '';
     if (sTernero) {
       const castRegistros = vacunasData.filter(v =>

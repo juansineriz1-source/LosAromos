@@ -30,13 +30,13 @@ const ETIQUETAS_ESTADO = {
   P: 'Preñada', V: 'Vacía', I: 'Inseminada',          // hembras
   S: 'En servicio', F: 'Fuera servicio', E: 'En engorde', R: 'Retirado',  // machos
 };
-// Tipos macho
-const TIPOS_MACHO = new Set(['T', 'TH', 'TN']);
+// Tipos macho: Toro (T), Torito (TH? no — TH es ternera hembra), Ternero Macho (TM)
+const TIPOS_MACHO = new Set(['T', 'TM']);
 const isMacho = tipo => TIPOS_MACHO.has((tipo || '').toUpperCase().trim());
 // Estados según sexo
 const estadosPorTipo = tipo => isMacho(tipo) ? ESTADOS_MACHO : ESTADOS;
 
-const TIPOS = ['V', 'VQ', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'V CUT', 'TH', 'TM', 'TN', 'T'];
+const TIPOS = ['V', 'VQ', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'V CUT', 'TH', 'TM', 'T'];
 
 const COLORES = ['Negra', 'Colorada'];
 
