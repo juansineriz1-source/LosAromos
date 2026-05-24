@@ -546,12 +546,13 @@ window.abrirDetalleAnimal = function(idx) {
 };
 
 async function _cargarGaleriaEnDetalle(a, idx) {
-  const contenedor = document.getElementById(`det-galeria-${idx}`);
+  const contenedorId = `det-galeria-${idx}`;
+  const contenedor = document.getElementById(contenedorId);
   if (!contenedor) return;
   try {
-    const uuid = await obtenerOCrearAnimalUuid(a.boton, a.caravana);
-    await renderizarGaleriaAnimal(uuid, contenedor, { clickable: true, onFotoClick: src => window.abrirLightbox(src) });
-  } catch {
+    const uuid = obtenerOCrearAnimalUuid(a.boton, a.caravana);
+    renderizarGaleriaAnimal(contenedorId, uuid, a.boton, a.caravana, _esAdmin);
+  } catch(e) {
     contenedor.innerHTML = '<p class="sin-historial" style="font-size:13px;">Sin fotos registradas</p>';
   }
 }
