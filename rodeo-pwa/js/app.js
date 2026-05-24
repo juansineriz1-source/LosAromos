@@ -1656,9 +1656,7 @@ function inicializarCastracion() {
         btnGuardarC.textContent = '💾 Guardar Castración';
         btnGuardarC.disabled = false;
       }
-    });
-  }
-})();
+}
 
 function construirManualHTML() {
   const VACUNAS_INFO = [
