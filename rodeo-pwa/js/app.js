@@ -16,7 +16,7 @@ import { inicializarFotos, cargarListaFotos } from './fotos.js';
 import { inicializarVideos, cargarListaVideos } from './videos.js';
 import { inicializarPush } from './push.js';
 import { inicializarCalendario, cargarFeedHoy } from './calendario.js';
-import { inicializarRodeoOficial, cargarRodeoOficial, filtrarRodeo, getAnimales } from './rodeo-oficial.js';
+import { inicializarRodeoOficial, cargarRodeoOficial, filtrarRodeo, getAnimales, cargarPesos, getPesosData, getPesosAnimal } from './rodeo-oficial.js';
 import { initAgenda, cargarAgenda } from './agenda.js';
 import { cargarVacunas, calcularAlertasGlobales, estadoVacunasAnimal, registrarVacunacion, getVacunasData } from './vacunas.js';
 import { cargarInseminaciones, getInseminacionesData, getInseminacionAnimal, calcularGestacion, alertasPrepartoAnimal, alertasInseminacionGlobales, registrarInseminacion } from './inseminaciones.js';
@@ -334,7 +334,7 @@ async function mostrarTab(nombre) {
 
   // Cargar datos según pestaña
   if (nombre === 'inicio')    await cargarInicio();
-  if (nombre === 'rodeo')     await cargarRodeoOficial();
+  if (nombre === 'rodeo')     { await cargarRodeoOficial(); cargarPesos(); }
   if (nombre === 'agenda')    await cargarAgenda();
   if (nombre === 'recorrida') {
     await cargarListaRecorridas();

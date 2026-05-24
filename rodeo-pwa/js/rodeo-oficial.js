@@ -22,6 +22,7 @@ let _filtros = {
   periodoVacuna: 365,       // días hacia atrás para considerar "este año"
 };
 let _panelFiltrosAbierto = false;
+let _pesosData = []; // cache de pesos cargados
 
 // ─── Opciones de campo ────────────────────────────────────────────────────────
 const ESTADOS          = ['P', 'V', 'I'];          // hembras
@@ -194,6 +195,39 @@ export async function cargarRodeoOficial() {
   }
 }
 
+// ─── Cargar pesos desde Sheets ────────────────────────────────────────────────
+export async function cargarPesos() {
+  try {
+    const resp = await fetch('/api/animales?modo=pesos');
+    const data = await resp.json();
+    _pesosData = data.pesos || [];
+  } catch(e) {
+    console.error('[pesos]', e);
+    _pesosData = [];
+  }
+}
+export function getPesosData() { return _pesosData; }
+
+// ─── Obtener historial de peso de un animal ───────────────────────────────────
+export function getPesosAnimal(animal) {
+  const b = (animal.boton    || '').toUpperCase();
+  const c = (animal.caravana || '').toUpperCase();
+  return _pesosData
+    .filter(p =>
+      (b && p.boton    && p.boton.toUpperCase()    === b) ||
+      (c && p.caravana && p.caravana.toUpperCase() === c)
+    )
+    .sort((a2, b2) => {
+      const parseF = f => {
+        if (!f) return 0;
+        const [d, m, y] = f.split('/');
+        if (!d || !m || !y) return 0;
+        return new Date(`${y}-${m}-${d}`).getTime();
+      };
+      return parseF(b2.fecha) - parseF(a2.fecha);
+    });
+}
+
 // ─── Renderizar lista ─────────────────────────────────────────────────────────
 function renderizarRodeo(animales, total) {
   const contenedor = document.getElementById('rodeo-oficial-lista');
@@ -223,6 +257,13 @@ function renderizarRodeo(animales, total) {
     const tipoClass   = (a.tipo   || '').toLowerCase().replace(' ', '-');
     const colorDot    = a.color === 'Negra' ? '⚫' : a.color === 'Colorada' ? '🟠' : '';
 
+    // Último peso del animal
+    const pesosA   = getPesosAnimal(a);
+    const ultimoPeso = pesosA[0];
+    const pesoBadge = ultimoPeso
+      ? `<span class="peso-ultimo">⚖ ${ultimoPeso.peso_kg} kg</span>`
+      : '';
+
     return `
       <div class="rodeo-of-item rodeo-of-item-tap" data-idx="${idx}" onclick="abrirDetalleAnimal(${idx})">
         <div class="rodeo-of-ids">
@@ -234,6 +275,7 @@ function renderizarRodeo(animales, total) {
             <span class="rodeo-of-tipo  rodeo-tipo-${tipoClass}">${a.tipo   || '—'}</span>
             <span class="rodeo-of-estado rodeo-estado-${estadoClass}">${a.estado || '—'}${a.estado ? ` · ${ETIQUETAS_ESTADO[a.estado] || ''}` : ''}</span>
             ${colorDot ? `<span class="rodeo-of-color">${colorDot} ${a.color}</span>` : ''}
+            ${pesoBadge}
           </div>
         </div>
         ${_esAdmin ? `<button class="rodeo-of-btn-editar" onclick="event.stopPropagation(); abrirEditorAnimal(${idx})">✏️</button>` : '<span class="rodeo-of-chevron">›</span>'}
@@ -481,6 +523,12 @@ window.abrirDetalleAnimal = function(idx) {
           <p class="sin-historial" style="font-size:13px;">Cargando fotos...</p>
         </div>
 
+        <!-- Historial de Pesos -->
+        <div class="det-seccion-titulo" style="margin-top:14px;">⚖️ Pesos</div>
+        <div class="peso-seccion det-card" style="padding:12px 14px;">
+          <div id="det-pesos-${idx}">Cargando pesos...</div>
+        </div>
+
       </div>
     </div>
   `;
@@ -493,6 +541,8 @@ window.abrirDetalleAnimal = function(idx) {
   _cargarGaleriaEnDetalle(a, idx);
   // Renderizar vacunas
   _renderizarVacunas(a, idx);
+  // Renderizar pesos
+  _renderizarPesosDetalle(a, idx);
 };
 
 async function _cargarGaleriaEnDetalle(a, idx) {
@@ -503,6 +553,151 @@ async function _cargarGaleriaEnDetalle(a, idx) {
     await renderizarGaleriaAnimal(uuid, contenedor, { clickable: true, onFotoClick: src => window.abrirLightbox(src) });
   } catch {
     contenedor.innerHTML = '<p class="sin-historial" style="font-size:13px;">Sin fotos registradas</p>';
+  }
+}
+
+// ─── Renderizar sección de pesos en el modal de detalle ────────────────────────
+function _renderizarPesosDetalle(a, idx) {
+  const contenedor = document.getElementById(`det-pesos-${idx}`);
+  if (!contenedor) return;
+
+  const pesos = getPesosAnimal(a);
+
+  // Calcular ganancia diaria entre las dos últimas pesadas
+  let gananciaHtml = '';
+  if (pesos.length >= 2) {
+    const parseF = f => {
+      if (!f) return 0;
+      const [d, m, y] = f.split('/');
+      if (!d || !m || !y) return 0;
+      return new Date(`${y}-${m}-${d}`).getTime();
+    };
+    const p0 = parseFloat(pesos[0].peso_kg) || 0;
+    const p1 = parseFloat(pesos[1].peso_kg) || 0;
+    const t0 = parseF(pesos[0].fecha);
+    const t1 = parseF(pesos[1].fecha);
+    const dias = t0 && t1 ? Math.abs((t0 - t1) / 86400000) : 0;
+    if (dias > 0 && p0 > 0 && p1 > 0) {
+      const ganancia = ((p0 - p1) / dias).toFixed(1);
+      const claseG   = parseFloat(ganancia) >= 0 ? 'positiva' : 'negativa';
+      const iconoG   = parseFloat(ganancia) >= 0 ? '↑' : '↓';
+      gananciaHtml = `<span class="peso-ganancia ${claseG}">${iconoG} ${Math.abs(ganancia)} kg/día</span>`;
+    }
+  }
+
+  // Último peso
+  const ultimoPeso = pesos[0];
+  const ultimoHtml = ultimoPeso
+    ? `<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+         <div>
+           <div style="font-size:22px;font-weight:800;color:var(--verde-oscuro);">${ultimoPeso.peso_kg} kg</div>
+           <div style="font-size:12px;color:var(--gris);">${ultimoPeso.fecha || ''}${ultimoPeso.operador ? ' — ' + ultimoPeso.operador : ''}</div>
+         </div>
+         ${gananciaHtml}
+       </div>`
+    : '<p class="sin-historial" style="font-size:13px;">Sin pesadas registradas</p>';
+
+  // Historial (últimas 10)
+  const historialHtml = pesos.length > 0 ? `
+    <div class="det-seccion-titulo" style="font-size:11px;margin:8px 0 4px;">HISTORIAL</div>
+    <table class="peso-historial-tabla">
+      <thead><tr><th>Fecha</th><th>Peso</th><th>Tipo</th><th>Operador</th></tr></thead>
+      <tbody>
+        ${pesos.slice(0, 10).map(p => `
+          <tr>
+            <td>${p.fecha || '—'}</td>
+            <td><strong>${p.peso_kg || '—'} kg</strong></td>
+            <td>${p.tipo || '—'}</td>
+            <td>${p.operador || '—'}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  ` : '';
+
+  // Formulario de nuevo peso (solo admin)
+  const hoy = new Date();
+  const hoyISO = `${hoy.getFullYear()}-${(hoy.getMonth()+1).toString().padStart(2,'0')}-${hoy.getDate().toString().padStart(2,'0')}`;
+  const formHtml = _esAdmin ? `
+    <div class="peso-form-inline" id="peso-form-${idx}">
+      <div class="det-seccion-titulo" style="font-size:11px;margin:12px 0 6px;">+ REGISTRAR PESO</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--gris);display:block;margin-bottom:4px;">FECHA</label>
+          <input type="date" id="peso-fecha-${idx}" value="${hoyISO}"
+                 style="width:100%;padding:8px 10px;border-radius:10px;border:1.5px solid var(--borde);font-size:14px;box-sizing:border-box;">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--gris);display:block;margin-bottom:4px;">PESO (kg)</label>
+          <input type="number" id="peso-kg-${idx}" placeholder="Ej: 420" min="1" max="1500" step="0.5"
+                 style="width:100%;padding:8px 10px;border-radius:10px;border:1.5px solid var(--borde);font-size:14px;box-sizing:border-box;">
+        </div>
+      </div>
+      <input type="text" id="peso-obs-${idx}" placeholder="Observaciones (opcional)"
+             style="width:100%;padding:8px 10px;border-radius:10px;border:1.5px solid var(--borde);font-size:14px;box-sizing:border-box;margin-bottom:8px;">
+      <button class="peso-btn-add" id="btn-registrar-peso-${idx}" data-idx="${idx}">
+        ⚖ Guardar pesada
+      </button>
+    </div>
+  ` : '';
+
+  contenedor.innerHTML = ultimoHtml + historialHtml + formHtml;
+
+  // Listener para guardar
+  if (_esAdmin) {
+    const btnGuardar = document.getElementById(`btn-registrar-peso-${idx}`);
+    if (btnGuardar) {
+      btnGuardar.addEventListener('click', () => _guardarPeso(a, idx));
+    }
+  }
+}
+
+// ─── Guardar nuevo peso ──────────────────────────────────────────────────────
+async function _guardarPeso(a, idx) {
+  const rawDate = (document.getElementById(`peso-fecha-${idx}`)?.value || '');
+  const pesoKg  = parseFloat(document.getElementById(`peso-kg-${idx}`)?.value || '');
+  const obs     = (document.getElementById(`peso-obs-${idx}`)?.value || '').trim();
+
+  if (!rawDate) { if (_onToast) _onToast('Ingresá la fecha del pesaje', 'advertencia'); return; }
+  if (!pesoKg || pesoKg <= 0 || pesoKg > 1500) { if (_onToast) _onToast('Ingresá un peso válido (1-1500 kg)', 'advertencia'); return; }
+
+  const [y, m, d] = rawDate.split('-');
+  const fechaFmt  = `${d}/${m}/${y}`;
+  const operador  = localStorage.getItem('rodeo_operador') || 'Admin';
+
+  const btn = document.getElementById(`btn-registrar-peso-${idx}`);
+  if (btn) { btn.disabled = true; btn.textContent = 'Guardando...'; }
+
+  try {
+    const resp = await fetch('/api/animales', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        modo:         'registro-peso',
+        caravana:     a.caravana || '',
+        boton:        a.boton    || '',
+        tipo:         a.tipo     || '',
+        fecha:        fechaFmt,
+        peso_kg:      pesoKg,
+        observaciones: obs,
+        operador,
+      }),
+    });
+    const data = await resp.json();
+    if (data.ok) {
+      // Actualizar caché local
+      _pesosData.push({ caravana: a.caravana, boton: a.boton, tipo: a.tipo, fecha: fechaFmt,
+                        peso_kg: String(pesoKg), observaciones: obs, operador, timestamp: new Date().toISOString() });
+      if (_onToast) _onToast(`✓ Pesada registrada: ${pesoKg} kg el ${fechaFmt}`, 'exito', 3000);
+      // Re-renderizar la sección
+      _renderizarPesosDetalle(a, idx);
+    } else {
+      if (_onToast) _onToast('Error: ' + (data.error || 'desconocido'), 'error');
+      if (btn) { btn.disabled = false; btn.textContent = '⚖ Guardar pesada'; }
+    }
+  } catch (err) {
+    if (_onToast) _onToast('Error de red: ' + err.message, 'error');
+    if (btn) { btn.disabled = false; btn.textContent = '⚖ Guardar pesada'; }
   }
 }
 
@@ -821,6 +1016,14 @@ window.abrirEditorAnimal = function(idx) {
   // Cargar galería de fotos del animal
   const animal_uuid = obtenerOCrearAnimalUuid(a.boton, a.caravana);
   renderizarGaleriaAnimal('galeria-animal-modal', animal_uuid, a.boton, a.caravana, _esAdmin);
+
+  // Peso rápido desde el modal de edición (admin)
+  modal.addEventListener('click', async e => {
+    const btn = e.target.closest('[data-idx]');
+    if (!btn || !btn.id.startsWith('btn-registrar-peso-')) return;
+    const idxBtn = parseInt(btn.dataset.idx, 10);
+    if (!isNaN(idxBtn)) await _guardarPeso(_animales[idxBtn], idxBtn);
+  });
 };
 
 // ─── Helpers de selección ────────────────────────────────────────────────────

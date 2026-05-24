@@ -19,19 +19,20 @@ const { core, precaching, routing, strategies, backgroundSync, expiration } = wo
 // ─── Configuración base ─────────────────────────────────────────────────────
 core.setCacheNameDetails({
   prefix: 'rodeo-pwa',
-  suffix: 'v25',
+  suffix: 'v26',
 });
 
 core.skipWaiting();
 core.clientsClaim();
 
 // ─── Pre-caché ───────────────────────────────────────────────────────────────
-// Revisión 10 — Módulo de vacunación integrado
+// Revisión 11 — Módulo de pesaje (weight tracking) integrado
 precaching.precacheAndRoute([
-  { url: '/', revision: '10' },
-  { url: '/index.html', revision: '10' },
-  { url: '/css/estilos.css', revision: '10' },
-  { url: '/js/app.js', revision: '11' },
+  { url: '/', revision: '11' },
+  { url: '/index.html', revision: '11' },
+  { url: '/css/estilos.css', revision: '11' },
+  { url: '/js/app.js', revision: '12' },
+  { url: '/js/rodeo-oficial.js', revision: '2' },
   { url: '/js/vacunas.js', revision: '1' },
   { url: '/js/inseminaciones.js', revision: '1' },
   { url: '/js/db.js', revision: '9' },
