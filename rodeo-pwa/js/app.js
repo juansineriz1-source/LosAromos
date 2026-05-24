@@ -1134,7 +1134,182 @@ function inicializarVacunacion() {
       }
     });
   }
+
+  // ── Vacunacion Masiva ──────────────────────────────────────────────────────
+  const btnAbrirMasiva  = document.getElementById('btn-abrir-masiva');
+  const btnCerrarMasiva = document.getElementById('btn-cerrar-masiva');
+  const btnGuardarMas   = document.getElementById('btn-guardar-masiva');
+  const modalMasiva     = document.getElementById('modal-vac-masiva');
+
+  let _selMasiva = new Set();
+  let _catMasiva = '';
+
+  function tipoCatMasiva(tipo) {
+    const t = (tipo || '').toUpperCase().trim();
+    if (t === 'T')  return 'Toro';
+    if (t === 'TH') return 'Torito';
+    if (t === 'TN') return 'Ternero';
+    if (t === 'V')  return 'Vaca';
+    if (t === 'VQ') return 'Vaquillona';
+    return '';
+  }
+
+  function renderListaMasiva() {
+    const animalesRef = typeof getAnimales === 'function' ? getAnimales() : [];
+    const lista = document.getElementById('masiva-lista-animales');
+    const contador = document.getElementById('masiva-contador');
+    if (!lista) return;
+    const filtrados = _catMasiva
+      ? animalesRef.filter(a => tipoCatMasiva(a.tipo) === _catMasiva)
+      : animalesRef;
+    lista.innerHTML = filtrados.map((a) => {
+      const globalIdx = animalesRef.indexOf(a);
+      const selec = _selMasiva.has(globalIdx);
+      return `
+        <div class="masiva-animal-item ${selec ? '' : 'deselected'}" data-idx="${globalIdx}" onclick="toggleAnimalMasiva(${globalIdx})">
+          <div class="masiva-check ${selec ? 'checked' : ''}">${selec ? '✓' : ''}</div>
+          <div class="masiva-animal-info">
+            <div class="masiva-animal-boton">🐄 ${a.boton || a.caravana || '—'}</div>
+            <div class="masiva-animal-sub">${a.caravana ? 'CAR: ' + a.caravana + ' · ' : ''}${tipoCatMasiva(a.tipo)} · ${a.estado || '—'}</div>
+          </div>
+        </div>`;
+    }).join('');
+    if (contador) contador.textContent = _selMasiva.size + ' seleccionados';
+  }
+
+  window.toggleAnimalMasiva = function(globalIdx) {
+    if (_selMasiva.has(globalIdx)) _selMasiva.delete(globalIdx);
+    else _selMasiva.add(globalIdx);
+    renderListaMasiva();
+  };
+
+  if (btnAbrirMasiva) {
+    btnAbrirMasiva.addEventListener('click', () => {
+      const hoy = new Date().toISOString().split('T')[0];
+      const mFecha   = document.getElementById('masiva-fecha');
+      const mVacuna  = document.getElementById('masiva-vacuna');
+      const mLote    = document.getElementById('masiva-lote');
+      const mVet     = document.getElementById('masiva-vet');
+      const mProg    = document.getElementById('masiva-progreso');
+      if (mFecha)  mFecha.value  = hoy;
+      if (mVacuna) mVacuna.value = '';
+      if (mLote)   mLote.value   = '';
+      if (mVet)    mVet.value    = '';
+      if (mProg)   mProg.classList.add('oculto');
+      _catMasiva = '';
+      const animalesRef = typeof getAnimales === 'function' ? getAnimales() : [];
+      _selMasiva = new Set(animalesRef.map((_, i) => i));
+      document.querySelectorAll('.masiva-cat-btn').forEach(b => b.classList.remove('activo'));
+      const todosBtn = document.querySelector('.masiva-cat-btn[data-cat=""]');
+      if (todosBtn) todosBtn.classList.add('activo');
+      renderListaMasiva();
+      if (modalMasiva) modalMasiva.classList.remove('oculto');
+    });
+  }
+
+  if (btnCerrarMasiva) btnCerrarMasiva.addEventListener('click', () => { if (modalMasiva) modalMasiva.classList.add('oculto'); });
+  if (modalMasiva) modalMasiva.addEventListener('click', e => { if (e.target === modalMasiva) modalMasiva.classList.add('oculto'); });
+
+  document.querySelectorAll('.masiva-cat-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.masiva-cat-btn').forEach(b => b.classList.remove('activo'));
+      btn.classList.add('activo');
+      _catMasiva = btn.dataset.cat || '';
+      const animalesRef = typeof getAnimales === 'function' ? getAnimales() : [];
+      animalesRef
+        .map((a, i) => ({ a, i }))
+        .filter(({ a }) => !_catMasiva || tipoCatMasiva(a.tipo) === _catMasiva)
+        .forEach(({ i }) => _selMasiva.add(i));
+      renderListaMasiva();
+    });
+  });
+
+  const btnSelTodos = document.getElementById('masiva-sel-todos');
+  if (btnSelTodos) {
+    btnSelTodos.addEventListener('click', () => {
+      const animalesRef = typeof getAnimales === 'function' ? getAnimales() : [];
+      animalesRef
+        .map((a, i) => ({ a, i }))
+        .filter(({ a }) => !_catMasiva || tipoCatMasiva(a.tipo) === _catMasiva)
+        .forEach(({ i }) => _selMasiva.add(i));
+      renderListaMasiva();
+    });
+  }
+
+  const btnDeselTodos = document.getElementById('masiva-desel-todos');
+  if (btnDeselTodos) {
+    btnDeselTodos.addEventListener('click', () => {
+      const animalesRef = typeof getAnimales === 'function' ? getAnimales() : [];
+      animalesRef
+        .map((a, i) => ({ a, i }))
+        .filter(({ a }) => !_catMasiva || tipoCatMasiva(a.tipo) === _catMasiva)
+        .forEach(({ i }) => _selMasiva.delete(i));
+      renderListaMasiva();
+    });
+  }
+
+  if (btnGuardarMas) {
+    btnGuardarMas.addEventListener('click', async () => {
+      const vacuna = (document.getElementById('masiva-vacuna') || {}).value;
+      const fecha  = (document.getElementById('masiva-fecha')  || {}).value;
+      if (!vacuna) { mostrarToast('Selecciona una vacuna'); return; }
+      if (!fecha)  { mostrarToast('Ingresa la fecha'); return; }
+      if (!_selMasiva.size) { mostrarToast('Selecciona al menos un animal'); return; }
+      const animalesRef = typeof getAnimales === 'function' ? getAnimales() : [];
+      const seleccionados = [..._selMasiva].map(i => animalesRef[i]).filter(Boolean);
+      const progreso = document.getElementById('masiva-progreso');
+      if (progreso) {
+        progreso.textContent = `Guardando 0 / ${seleccionados.length}...`;
+        progreso.classList.remove('oculto');
+      }
+      btnGuardarMas.disabled = true;
+      btnGuardarMas.textContent = 'Guardando...';
+      try {
+        const fechaAR = fecha.split('-').reverse().join('/');
+        const operadorActual = (typeof estado !== 'undefined' && estado && estado.operador) ? estado.operador : 'sistema';
+        const body = {
+          modo:             'registro-vacuna-masiva',
+          vacuna,
+          fecha_aplicacion: fechaAR,
+          lote:             (document.getElementById('masiva-lote') || {}).value || '',
+          veterinario:      (document.getElementById('masiva-vet')  || {}).value || '',
+          operador:         operadorActual,
+          animales:         seleccionados.map(a => ({
+            caravana:  a.caravana || '',
+            boton:     a.boton    || '',
+            categoria: tipoCatMasiva(a.tipo) || a.tipo || '',
+          })),
+        };
+        const r = await fetch('/api/animales', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(body),
+        });
+        const result = await r.json();
+        if (result.ok) {
+          if (progreso) progreso.textContent = `✅ ${result.registrados} animales vacunados correctamente`;
+          mostrarToast(`✅ Vacunacion masiva: ${result.registrados} animales`);
+          await cargarVacunas();
+          renderizarPanelVacunacion();
+          setTimeout(() => {
+            if (modalMasiva) modalMasiva.classList.add('oculto');
+            if (progreso) progreso.classList.add('oculto');
+          }, 2000);
+        } else {
+          throw new Error(result.error || 'Error desconocido');
+        }
+      } catch(e) {
+        const prog2 = document.getElementById('masiva-progreso');
+        if (prog2) prog2.classList.add('oculto');
+        mostrarToast('Error: ' + e.message);
+      } finally {
+        btnGuardarMas.disabled = false;
+        btnGuardarMas.textContent = '💾 Guardar vacunación masiva';
+      }
+    });
+  }
 }
+
 
 function tipoCategoriaVacLocal(tipo) {
   const t = (tipo || '').toUpperCase().trim();

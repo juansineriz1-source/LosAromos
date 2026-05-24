@@ -151,6 +151,50 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true, fecha_parto_esperada: fmt(fechaParto) });
       }
 
+      if (body.modo === 'registro-vacuna-masiva') {
+        // body.animales = array de { caravana, boton, categoria }
+        // body.vacuna, body.fecha_aplicacion, body.lote, body.veterinario, body.operador
+        const animalesArr = Array.isArray(body.animales) ? body.animales : [];
+        if (!animalesArr.length) return res.status(400).json({ error: 'Sin animales seleccionados' });
+        if (!body.vacuna)        return res.status(400).json({ error: 'Vacuna requerida' });
+
+        // Verificar hoja
+        const urlVacH2 = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent('Vacunacion!A1:A1')}`;
+        const chkResp2 = await fetch(urlVacH2, { headers: { Authorization: `Bearer ${token}` } });
+        if (!chkResp2.ok) return res.status(404).json({ error: 'Hoja Vacunacion no encontrada' });
+
+        // Construir todas las filas
+        const fechaApl = body.fecha_aplicacion || new Date().toLocaleDateString('es-AR');
+        const ts       = new Date().toLocaleString('es-AR');
+        const filas    = animalesArr.map(a => [
+          a.caravana    || '',
+          a.boton       || '',
+          a.categoria   || a.tipo || '',
+          body.vacuna,
+          'anual',
+          fechaApl,
+          '',          // fecha_proxima
+          '30',        // dias_alerta
+          'aplicada',
+          body.lote        || '',
+          body.veterinario || '',
+          body.operador    || '',
+          body.observaciones || '',
+          ts,
+          a.uuid || '',
+        ]);
+
+        // Batch append — mandamos todas las filas de una
+        const appendUrlB = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent('Vacunacion!A:O')}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
+        const appendRespB = await fetch(appendUrlB, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ values: filas }),
+        });
+        if (!appendRespB.ok) throw new Error(`Sheets batch append error: ${appendRespB.status}`);
+        return res.status(200).json({ ok: true, registrados: filas.length });
+      }
+
       return res.status(400).json({ error: 'modo no reconocido' });
     }
 

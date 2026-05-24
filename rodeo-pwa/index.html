@@ -431,6 +431,9 @@
         <!-- Header -->
         <div class="vac-panel-header">
           <h2 class="vac-titulo">💉 Vacunación</h2>
+          <button class="vac-btn-masiva" id="btn-abrir-masiva" title="Vacunacion masiva">
+            ⚡ Masiva
+          </button>
           <button class="vac-btn-cerrar" id="btn-cerrar-vacunacion">✕</button>
         </div>
 
@@ -738,6 +741,84 @@
         <textarea id="reg-vac-obs" class="vac-textarea" placeholder="Notas adicionales..."></textarea>
 
         <button id="btn-guardar-reg-vac" class="btn-guardar-grande" style="margin-top:20px;">💾 Guardar Vacunación</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal vacunacion masiva -->
+  <div id="modal-vac-masiva" class="vac-modal-overlay oculto">
+    <div class="vac-modal-card" style="max-height:95vh;">
+      <div class="vac-modal-header">
+        <h2>⚡ Vacunación Masiva</h2>
+        <button id="btn-cerrar-masiva">✕</button>
+      </div>
+      <div class="vac-modal-body" style="padding:0;display:flex;flex-direction:column;height:100%;">
+
+        <!-- Paso 1: datos de la vacuna -->
+        <div style="padding:16px 20px 12px;border-bottom:1px solid #f3f4f6;flex-shrink:0;">
+
+          <label class="campo-label">Vacuna aplicada *</label>
+          <select id="masiva-vacuna" class="vac-select">
+            <option value="">-- Seleccionar vacuna --</option>
+            <option>Aftosa (Campana 1)</option>
+            <option>Aftosa (Campana 2)</option>
+            <option>Brucelosis (Cepa 19) - unica en la vida</option>
+            <option>Carbunclo Bacteridiano (Antrax)</option>
+            <option>Clostridiales</option>
+            <option>Diarrea Neonatal (Preparto - a la madre)</option>
+            <option>Reproductivas (IBR+DVB+Lepto+Campy)</option>
+            <option>Queratoconjuntivitis</option>
+            <option>Antiparasitario interno</option>
+            <option>Vitaminas / Minerales</option>
+            <option>Otra</option>
+          </select>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
+            <div>
+              <label class="campo-label">Fecha</label>
+              <input type="date" id="masiva-fecha" class="vac-input">
+            </div>
+            <div>
+              <label class="campo-label">Lote / Prod.</label>
+              <input type="text" id="masiva-lote" class="vac-input" placeholder="Opcional">
+            </div>
+          </div>
+
+          <label class="campo-label" style="margin-top:12px;">Veterinario (opcional)</label>
+          <input type="text" id="masiva-vet" class="vac-input" placeholder="Nombre">
+        </div>
+
+        <!-- Paso 2: seleccion de animales -->
+        <div style="padding:12px 20px 8px;border-bottom:1px solid #f3f4f6;flex-shrink:0;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-size:13px;font-weight:700;color:#374151;">Seleccionar animales</span>
+            <span id="masiva-contador" style="font-size:13px;font-weight:700;color:#1a5c30;">0 seleccionados</span>
+          </div>
+          <!-- Chips de categoria -->
+          <div class="masiva-cat-row">
+            <button class="masiva-cat-btn activo" data-cat="">Todos</button>
+            <button class="masiva-cat-btn" data-cat="Ternero">Terneros</button>
+            <button class="masiva-cat-btn" data-cat="Ternera">Terneras</button>
+            <button class="masiva-cat-btn" data-cat="Vaquillona">Vaquillonas</button>
+            <button class="masiva-cat-btn" data-cat="Vaca">Vacas</button>
+            <button class="masiva-cat-btn" data-cat="Toro">Toros</button>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <button class="masiva-accion-btn" id="masiva-sel-todos">✓ Sel. todos</button>
+            <button class="masiva-accion-btn" id="masiva-desel-todos">✗ Desel. todos</button>
+          </div>
+        </div>
+
+        <!-- Lista scrollable de animales con checkboxes -->
+        <div id="masiva-lista-animales" style="flex:1;overflow-y:auto;padding:8px 20px 12px;"></div>
+
+        <!-- Boton guardar -->
+        <div style="padding:16px 20px;border-top:1px solid #f3f4f6;flex-shrink:0;">
+          <div id="masiva-progreso" class="masiva-progreso oculto"></div>
+          <button id="btn-guardar-masiva" class="btn-guardar-grande">
+            💾 Guardar vacunación masiva
+          </button>
+        </div>
       </div>
     </div>
   </div>

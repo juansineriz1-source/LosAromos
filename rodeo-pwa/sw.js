@@ -19,7 +19,7 @@ const { core, precaching, routing, strategies, backgroundSync, expiration } = wo
 // ─── Configuración base ─────────────────────────────────────────────────────
 core.setCacheNameDetails({
   prefix: 'rodeo-pwa',
-  suffix: 'v18',
+  suffix: 'v19',
 });
 
 core.skipWaiting();

@@ -4089,3 +4089,114 @@ html { scroll-behavior: smooth; }
 .vac-ins-vacuna-nombre { font-weight: 600; color: #111827; }
 .vac-ins-vacuna-fecha  { color: #2e7d52; font-weight: 700; }
 
+/* ─── VACUNACION MASIVA ──────────────────────────────────────────────────── */
+
+.vac-btn-masiva {
+  height: 32px;
+  padding: 0 14px;
+  background: rgba(255,255,255,0.20);
+  color: #fff;
+  border: 1.5px solid rgba(255,255,255,0.40);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: background .15s;
+}
+.vac-btn-masiva:active { background: rgba(255,255,255,0.35); }
+
+.masiva-cat-row {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+.masiva-cat-row::-webkit-scrollbar { display: none; }
+.masiva-cat-btn {
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1.5px solid #d1d5db;
+  background: #fff;
+  color: #6b7a6e;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all .15s;
+}
+.masiva-cat-btn.activo { background: #1a5c30; border-color: #1a5c30; color: #fff; }
+
+.masiva-accion-btn {
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  color: #374151;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+}
+.masiva-accion-btn:active { background: #e5e7eb; }
+
+/* Cada animal en la lista masiva */
+.masiva-animal-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f3f4f6;
+  cursor: pointer;
+  transition: background .1s;
+}
+.masiva-animal-item:last-child { border-bottom: none; }
+.masiva-animal-item.deselected { opacity: 0.4; }
+
+.masiva-check {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 2px solid #d1d5db;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+  transition: all .15s;
+}
+.masiva-check.checked {
+  background: #1a5c30;
+  border-color: #1a5c30;
+  color: #fff;
+}
+
+.masiva-animal-info { flex: 1; }
+.masiva-animal-boton {
+  font-family: 'Manrope', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: #111827;
+}
+.masiva-animal-sub {
+  font-size: 11px;
+  color: #9ca3af;
+  margin-top: 1px;
+}
+
+/* Barra de progreso */
+.masiva-progreso {
+  background: #e8f5e9;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a5c30;
+  text-align: center;
+}
