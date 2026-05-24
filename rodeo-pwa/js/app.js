@@ -1368,6 +1368,29 @@ function renderizarPanelVacunacion(filtroCategoria = '') {
     const alertasPrep = ins ? alertasPrepartoAnimal(ins).filter(v => v.nivel === 'urgente') : [];
     const hayAlertaParto = alertasPrep.length > 0;
 
+    // Detectar si es toro o torito
+    const tipoUp = (a.tipo || '').toUpperCase().trim();
+    const esToro = tipoUp === 'T' || tipoUp === 'TH';
+
+    // Último raspado para toros
+    let raspBadge = '';
+    if (esToro) {
+      const raspRegistros = vacunasData.filter(v =>
+        v.vacuna === 'Raspado Prepucial (Tricomoniasis/Campylobacter)' &&
+        ((v.boton && v.boton === a.boton) || (v.caravana && v.caravana === a.caravana))
+      ).sort((x, y) => new Date(y.timestamp) - new Date(x.timestamp));
+      const ultRasp = raspRegistros[0];
+      if (ultRasp) {
+        const resMap = { negativo: '✅ Negativo', positivo: '🔴 Positivo', pendiente: '⏳ Pendiente' };
+        const resClase = ultRasp.estado || 'pendiente';
+        raspBadge = `<div class="rasp-badge ${resClase}">
+          🧫 Raspado: ${resMap[resClase] || resClase} — ${ultRasp.fecha_aplicacion || ''}
+        </div>`;
+      } else {
+        raspBadge = `<div class="rasp-badge pendiente">🧫 Sin raspado registrado</div>`;
+      }
+    }
+
     // Barra de gestacion
     const barraGest = gest ? `
       <div class="vac-gest-wrap">
@@ -1382,7 +1405,9 @@ function renderizarPanelVacunacion(filtroCategoria = '') {
         ${alertasPrep.length ? `<div class="vac-gest-alerta">💉 ${alertasPrep[0].texto}</div>` : ''}
       </div>` : '';
 
-    const dotsHtml = estados.map(e => `
+    const dotsHtml = estados
+      .filter(e => e.vacuna !== 'Raspado Prepucial (Tricomoniasis/Campylobacter)')
+      .map(e => `
       <div class="vac-dot-item ${e.estado}">
         <div class="vac-dot"></div>
         ${e.vacuna.split(' ')[0].replace('(Campana','').replace(')','').trim()}
@@ -1392,15 +1417,15 @@ function renderizarPanelVacunacion(filtroCategoria = '') {
       <div class="vac-animal-card" style="${(hayUrgente || hayAlertaParto) ? 'border-color:#ffcdd2;' : ''}">
         <div class="vac-animal-card-header">
           <div>
-            <div class="vac-animal-nombre">🐄 ${a.boton || a.caravana || '—'}</div>
+            <div class="vac-animal-nombre">${esToro ? '🐂' : '🐄'} ${a.boton || a.caravana || '—'}</div>
             <div class="vac-animal-sub">${a.caravana ? 'CAR: ' + a.caravana + ' · ' : ''}${a.tipo || '—'} · ${a.estado || '—'}</div>
           </div>
           <div style="display:flex;gap:6px;">
-            <button class="vac-btn-ins" onclick="abrirRegistroInseminacion(${idxGlobal})" title="Registrar inseminacion">🐄+</button>
+            ${esToro ? `<button class="vac-btn-rasp" onclick="abrirRegistroRaspado(${idxGlobal})" title="Registrar raspado prepucial">🧫</button>` : `<button class="vac-btn-ins" onclick="abrirRegistroInseminacion(${idxGlobal})" title="Registrar inseminacion">🐄+</button>`}
             <button class="vac-btn-registrar" onclick="abrirRegistroVacuna(${idxGlobal})">+ Vacuna</button>
           </div>
         </div>
-        ${barraGest}
+        ${esToro ? raspBadge : barraGest}
         <div class="vac-dots-row">${dotsHtml || '<span style="color:#9ca3af;font-size:12px;">Sin datos registrados</span>'}</div>
       </div>`;
   }).join('');
@@ -1440,7 +1465,98 @@ function abrirRegistroInseminacion(idx) {
 }
 window.abrirRegistroInseminacion = abrirRegistroInseminacion;
 
-function construirManualHTML() {
+// ─── RASPADO PREPUCIAL ────────────────────────────────────────────────────────
+function abrirRegistroRaspado(idx) {
+  const a = getAnimales()[idx];
+  if (!a) return;
+  _animalParaVacunar = a;
+  document.getElementById('reg-rasp-animal-label').textContent =
+    `🐂 ${a.boton || a.caravana || '—'} · ${a.tipo || '—'} · ${a.estado || '—'}`;
+  const hoy = new Date().toISOString().split('T')[0];
+  document.getElementById('reg-rasp-fecha').value     = hoy;
+  document.getElementById('reg-rasp-resultado').value = 'pendiente';
+  document.getElementById('reg-rasp-vet').value       = '';
+  document.getElementById('reg-rasp-lab').value       = '';
+  document.getElementById('reg-rasp-obs').value       = '';
+  // Resetear botones de resultado
+  document.querySelectorAll('.rasp-res-btn').forEach(b => b.classList.remove('activo'));
+  document.querySelector('.rasp-res-btn[data-res="pendiente"]')?.classList.add('activo');
+  document.getElementById('modal-registrar-raspado').classList.remove('oculto');
+}
+window.abrirRegistroRaspado = abrirRegistroRaspado;
+
+// Inicializar listeners del modal de raspado
+(function inicializarRaspado() {
+  const modalRasp    = document.getElementById('modal-registrar-raspado');
+  const btnCerrarR   = document.getElementById('btn-cerrar-modal-rasp');
+  const btnGuardarR  = document.getElementById('btn-guardar-reg-rasp');
+
+  if (btnCerrarR) btnCerrarR.addEventListener('click', () => modalRasp?.classList.add('oculto'));
+  if (modalRasp)  modalRasp.addEventListener('click', e => { if (e.target === modalRasp) modalRasp.classList.add('oculto'); });
+
+  // Botones de resultado
+  document.querySelectorAll('.rasp-res-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.rasp-res-btn').forEach(b => b.classList.remove('activo'));
+      btn.classList.add('activo');
+      const inp = document.getElementById('reg-rasp-resultado');
+      if (inp) inp.value = btn.dataset.res || 'pendiente';
+    });
+  });
+
+  if (btnGuardarR) {
+    btnGuardarR.addEventListener('click', async () => {
+      if (!_animalParaVacunar) return;
+      const fecha     = document.getElementById('reg-rasp-fecha').value;
+      const resultado = document.getElementById('reg-rasp-resultado').value || 'pendiente';
+      const vet       = document.getElementById('reg-rasp-vet').value;
+      const lab       = document.getElementById('reg-rasp-lab').value;
+      const obs       = document.getElementById('reg-rasp-obs').value;
+
+      if (!fecha) { mostrarToast('Ingresá la fecha del raspado'); return; }
+      if (!vet)   { mostrarToast('Ingresá el veterinario'); return; }
+
+      btnGuardarR.textContent = 'Guardando...';
+      btnGuardarR.disabled = true;
+
+      try {
+        const operadorActual = (typeof estado !== 'undefined' && estado?.operador) ? estado.operador : 'sistema';
+        const fechaAR = fecha.split('-').reverse().join('/');
+        const obsCompleta = `Lab: ${lab || '—'} | ${obs}`.trim();
+
+        await registrarVacunacion({
+          caravana:         _animalParaVacunar.caravana || '',
+          boton:            _animalParaVacunar.boton    || '',
+          categoria:        _animalParaVacunar.tipo     || '',
+          vacuna:           'Raspado Prepucial (Tricomoniasis/Campylobacter)',
+          tipo_frecuencia:  'anual',
+          fecha_aplicacion: fechaAR,
+          estado:           resultado,   // negativo / positivo / pendiente
+          veterinario:      vet,
+          observaciones:    obsCompleta,
+        }, operadorActual);
+
+        const emoji = resultado === 'negativo' ? '✅' : resultado === 'positivo' ? '🔴' : '⏳';
+        mostrarToast(`${emoji} Raspado registrado: ${resultado}`);
+
+        if (resultado === 'positivo') {
+          setTimeout(() => mostrarToast('⚠️ Resultado POSITIVO — aislar al toro del rodeo'), 1500);
+        }
+
+        modalRasp?.classList.add('oculto');
+        await cargarVacunas();
+        renderizarPanelVacunacion();
+      } catch(e) {
+        mostrarToast('Error al guardar — intentá de nuevo');
+        console.error('[raspado]', e);
+      } finally {
+        btnGuardarR.textContent = '💾 Guardar Raspado';
+        btnGuardarR.disabled = false;
+      }
+    });
+  }
+})();
+
   const VACUNAS_INFO = [
     { nombre: 'Aftosa (Campaña 1)',       oblig: true,  frecuencia: 'Anual',              cat: 'Todo el rodeo',            nota: 'Obligatoria SENASA. Registro SIGSA.' },
     { nombre: 'Aftosa (Campaña 2)',       oblig: true,  frecuencia: 'Anual',              cat: 'Solo terneros/as',         nota: 'Solo refuerzo en terneros desde 2026.' },

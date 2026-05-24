@@ -4200,3 +4200,78 @@ html { scroll-behavior: smooth; }
   color: #1a5c30;
   text-align: center;
 }
+
+/* --- RASPADO PREPUCIAL (Toros) -------------------------------------------- */
+
+.vac-btn-rasp {
+  height: 36px;
+  padding: 0 10px;
+  background: #f3e5f5;
+  color: #6a1b9a;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* Badge de resultado de raspado en la card del toro */
+.rasp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 8px;
+}
+.rasp-badge.negativo  { background: #e8f5e9; color: #1a5c30; }
+.rasp-badge.positivo  { background: #ffebee; color: #b71c1c; }
+.rasp-badge.pendiente { background: #f3e5f5; color: #6a1b9a; }
+
+/* Botones de resultado en el modal */
+.rasp-resultado-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.rasp-res-btn {
+  flex: 1;
+  min-width: 90px;
+  height: 40px;
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+  background: #f9fafb;
+  color: #6b7a6e;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all .15s;
+}
+.rasp-res-btn.activo { border-color: #6a1b9a; background: #f3e5f5; color: #6a1b9a; }
+.rasp-res-btn.positivo.activo { border-color: #b71c1c; background: #ffebee; color: #b71c1c; }
+.rasp-res-btn[data-res="negativo"].activo { border-color: #1a5c30; background: #e8f5e9; color: #1a5c30; }
+
+/* Card informativa dentro del modal */
+.rasp-info-card {
+  background: #f3e5f5;
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-top: 16px;
+  border: 1px solid #e1bee7;
+}
+.rasp-info-titulo {
+  font-size: 12px;
+  font-weight: 700;
+  color: #6a1b9a;
+  margin-bottom: 6px;
+}
+.rasp-info-texto {
+  font-size: 12px;
+  color: #4a148c;
+  line-height: 1.6;
+}

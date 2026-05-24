@@ -823,6 +823,50 @@
     </div>
   </div>
 
+  <!-- Modal raspado prepucial (solo toros) -->
+  <div id="modal-registrar-raspado" class="vac-modal-overlay oculto">
+    <div class="vac-modal-card">
+      <div class="vac-modal-header">
+        <h2>🧫 Raspado Prepucial</h2>
+        <button id="btn-cerrar-modal-rasp">✕</button>
+      </div>
+      <div class="vac-modal-body">
+        <p id="reg-rasp-animal-label" style="font-weight:700; color:#1a5c30; margin-bottom:4px;"></p>
+        <p style="font-size:12px;color:#6b7a6e;margin-bottom:16px;">Diagnóstico de Tricomoniasis y Campylobacteriosis venérea</p>
+
+        <label class="campo-label">Fecha del raspado *</label>
+        <input type="date" id="reg-rasp-fecha" class="vac-input">
+
+        <label class="campo-label" style="margin-top:14px;">Resultado</label>
+        <div class="rasp-resultado-row">
+          <button class="rasp-res-btn activo" data-res="pendiente">⏳ Pendiente</button>
+          <button class="rasp-res-btn" data-res="negativo">✅ Negativo</button>
+          <button class="rasp-res-btn positivo" data-res="positivo">🔴 Positivo</button>
+        </div>
+        <input type="hidden" id="reg-rasp-resultado" value="pendiente">
+
+        <label class="campo-label" style="margin-top:14px;">Veterinario *</label>
+        <input type="text" id="reg-rasp-vet" class="vac-input" placeholder="Nombre del veterinario">
+
+        <label class="campo-label" style="margin-top:14px;">Laboratorio (opcional)</label>
+        <input type="text" id="reg-rasp-lab" class="vac-input" placeholder="Ej: Lab. Santa Rosa, PCR Rosario...">
+
+        <label class="campo-label" style="margin-top:14px;">Observaciones</label>
+        <textarea id="reg-rasp-obs" class="vac-textarea" placeholder="Notas adicionales sobre el procedimiento..."></textarea>
+
+        <!-- Info contextual -->
+        <div class="rasp-info-card">
+          <div class="rasp-info-titulo">ℹ️ ¿Qué es el raspado prepucial?</div>
+          <div class="rasp-info-texto">
+            Es una muestra de esmegma tomada del prepucio del toro para detectar <strong>Tricomoniasis</strong> (<em>T. foetus</em>) y <strong>Campylobacteriosis</strong> (<em>C. fetus</em>), enfermedades venéreas que causan abortos y baja concepción. Se recomienda realizarlo 30-45 días después del final del servicio y repetirlo 2-3 veces con 10 días de intervalo.
+          </div>
+        </div>
+
+        <button id="btn-guardar-reg-rasp" class="btn-guardar-grande" style="margin-top:20px;">💾 Guardar Raspado</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ═══════════════════════ SCRIPTS ══════════════════════════════ -->
   <!-- jsPDF para generacion de PDF del manual -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
