@@ -1715,30 +1715,35 @@ function inicializarInsMasiva() {
 
     lista.innerHTML = filtrados.length === 0
       ? '<p style="color:#9ca3af;font-size:13px;text-align:center;padding:20px 0;">Sin animales en esta categoría</p>'
-      : filtrados.map(a => {
-          const id = a.boton || a.caravana || a._rowIndex;
-          const sel = _selIns.has(String(id));
-          return `<label class="masiva-animal-row ${sel ? 'seleccionado' : ''}">
-            <input type="checkbox" class="ins-masiva-check" data-id="${id}"
-              data-boton="${a.boton||''}" data-caravana="${a.caravana||''}" data-tipo="${a.tipo||''}"
-              ${sel ? 'checked' : ''}>
-            <span class="masiva-animal-info">
-              <span class="masiva-animal-id">${a.boton ? '🔖 '+a.boton : '🏷 '+a.caravana}</span>
-              <span class="masiva-animal-tipo">${a.tipo||'—'} · ${a.estado||'—'}</span>
-            </span>
-          </label>`;
+      : filtrados.map((a, i) => {
+          const id  = String(a.boton || a.caravana || i);
+          const sel = _selIns.has(id);
+          const cat = tipoCategoriaVacLocal(a.tipo) || a.tipo || '—';
+          return `<div class="masiva-animal-item ${sel ? '' : 'deselected'}" data-ins-id="${id}" onclick="window._toggleAnimalIns('${id}')">
+            <div class="masiva-check ${sel ? 'checked' : ''}">${sel ? '✓' : ''}</div>
+            <div class="masiva-animal-info">
+              <div class="masiva-animal-boton">🐄 ${a.boton || a.caravana || '—'}</div>
+              <div class="masiva-animal-sub">${a.caravana ? 'CAR: ' + a.caravana + ' · ' : ''}${cat} · ${a.estado || '—'}</div>
+            </div>
+          </div>`;
         }).join('');
 
-    lista.querySelectorAll('.ins-masiva-check').forEach(cb => {
-      cb.addEventListener('change', () => {
-        const id = cb.dataset.id;
-        if (cb.checked) _selIns.add(id); else _selIns.delete(id);
-        cb.closest('label').classList.toggle('seleccionado', cb.checked);
-        actualizarContadorIns();
-      });
-    });
     actualizarContadorIns();
   }
+
+  window._toggleAnimalIns = function(id) {
+    if (_selIns.has(id)) _selIns.delete(id);
+    else _selIns.add(id);
+    // Actualizar solo el item clickeado sin re-render completo
+    const item = lista.querySelector(`[data-ins-id="${id}"]`);
+    if (item) {
+      const sel = _selIns.has(id);
+      item.classList.toggle('deselected', !sel);
+      const chk = item.querySelector('.masiva-check');
+      if (chk) { chk.classList.toggle('checked', sel); chk.textContent = sel ? '✓' : ''; }
+    }
+    actualizarContadorIns();
+  };
 
   // Filtros de categoría
   document.querySelectorAll('[data-cat-ins]').forEach(btn => {
@@ -1751,19 +1756,21 @@ function inicializarInsMasiva() {
   });
 
   btnSelTodos?.addEventListener('click', () => {
-    lista.querySelectorAll('.ins-masiva-check').forEach(cb => {
-      cb.checked = true; _selIns.add(cb.dataset.id);
-      cb.closest('label').classList.add('seleccionado');
-    });
-    actualizarContadorIns();
+    const animales = getAnimales().filter(a => esFembraIns(a.tipo));
+    const filtrados = _catActualIns
+      ? animales.filter(a => (a.tipo||'').toUpperCase().trim() === _catActualIns)
+      : animales;
+    filtrados.forEach((a, i) => _selIns.add(String(a.boton || a.caravana || i)));
+    renderListaIns();
   });
 
   btnDeselTodos?.addEventListener('click', () => {
-    lista.querySelectorAll('.ins-masiva-check').forEach(cb => {
-      cb.checked = false; _selIns.delete(cb.dataset.id);
-      cb.closest('label').classList.remove('seleccionado');
-    });
-    actualizarContadorIns();
+    const animales = getAnimales().filter(a => esFembraIns(a.tipo));
+    const filtrados = _catActualIns
+      ? animales.filter(a => (a.tipo||'').toUpperCase().trim() === _catActualIns)
+      : animales;
+    filtrados.forEach((a, i) => _selIns.delete(String(a.boton || a.caravana || i)));
+    renderListaIns();
   });
 
   btnAbrir?.addEventListener('click', () => {
