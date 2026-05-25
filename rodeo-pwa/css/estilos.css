@@ -2970,8 +2970,10 @@ html { scroll-behavior: smooth; }
   margin-top: 12px;
   border: 1.5px solid var(--borde);
   border-radius: var(--radio-grande);
-  overflow: hidden;
+  overflow: visible;
   animation: fadeIn .18s ease;
+  position: relative;
+  z-index: 10;
 }
 .panel-filtros-visible {
   display: block;
@@ -3017,6 +3019,8 @@ html { scroll-behavior: smooth; }
 .filtro-seccion-body {
   padding: 10px 14px 14px;
   background: #fafbfa;
+  position: relative;
+  pointer-events: all;
 }
 
 /* Grid de chips multi-select */

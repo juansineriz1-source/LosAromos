@@ -325,14 +325,20 @@ function aplicarFiltros() {
   const texto = (document.getElementById('rodeo-of-buscar')?.value || '').toLowerCase().trim();
   let filtrados = _animales;
 
-  // Filtro por Tipo (OR entre tipos seleccionados)
+  // Filtro por Tipo (OR entre tipos seleccionados) — case-insensitive + trim
   if (_filtros.tipos.size) {
-    filtrados = filtrados.filter(a => _filtros.tipos.has(a.tipo || ''));
+    filtrados = filtrados.filter(a => {
+      const t = (a.tipo || '').trim().toUpperCase();
+      return [..._filtros.tipos].some(f => f.trim().toUpperCase() === t);
+    });
   }
 
-  // Filtro por Estado (OR entre estados seleccionados)
+  // Filtro por Estado (OR entre estados seleccionados) — case-insensitive + trim
   if (_filtros.estados.size) {
-    filtrados = filtrados.filter(a => _filtros.estados.has(a.estado || ''));
+    filtrados = filtrados.filter(a => {
+      const e = (a.estado || '').trim().toUpperCase();
+      return [..._filtros.estados].some(f => f.trim().toUpperCase() === e);
+    });
   }
 
   // Filtro por Vacunas este año
