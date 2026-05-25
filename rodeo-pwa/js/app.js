@@ -9,7 +9,7 @@ import {
   obtenerTodosLosAnimales, obtenerTodosLosRegistros,
   guardarNovedad, obtenerNovedades,
 } from './db.js';
-import { conectarBaston, desconectarBaston, simularLectura } from './bluetooth.js';
+import { conectarBaston, desconectarBaston, simularLectura, setCallbackCaravana, isConectado } from './bluetooth.js';
 import { inicializarSync, sincronizarPendientes } from './sync.js';
 import { inicializarRecorrida, cargarListaRecorridas } from './recorrida.js';
 import { inicializarFotos, cargarListaFotos } from './fotos.js';
@@ -1471,6 +1471,138 @@ function inicializarPanelPesadas() {
   let _animalPeso    = null;  // animal seleccionado en modo individual
   let _grupoAnimales = [];    // animales en pesada grupal
   let _cantGrupal    = 2;     // cantidad en la balanza
+  let _bleEscaneando = false; // true cuando el bastón está redirigido a Pesadas
+  let _tabActual     = 'individual'; // tab visible
+
+  // ─── BLE: botón conectar / activar escaneo ─────────────────────────────
+  const btnBLE     = document.getElementById('btn-peso-ble-conectar');
+  const bleDot     = document.getElementById('peso-ble-dot');
+  const bleTexto   = document.getElementById('peso-ble-texto');
+
+  function _actualizarBannerBLE() {
+    if (!btnBLE) return;
+    if (_bleEscaneando) {
+      bleDot.style.background   = '#7c5c1e';
+      bleTexto.textContent       = 'Bastón activo — escaneá animales';
+      bleTexto.style.color       = '#7c5c1e';
+      btnBLE.textContent         = '⏹ Detener escaneo';
+      btnBLE.className           = 'peso-ble-btn escaneando';
+      // Mostrar indicadores en ambos panes
+      const indScan  = document.getElementById('peso-ind-ble-scan');
+      const grupScan = document.getElementById('peso-grup-ble-scan');
+      if (indScan)  indScan.style.display  = 'flex';
+      if (grupScan) grupScan.style.display = 'flex';
+    } else if (isConectado()) {
+      bleDot.style.background   = '#22c55e';
+      bleTexto.textContent       = 'Bastón conectado — listo para escanear';
+      bleTexto.style.color       = '#15803d';
+      btnBLE.textContent         = '🟢 Iniciar escaneo';
+      btnBLE.className           = 'peso-ble-btn conectado';
+      document.getElementById('peso-ind-ble-scan')?.style.setProperty('display','none');
+      document.getElementById('peso-grup-ble-scan')?.style.setProperty('display','none');
+    } else {
+      bleDot.style.background   = '#d1d5db';
+      bleTexto.textContent       = 'Bastón no conectado';
+      bleTexto.style.color       = '#6b7a6e';
+      btnBLE.textContent         = '🔵 Conectar Bastón';
+      btnBLE.className           = 'peso-ble-btn';
+      document.getElementById('peso-ind-ble-scan')?.style.setProperty('display','none');
+      document.getElementById('peso-grup-ble-scan')?.style.setProperty('display','none');
+    }
+  }
+
+  // Callback que recibe cada caravana escaneada por el bastón
+  function _recibirCaravanaBLE(caravana) {
+    if ('vibrate' in navigator) navigator.vibrate([80, 40, 80]);
+    if (_tabActual === 'individual') {
+      // Modo individual: seleccionar el animal
+      const encontrado = getAnimales().find(a =>
+        (a.caravana || '').toLowerCase() === caravana.toLowerCase() ||
+        (a.boton    || '').toLowerCase() === caravana.toLowerCase()
+      );
+      const res = document.getElementById('peso-ind-resultado');
+      const inp = document.getElementById('peso-ind-buscar');
+      if (inp) inp.value = caravana;
+      if (encontrado) {
+        _animalPeso = encontrado;
+        res.innerHTML = `
+          <div class="peso-animal-card seleccionado peso-ble-flash">
+            <span class="peso-animal-id">${encontrado.boton || '—'}</span>
+            <span class="peso-animal-car">Car. ${encontrado.caravana || '—'}</span>
+            <span style="font-size:12px;font-weight:700;background:#e8f5e9;color:#1a5c30;padding:2px 8px;border-radius:6px;">${encontrado.tipo || '?'}</span>
+          </div>`;
+        mostrarToast(`✓ ${encontrado.boton || caravana} — escaneado`, 'exito', 2000);
+        // Foco al campo de peso
+        setTimeout(() => document.getElementById('peso-ind-kg')?.focus(), 200);
+      } else {
+        _animalPeso = null;
+        res.innerHTML = `<p class="peso-no-result">⚠ Caravana "${caravana}" no encontrada en el rodeo</p>`;
+        mostrarToast(`⚠ ${caravana} no encontrado`, 'advertencia', 2000);
+      }
+    } else {
+      // Modo grupal: agregar al grupo (si no está ya)
+      const encontrado = getAnimales().find(a =>
+        (a.caravana || '').toLowerCase() === caravana.toLowerCase() ||
+        (a.boton    || '').toLowerCase() === caravana.toLowerCase()
+      );
+      if (!encontrado) {
+        mostrarToast(`⚠ ${caravana} no encontrado en el rodeo`, 'advertencia', 2000);
+        return;
+      }
+      if (_grupoAnimales.find(g => g.boton === encontrado.boton && g.caravana === encontrado.caravana)) {
+        mostrarToast(`${encontrado.boton || caravana} ya está en el grupo`, 'advertencia', 1500);
+        return;
+      }
+      _grupoAnimales.push(encontrado);
+      _renderGrupo();
+      _recalcular();
+      mostrarToast(`✓ ${encontrado.boton || caravana} agregado (${_grupoAnimales.length} total)`, 'exito', 1500);
+    }
+  }
+
+  btnBLE?.addEventListener('click', async () => {
+    if (_bleEscaneando) {
+      // Detener escaneo → restaurar callback original
+      _bleEscaneando = false;
+      setCallbackCaravana(caravanaRecibida);
+      _actualizarBannerBLE();
+      return;
+    }
+
+    if (!isConectado()) {
+      // No conectado → conectar primero
+      btnBLE.textContent = 'Conectando...';
+      btnBLE.disabled    = true;
+      try {
+        const ok = await conectarBaston({
+          onCaravana: _recibirCaravanaBLE,
+          onEstado: (est, msg) => {
+            manejarEstadoBluetooth(est, msg);
+            if (est === 'conectado') {
+              estado.bluetoothConectado = true;
+              _bleEscaneando = true;
+              _actualizarBannerBLE();
+            } else if (est === 'desconectado' || est === 'error') {
+              _bleEscaneando = false;
+              _actualizarBannerBLE();
+            }
+          },
+        });
+        if (ok) {
+          _bleEscaneando = true;
+        }
+      } catch(e) {
+        mostrarToast('Error al conectar bastón', 'error', 2500);
+      }
+      btnBLE.disabled = false;
+      _actualizarBannerBLE();
+    } else {
+      // Ya conectado → activar escaneo para este panel
+      _bleEscaneando = true;
+      setCallbackCaravana(_recibirCaravanaBLE);
+      _actualizarBannerBLE();
+    }
+  });
 
   // Abrir panel
   btnAbrir.addEventListener('click', () => {
@@ -1480,12 +1612,27 @@ function inicializarPanelPesadas() {
     _mostrarTabPeso('individual');
     _resetIndividual();
     _resetGrupal();
+    _actualizarBannerBLE();
   });
-  btnCerrar.addEventListener('click', () => panel.classList.add('oculto'));
+
+  btnCerrar.addEventListener('click', () => {
+    // Al cerrar, restaurar callback original del bastón si estaba escaneando
+    if (_bleEscaneando) {
+      _bleEscaneando = false;
+      setCallbackCaravana(caravanaRecibida);
+    }
+    panel.classList.add('oculto');
+  });
 
   // Tabs
-  document.getElementById('tab-peso-individual')?.addEventListener('click', () => _mostrarTabPeso('individual'));
-  document.getElementById('tab-peso-grupal')?.addEventListener('click',     () => _mostrarTabPeso('grupal'));
+  document.getElementById('tab-peso-individual')?.addEventListener('click', () => {
+    _tabActual = 'individual';
+    _mostrarTabPeso('individual');
+  });
+  document.getElementById('tab-peso-grupal')?.addEventListener('click', () => {
+    _tabActual = 'grupal';
+    _mostrarTabPeso('grupal');
+  });
 
   function _mostrarTabPeso(tab) {
     const ind  = document.getElementById('pane-peso-individual');

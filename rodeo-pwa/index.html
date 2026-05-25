@@ -541,12 +541,28 @@
           <button id="tab-peso-grupal" class="peso-tab">👥 Pesada Grupal</button>
         </div>
 
+        <!-- Banner Bastón BLE (compartido entre ambos tabs) -->
+        <div id="peso-ble-banner" style="margin:0;padding:10px 16px;background:#f0fdf4;border-bottom:1px solid #bbf7d0;display:flex;align-items:center;gap:10px;">
+          <div id="peso-ble-estado" style="display:flex;align-items:center;gap:6px;flex:1;">
+            <span id="peso-ble-dot" style="width:10px;height:10px;border-radius:50%;background:#d1d5db;flex-shrink:0;"></span>
+            <span id="peso-ble-texto" style="font-size:13px;color:#6b7a6e;font-weight:600;">Bastón no conectado</span>
+          </div>
+          <button id="btn-peso-ble-conectar" class="peso-ble-btn">
+            🔵 Conectar Bastón
+          </button>
+        </div>
+
         <!-- PANE: Individual -->
         <div id="pane-peso-individual" style="padding:16px;">
-          <label class="campo-label">Buscar animal</label>
+          <label class="campo-label">Buscar animal <span style="font-size:11px;color:#9ca3af;font-weight:400;">(o escané con el bastón)</span></label>
           <input type="text" id="peso-ind-buscar" class="vac-input"
             placeholder="🔍 Botón o caravana..."
             style="width:100%;box-sizing:border-box;">
+          <!-- Indicador de escaneo BLE (aparece solo cuando bastón activo) -->
+          <div id="peso-ind-ble-scan" style="display:none;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;background:#eff6ff;border:1px solid #bfdbfe;margin:6px 0;">
+            <span style="animation:pulse 1.2s infinite;font-size:16px;">&#x1F7E2;</span>
+            <span style="font-size:13px;color:#1d4ed8;font-weight:600;">Esperando lectura del bastón...</span>
+          </div>
           <div id="peso-ind-resultado" style="margin:8px 0;"></div>
 
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;">
@@ -610,6 +626,11 @@
           <label class="campo-label" style="margin-top:14px;display:block;">
             Animales del grupo <span id="peso-grup-badge" style="background:#7c5c1e;color:#fff;border-radius:99px;padding:1px 8px;font-size:11px;">0</span>
           </label>
+          <!-- Indicador de escaneo BLE (aparece solo cuando bastón activo) -->
+          <div id="peso-grup-ble-scan" style="display:none;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;background:#eff6ff;border:1px solid #bfdbfe;margin-bottom:8px;">
+            <span style="animation:pulse 1.2s infinite;font-size:16px;">&#x1F7E2;</span>
+            <span style="font-size:13px;color:#1d4ed8;font-weight:600;">Escaná cada animal con el bastón...</span>
+          </div>
           <input type="text" id="peso-grup-buscar" class="vac-input"
             placeholder="🔍 Buscar y agregar por botón o caravana..."
             style="width:100%;box-sizing:border-box;">

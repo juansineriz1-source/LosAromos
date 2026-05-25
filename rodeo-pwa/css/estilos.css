@@ -4521,3 +4521,51 @@ html { scroll-behavior: smooth; }
 }
 .ins-animal-card strong { font-size: 16px; font-weight: 800; color: #1d4ed8; }
 .ins-animal-card span   { font-size: 13px; color: #1e40af; }
+
+/* ─── BLE BASTÓN EN PESADAS ──────────────────────────────────────────────── */
+
+/* Botón conectar bastón dentro del panel de Pesadas */
+.peso-ble-btn {
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 20px;
+  border: 2px solid #3b82f6;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s, color .15s, border-color .15s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.peso-ble-btn:active  { background: #dbeafe; }
+.peso-ble-btn.conectado {
+  background: #1d4ed8;
+  color: #fff;
+  border-color: #1d4ed8;
+}
+.peso-ble-btn.escaneando {
+  background: #7c5c1e;
+  color: #fff;
+  border-color: #7c5c1e;
+}
+
+/* Animación de pulso para el indicador de escaneo */
+@keyframes pulse {
+  0%   { opacity: 1; transform: scale(1); }
+  50%  { opacity: 0.5; transform: scale(1.2); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Card de animal escaneado con flash (feedback visual) */
+.peso-ble-flash {
+  animation: bleFlash .4s ease-out;
+}
+@keyframes bleFlash {
+  0%   { background: #dbeafe; transform: scale(1.02); }
+  100% { background: #fff7ed; transform: scale(1); }
+}

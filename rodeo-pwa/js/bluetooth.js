@@ -261,3 +261,23 @@ export function simularLectura(caravana = null) {
     onCaravanaLeida(caravanaSimulada);
   }
 }
+
+/**
+ * Redirige el callback de lectura de caravana a otra función,
+ * sin necesidad de reconectar el bastón.
+ * Útil para que otros módulos (Pesadas, etc.) reciban las lecturas
+ * mientras el bastón ya está conectado.
+ *
+ * @param {function|null} fn — nueva función receptora, o null para restaurar el original
+ * @param {function} [original] — función original a restaurar cuando fn es null
+ */
+export function setCallbackCaravana(fn) {
+  onCaravanaLeida = fn || (() => {});
+}
+
+/**
+ * Indica si el bastón está actualmente conectado.
+ */
+export function isConectado() {
+  return servidorGATT?.connected ?? false;
+}
