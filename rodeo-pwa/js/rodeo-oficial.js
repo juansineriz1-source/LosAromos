@@ -53,136 +53,109 @@ export function inicializarRodeoOficial(onToast, esAdmin) {
     btnAgregar.onclick = () => abrirModalAgregarAnimal();
   }
 
-  // ── Panel de filtros avanzados ──────────────────────────────────────────────
+  // ── Panel de filtros — EVENT DELEGATION (infalible) ───────────────────────
   const btnToggle  = document.getElementById('btn-toggle-filtros');
   const btnLimpiar = document.getElementById('btn-limpiar-filtros');
   const panel      = document.getElementById('panel-filtros');
 
-  // Toggle abrir/cerrar panel
-  if (btnToggle && panel) {
-    btnToggle.addEventListener('click', () => {
-      _panelFiltrosAbierto = !_panelFiltrosAbierto;
-      panel.style.display  = _panelFiltrosAbierto ? 'block' : 'none';
-      panel.classList.toggle('panel-filtros-visible', _panelFiltrosAbierto);
-      btnToggle.classList.toggle('activo', _panelFiltrosAbierto);
-    });
-  }
-  // Exponer para que el onclick del HTML también actualice el estado interno
+  // Toggle abrir/cerrar
   window._toggleFiltros = () => {
     if (!panel) return;
     _panelFiltrosAbierto = panel.style.display !== 'block';
     panel.style.display  = _panelFiltrosAbierto ? 'block' : 'none';
     btnToggle?.classList.toggle('activo', _panelFiltrosAbierto);
   };
+  btnToggle?.addEventListener('click', window._toggleFiltros);
 
-  // Limpiar todos los filtros
-  if (btnLimpiar) {
-    btnLimpiar.addEventListener('click', () => {
-      _filtros.tipos.clear();
-      _filtros.estados.clear();
-      _filtros.vacunas.clear();
-      _filtros.vacunaEstAño  = null;
-      _filtros.periodoVacuna = 365;
-      // Resetear UI
-      document.querySelectorAll('.filtro-chip').forEach(c => c.classList.remove('activo'));
-      document.querySelector('[data-grupo="periodo"][data-val="365"]')?.classList.add('activo');
-      document.getElementById('vac-toggle-si')?.classList.remove('activo');
-      document.getElementById('vac-toggle-no')?.classList.remove('activo');
-      document.getElementById('filtro-vacunas-detalle')?.style && (document.getElementById('filtro-vacunas-detalle').style.display = 'none');
-      _actualizarBarraFiltros();
-      aplicarFiltros();
+  // Limpiar filtros
+  btnLimpiar?.addEventListener('click', () => {
+    _filtros.tipos.clear();
+    _filtros.estados.clear();
+    _filtros.vacunas.clear();
+    _filtros.vacunaEstAño  = null;
+    _filtros.periodoVacuna = 365;
+    panel?.querySelectorAll('.filtro-chip').forEach(c => c.classList.remove('activo'));
+    panel?.querySelector('[data-grupo="periodo"][data-val="365"]')?.classList.add('activo');
+    document.getElementById('vac-toggle-si')?.classList.remove('activo');
+    document.getElementById('vac-toggle-no')?.classList.remove('activo');
+    const det = document.getElementById('filtro-vacunas-detalle');
+    if (det) det.style.display = 'none';
+    _actualizarBarraFiltros();
+    aplicarFiltros();
+  });
+
+  // ── ÚNICO listener delegado para TODO el panel ──────────────────────────────
+  // Captura clicks en chips de tipo, estado, vacuna y período sin importar CSS ni timing
+  if (panel) {
+    panel.addEventListener('click', e => {
+      const btn = e.target.closest('[data-grupo]');
+      if (!btn) return;
+      const grupo = btn.dataset.grupo;
+      const val   = btn.dataset.val;
+
+      if (grupo === 'tipo') {
+        if (_filtros.tipos.has(val)) { _filtros.tipos.delete(val); btn.classList.remove('activo'); }
+        else                         { _filtros.tipos.add(val);    btn.classList.add('activo'); }
+        _actualizarBarraFiltros();
+        aplicarFiltros();
+
+      } else if (grupo === 'estado') {
+        if (_filtros.estados.has(val)) { _filtros.estados.delete(val); btn.classList.remove('activo'); }
+        else                           { _filtros.estados.add(val);    btn.classList.add('activo'); }
+        _actualizarBarraFiltros();
+        aplicarFiltros();
+
+      } else if (grupo === 'vacuna') {
+        if (_filtros.vacunas.has(val)) { _filtros.vacunas.delete(val); btn.classList.remove('activo'); }
+        else                           { _filtros.vacunas.add(val);    btn.classList.add('activo'); }
+        _actualizarBarraFiltros();
+        aplicarFiltros();
+
+      } else if (grupo === 'periodo') {
+        panel.querySelectorAll('[data-grupo="periodo"]').forEach(b => b.classList.remove('activo'));
+        btn.classList.add('activo');
+        _filtros.periodoVacuna = parseInt(val);
+        if (_filtros.vacunaEstAño) aplicarFiltros();
+
+      } else if (grupo === 'vac-toggle') {
+        const detalle = document.getElementById('filtro-vacunas-detalle');
+        const si = document.getElementById('vac-toggle-si');
+        const no = document.getElementById('vac-toggle-no');
+        if (_filtros.vacunaEstAño === val) {
+          _filtros.vacunaEstAño = null;
+          si?.classList.remove('activo');
+          no?.classList.remove('activo');
+          if (detalle) detalle.style.display = 'none';
+        } else {
+          _filtros.vacunaEstAño = val;
+          si?.classList.toggle('activo', val === 'si');
+          no?.classList.toggle('activo', val === 'no');
+          if (detalle) detalle.style.display = val === 'si' ? 'block' : 'none';
+          if (val === 'no') {
+            _filtros.vacunas.clear();
+            panel.querySelectorAll('[data-grupo="vacuna"]').forEach(c => c.classList.remove('activo'));
+          }
+        }
+        _actualizarBarraFiltros();
+        aplicarFiltros();
+      }
     });
-  }
 
-  // ── Secciones colapsables ───────────────────────────────────────────────────
-  // Las secciones empiezan ABIERTAS (arrow ▾). Click las cierra, otro click las reabre.
-  document.querySelectorAll('.filtro-seccion-header').forEach(header => {
-    header.addEventListener('click', () => {
+    // Secciones colapsables — también delegado
+    panel.addEventListener('click', e => {
+      const header = e.target.closest('.filtro-seccion-header');
+      if (!header) return;
       const seccion = header.dataset.seccion;
       const body    = document.getElementById(`filtro-body-${seccion}`);
       const arrow   = header.querySelector('.filtro-seccion-arrow');
       if (!body) return;
-      // Usamos data-abierta para no depender de style.display inline
       const estaAbierta = body.dataset.abierta !== 'false';
-      body.style.display     = estaAbierta ? 'none' : '';
-      body.dataset.abierta   = estaAbierta ? 'false' : 'true';
-      arrow.textContent      = estaAbierta ? '›' : '▾';
+      body.style.display   = estaAbierta ? 'none' : '';
+      body.dataset.abierta = estaAbierta ? 'false' : 'true';
+      if (arrow) arrow.textContent = estaAbierta ? '›' : '▾';
     });
-  });
-
-  // ── Chips de Tipo (se generan después al cargar datos) ──────────────────────
-
-  // ── Chips de Estado ─────────────────────────────────────────────────────────
-  document.querySelectorAll('[data-grupo="estado"]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const val = btn.dataset.val;
-      if (_filtros.estados.has(val)) {
-        _filtros.estados.delete(val);
-        btn.classList.remove('activo');
-      } else {
-        _filtros.estados.add(val);
-        btn.classList.add('activo');
-      }
-      _actualizarBarraFiltros();
-      aplicarFiltros();
-    });
-  });
-
-  // ── Toggle Vacunadas SÍ / NO ────────────────────────────────────────────────
-  const toggleSi = document.getElementById('vac-toggle-si');
-  const toggleNo = document.getElementById('vac-toggle-no');
-  const detalle  = document.getElementById('filtro-vacunas-detalle');
-
-  function _setVacToggle(val) {
-    if (_filtros.vacunaEstAño === val) {
-      // Deseleccionar
-      _filtros.vacunaEstAño = null;
-      toggleSi.classList.remove('activo');
-      toggleNo.classList.remove('activo');
-      detalle.style.display = 'none';
-    } else {
-      _filtros.vacunaEstAño = val;
-      toggleSi.classList.toggle('activo', val === 'si');
-      toggleNo.classList.toggle('activo', val === 'no');
-      detalle.style.display = val === 'si' ? 'block' : 'none';
-      if (val === 'no') {
-        // Limpiar chips de vacuna específica al poner NO
-        _filtros.vacunas.clear();
-        document.querySelectorAll('[data-grupo="vacuna"]').forEach(c => c.classList.remove('activo'));
-      }
-    }
-    _actualizarBarraFiltros();
-    aplicarFiltros();
   }
 
-  toggleSi?.addEventListener('click', () => _setVacToggle('si'));
-  toggleNo?.addEventListener('click', () => _setVacToggle('no'));
-
-  // ── Chips de Vacuna específica ──────────────────────────────────────────────
-  document.querySelectorAll('[data-grupo="vacuna"]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const val = btn.dataset.val;
-      if (_filtros.vacunas.has(val)) {
-        _filtros.vacunas.delete(val);
-        btn.classList.remove('activo');
-      } else {
-        _filtros.vacunas.add(val);
-        btn.classList.add('activo');
-      }
-      _actualizarBarraFiltros();
-      aplicarFiltros();
-    });
-  });
-
-  // ── Chips de Período ────────────────────────────────────────────────────────
-  document.querySelectorAll('[data-grupo="periodo"]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('[data-grupo="periodo"]').forEach(b => b.classList.remove('activo'));
-      btn.classList.add('activo');
-      _filtros.periodoVacuna = parseInt(btn.dataset.val);
-      if (_filtros.vacunaEstAño) aplicarFiltros();
-    });
-  });
 
   // Exponer para que app.js pueda llamar desde el buscador
   window.aplicarFiltrosRodeo = aplicarFiltros;
