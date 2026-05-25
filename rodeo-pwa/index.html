@@ -740,17 +740,32 @@
         <label class="campo-label">Vacuna aplicada</label>
         <select id="reg-vac-select" class="vac-select">
           <option value="">-- Seleccionar --</option>
-          <option>Aftosa (Campana 1)</option>
-          <option>Aftosa (Campana 2)</option>
-          <option>Brucelosis (Cepa 19) - unica en la vida</option>
-          <option>Carbunclo Bacteridiano (Antrax)</option>
-          <option>Clostridiales</option>
-          <option>Diarrea Neonatal (Preparto - a la madre)</option>
-          <option>Reproductivas (IBR+DVB+Lepto+Campy)</option>
-          <option>Queratoconjuntivitis</option>
-          <option>Antiparasitario interno</option>
-          <option>Vitaminas / Minerales</option>
-          <option>Otra</option>
+          <optgroup label="🚨 SENASA Obligatorio">
+            <option>Aftosa (Campaña 1)</option>
+            <option>Aftosa (Campaña 2)</option>
+          </optgroup>
+          <optgroup label="🐄 Vaquillona / Vaca">
+            <option>Vacuna Reproductiva (IBR+DVB+Lepto+Campy)</option>
+            <option>Vacuna Diarrea Neonatal (Preparto)</option>
+            <option>Carbunclo (Antrax)</option>
+            <option>Desparasitante</option>
+            <option>Cobre</option>
+          </optgroup>
+          <optgroup label="🐼 Terneros / Terneras">
+            <option>Triple Clostridial</option>
+            <option>Refuerzo Clostridial</option>
+            <option>Vacuna Viral (IBR+DVB)</option>
+            <option>Refuerzo Viral</option>
+            <option>Brucelosis (Cepa 19)</option>
+          </optgroup>
+          <optgroup label="🐂 Toros / Toritos">
+            <option>Vacuna Reproductiva (IBR+DVB+Lepto+Campy)</option>
+            <option>Carbunclo (Antrax)</option>
+            <option>Desparasitante</option>
+          </optgroup>
+          <optgroup label="Otras">
+            <option>Otra</option>
+          </optgroup>
         </select>
 
         <label class="campo-label" style="margin-top:14px;">Fecha de aplicación</label>
@@ -785,17 +800,32 @@
           <label class="campo-label">Vacuna aplicada *</label>
           <select id="masiva-vacuna" class="vac-select">
             <option value="">-- Seleccionar vacuna --</option>
-            <option>Aftosa (Campana 1)</option>
-            <option>Aftosa (Campana 2)</option>
-            <option>Brucelosis (Cepa 19) - unica en la vida</option>
-            <option>Carbunclo Bacteridiano (Antrax)</option>
-            <option>Clostridiales</option>
-            <option>Diarrea Neonatal (Preparto - a la madre)</option>
-            <option>Reproductivas (IBR+DVB+Lepto+Campy)</option>
-            <option>Queratoconjuntivitis</option>
-            <option>Antiparasitario interno</option>
-            <option>Vitaminas / Minerales</option>
-            <option>Otra</option>
+            <optgroup label="🚨 SENASA Obligatorio">
+              <option>Aftosa (Campaña 1)</option>
+              <option>Aftosa (Campaña 2)</option>
+            </optgroup>
+            <optgroup label="🐄 Vaquillona / Vaca">
+              <option>Vacuna Reproductiva (IBR+DVB+Lepto+Campy)</option>
+              <option>Vacuna Diarrea Neonatal (Preparto)</option>
+              <option>Carbunclo (Antrax)</option>
+              <option>Desparasitante</option>
+              <option>Cobre</option>
+            </optgroup>
+            <optgroup label="🐼 Terneros / Terneras">
+              <option>Triple Clostridial</option>
+              <option>Refuerzo Clostridial</option>
+              <option>Vacuna Viral (IBR+DVB)</option>
+              <option>Refuerzo Viral</option>
+              <option>Brucelosis (Cepa 19)</option>
+            </optgroup>
+            <optgroup label="🐂 Toros / Toritos">
+              <option>Vacuna Reproductiva (IBR+DVB+Lepto+Campy)</option>
+              <option>Carbunclo (Antrax)</option>
+              <option>Desparasitante</option>
+            </optgroup>
+            <optgroup label="Otras">
+              <option>Otra</option>
+            </optgroup>
           </select>
 
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
