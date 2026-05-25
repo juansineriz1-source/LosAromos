@@ -83,7 +83,7 @@ export function inicializarRodeoOficial(onToast, esAdmin) {
       document.querySelector('[data-grupo="periodo"][data-val="365"]')?.classList.add('activo');
       document.getElementById('vac-toggle-si')?.classList.remove('activo');
       document.getElementById('vac-toggle-no')?.classList.remove('activo');
-      document.getElementById('filtro-vacunas-detalle').style.display = 'none';
+      document.getElementById('filtro-vacunas-detalle')?.style && (document.getElementById('filtro-vacunas-detalle').style.display = 'none');
       _actualizarBarraFiltros();
       aplicarFiltros();
     });
@@ -191,6 +191,9 @@ export async function cargarRodeoOficial() {
     if (!resp.ok) throw new Error(`Error ${resp.status}`);
     const { animales, total } = await resp.json();
     _animales = animales;
+    // Resetear el flag para que los chips de tipo se regeneren con datos actualizados
+    const wrapTipo = document.getElementById('filtro-chips-tipo');
+    if (wrapTipo) wrapTipo.dataset.generado = 'false';
     renderizarRodeo(animales, total);
   } catch (err) {
     contenedor.innerHTML = `<p class="sin-historial">Sin conexión — datos no disponibles</p>`;
@@ -458,8 +461,8 @@ window.abrirDetalleAnimal = function(idx) {
         <div class="det-card">
           ${fila('📅', 'Última actualización', a.fecha    ? a.fecha.replace(/(\d{4})-(\d{2})-(\d{2})/, '$3/$2/$1') : '')}
           ${fila('👤', 'Registrado por',       a.usuario  || '')}
-          ${a.tiene_boton    === 'si' || a.tiene_boton    === 'no' ? fila('🔖', '¿Tiene botón?',    a.tiene_boton   ) : ''}
-          ${a.tiene_caravana === 'si' || a.tiene_caravana === 'no' ? fila('🏷', '¿Tiene caravana?', a.tiene_caravana) : ''}
+          ${fila('🔖', '¿Tiene botón?',    a.tiene_boton   ) }
+          ${fila('🏷', '¿Tiene caravana?', a.tiene_caravana) }
         </div>
 
         <!-- Comentario -->
@@ -540,11 +543,12 @@ window.abrirDetalleAnimal = function(idx) {
 };
 
 async function _cargarGaleriaEnDetalle(a, idx) {
-  const contenedor = document.getElementById(`det-galeria-${idx}`);
+  const contenedorId = `det-galeria-${idx}`;
+  const contenedor   = document.getElementById(contenedorId);
   if (!contenedor) return;
   try {
-    const uuid = await obtenerOCrearAnimalUuid(a.boton, a.caravana);
-    await renderizarGaleriaAnimal(uuid, contenedor, { clickable: true, onFotoClick: src => window.abrirLightbox(src) });
+    const uuid = obtenerOCrearAnimalUuid(a.boton, a.caravana);
+    await renderizarGaleriaAnimal(contenedorId, uuid, a.boton, a.caravana, _esAdmin);
   } catch {
     contenedor.innerHTML = '<p class="sin-historial" style="font-size:13px;">Sin fotos registradas</p>';
   }
@@ -670,7 +674,7 @@ window._abrirVacunaModal = async function(idx, vacunaId) {
           vacuna:           vacunaId,
           fecha:            fechaFmt,
           comentario_otras: comentOtras,
-          usuario:          a.usuario || 'Admin',
+          usuario:          localStorage.getItem('rodeo_operador') || a.usuario || 'Admin',
           animal_actual:    a,
         }),
       });

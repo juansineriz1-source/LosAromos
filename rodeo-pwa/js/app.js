@@ -1158,8 +1158,8 @@ function inicializarVacunacion() {
   function tipoCatMasiva(tipo) {
     const t = (tipo || '').toUpperCase().trim();
     if (t === 'T')  return 'Toro';
-    if (t === 'TH') return 'Torito';
-    if (t === 'TN') return 'Ternero';
+    if (t === 'TH') return 'Ternera';   // TH = Ternera Hembra
+    if (t === 'TM') return 'Ternero';   // TM = Ternero Macho
     if (t === 'V')  return 'Vaca';
     if (t === 'VQ') return 'Vaquillona';
     return '';
@@ -1392,7 +1392,7 @@ function renderizarPanelVacunacion(filtroCategoria = '') {
     return;
   }
 
-  lista.innerHTML = animalesFiltrados.slice(0, 80).map((a, idx) => {
+  lista.innerHTML = animalesFiltrados.map((a, idx) => {
     // idx relativo al array completo para la funcion global
     const idxGlobal = _animales.indexOf(a);
     const estados = estadoVacunasAnimal(a, vacunasData);

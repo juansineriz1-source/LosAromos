@@ -144,8 +144,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Body inválido' });
   }
 
-  const hoy     = new Date();
-  const fechaHoy = `${hoy.getDate().toString().padStart(2,'0')}/${(hoy.getMonth()+1).toString().padStart(2,'0')}/${hoy.getFullYear()}`;
+  const fechaHoy = new Date().toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', day:'2-digit', month:'2-digit', year:'numeric' });
 
   try {
     const token = await obtenerAccessToken();

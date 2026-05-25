@@ -335,8 +335,9 @@ export default async function handler(req, res) {
 
     const animales = filas
       .slice(1)
-      .filter(f => f[0] || f[1])
-      .map((fila, idx) => parsearFila(fila, idx));
+      .map((fila, idx) => ({ fila, realIdx: idx }))       // preservar índice real de hoja
+      .filter(({ fila }) => fila[0] || fila[1])
+      .map(({ fila, realIdx }) => parsearFila(fila, realIdx));
 
     animales.sort((a, b) => {
       if (a.tipo < b.tipo) return -1;
