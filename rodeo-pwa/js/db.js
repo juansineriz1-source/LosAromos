@@ -32,7 +32,7 @@ export const CATEGORIAS = [
   { valor: 'T',      label: 'T — Toro' },
   { valor: 'V CUT',  label: 'V CUT — Vaca a recría' },
 ];
-export const COLORES = ['Negra', 'Colorada', 'Hosca', 'Bayo', 'Blanca', 'Sin registrar'];
+export const COLORES = ['Negra', 'Colorada'];
 export const ESTADOS_SANITARIOS = ['sano', 'vacunado', 'en_tratamiento', 'cuarentena', 'revisar'];
 export const RAZAS = ['Aberdeen Angus', 'Hereford', 'Shorthorn', 'Brahman', 'Brangus', 'Criolla', 'Holstein', 'Otra'];
 export const VACUNAS_COMUNES = [
