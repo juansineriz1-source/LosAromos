@@ -7,6 +7,7 @@
  * Para OPERARIOS: solo lectura.
  */
 import { obtenerOCrearAnimalUuid, renderizarGaleriaAnimal } from './fotos-animal.js';
+import { getInseminacionAnimal, getInseminacionesData, calcularGestacion } from './inseminaciones.js';
 
 // ─── Estado ───────────────────────────────────────────────────────────────────
 let _animales   = [];
@@ -61,10 +62,13 @@ export function inicializarRodeoOficial(onToast, esAdmin) {
   if (btnToggle && panel) {
     btnToggle.addEventListener('click', () => {
       _panelFiltrosAbierto = !_panelFiltrosAbierto;
+      panel.style.display  = _panelFiltrosAbierto ? 'block' : 'none';
       panel.classList.toggle('panel-filtros-visible', _panelFiltrosAbierto);
       btnToggle.classList.toggle('activo', _panelFiltrosAbierto);
     });
   }
+  // Exponer para emergencias
+  window._toggleFiltros = () => btnToggle?.click();
 
   // Limpiar todos los filtros
   if (btnLimpiar) {
@@ -468,6 +472,46 @@ window.abrirDetalleAnimal = function(idx) {
 
         <!-- Histórico de cambios -->
         ${hayHistorico ? `<div style="margin-top:14px;">${historicoHtml}</div>` : ''}
+
+        <!-- Inseminación / Gestación -->
+        ${(() => {
+          const insData = getInseminacionesData();
+          const ins     = getInseminacionAnimal(a, insData);
+          const g       = ins ? calcularGestacion(ins) : null;
+          if (!ins) return '';
+          const diasParto = g?.diasParaParto;
+          const partoLabel = diasParto !== null
+            ? (diasParto < 0 ? `<span style="color:#dc2626;font-weight:700;">⚠️ Pasados ${Math.abs(diasParto)} días — verificar</span>`
+               : diasParto === 0 ? `<span style="color:#dc2626;font-weight:700;">🔴 ¡HOY!</span>`
+               : diasParto <= 7  ? `<span style="color:#dc2626;font-weight:700;">🔴 En ${diasParto} días — inminente</span>`
+               : diasParto <= 30 ? `<span style="color:#f97316;font-weight:700;">🟠 En ${diasParto} días</span>`
+               : `<span style="color:#1a5c30;">📅 En ${diasParto} días</span>`)
+            : '—';
+          return `
+          <div class="det-seccion-titulo" style="margin-top:14px;">🐄 Inseminación</div>
+          <div class="det-card" style="padding:14px;">
+            ${fila('📅', 'Fecha inseminación', ins.fecha_inseminacion || '—')}
+            ${ins.metodo ? fila('🔬', 'Método', ins.metodo) : ''}
+            ${ins.semen_toro ? fila('🐂', 'Toro / Semen', ins.semen_toro) : ''}
+            ${ins.observaciones ? fila('📝', 'Observaciones', ins.observaciones) : ''}
+            ${g?.fechaParto ? `<div class="det-fila">
+              <span class="det-icono">🍼</span>
+              <div class="det-contenido">
+                <span class="det-label">Parto estimado</span>
+                <span class="det-valor">${g.fechaParto.toLocaleDateString('es-AR')} — ${partoLabel}</span>
+              </div>
+            </div>` : ''}
+            ${g ? `<div style="margin-top:10px;">
+              <div style="display:flex;justify-content:space-between;font-size:12px;color:#6b7280;margin-bottom:4px;">
+                <span>Gestación: mes ${g.mesGestacion} (${g.diasDesde} días)</span>
+                <span>${g.pct}%</span>
+              </div>
+              <div style="background:#f3f4f6;border-radius:99px;height:8px;overflow:hidden;">
+                <div style="width:${g.pct}%;height:100%;background:${g.pct >= 90 ? '#dc2626' : g.pct >= 70 ? '#f97316' : '#1a5c30'};border-radius:99px;transition:width .3s;"></div>
+              </div>
+            </div>` : ''}
+          </div>`;
+        })()}
 
         <!-- Vacunación -->
         <div class="det-seccion-titulo" style="margin-top:14px;">💉 Vacunación</div>
