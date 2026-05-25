@@ -522,6 +522,12 @@ window.abrirDetalleAnimal = function(idx) {
           <div class="vac-grid" id="vac-grid-${idx}">Cargando...</div>
         </div>
 
+        <!-- Pesos del animal -->
+        <div class="det-seccion-titulo" style="margin-top:14px;">⚖️ Pesos</div>
+        <div id="det-pesos-${idx}" class="det-card" style="padding:14px;">
+          <p class="sin-historial" style="font-size:13px;">Cargando...</p>
+        </div>
+
         <!-- Galería de fotos del animal -->
         <div class="det-seccion-titulo" style="margin-top:14px;">📷 Fotos del animal</div>
         <div id="det-galeria-${idx}" style="min-height:48px;">
@@ -540,6 +546,8 @@ window.abrirDetalleAnimal = function(idx) {
   _cargarGaleriaEnDetalle(a, idx);
   // Renderizar vacunas
   _renderizarVacunas(a, idx);
+  // Cargar pesos del animal
+  _cargarPesosEnDetalle(a, idx);
 };
 
 async function _cargarGaleriaEnDetalle(a, idx) {
@@ -551,6 +559,55 @@ async function _cargarGaleriaEnDetalle(a, idx) {
     await renderizarGaleriaAnimal(contenedorId, uuid, a.boton, a.caravana, _esAdmin);
   } catch {
     contenedor.innerHTML = '<p class="sin-historial" style="font-size:13px;">Sin fotos registradas</p>';
+  }
+}
+
+async function _cargarPesosEnDetalle(a, idx) {
+  const contenedor = document.getElementById(`det-pesos-${idx}`);
+  if (!contenedor) return;
+  try {
+    const params = new URLSearchParams({ modo: 'pesos' });
+    if (a.caravana) params.set('caravana', a.caravana);
+    else if (a.boton) params.set('boton', a.boton);
+    const resp  = await fetch(`/api/animales?${params}`);
+    const data  = resp.ok ? await resp.json() : { pesos: [] };
+    const pesos = data.pesos || [];
+
+    if (!pesos.length) {
+      contenedor.innerHTML = '<p class="sin-historial" style="font-size:13px;">Sin pesadas registradas</p>';
+      return;
+    }
+
+    // El primero es el más reciente (ya viene ordenado desc por fecha)
+    const ultimo = pesos[0];
+    const resto  = pesos.slice(1, 5);
+
+    contenedor.innerHTML = `
+      <!-- Último peso destacado -->
+      <div style="display:flex;align-items:center;gap:14px;padding-bottom:${resto.length ? '12px' : '0'};${resto.length ? 'border-bottom:1px solid #f3f4f6;' : ''}">
+        <div style="background:#fff7ed;border-radius:14px;padding:12px 18px;text-align:center;min-width:80px;">
+          <div style="font-size:28px;font-weight:900;color:#7c5c1e;line-height:1;">${ultimo.peso_kg}<span style="font-size:14px;font-weight:600;"> kg</span></div>
+        </div>
+        <div style="flex:1;">
+          <div style="font-size:12px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:.4px;">Último peso</div>
+          <div style="font-size:15px;font-weight:700;color:#1a1a1a;margin-top:2px;">📅 ${ultimo.fecha}</div>
+          ${ultimo.tipo ? `<div style="font-size:12px;color:#6b7280;margin-top:2px;">${ultimo.tipo}</div>` : ''}
+          ${ultimo.operador ? `<div style="font-size:11px;color:#9ca3af;margin-top:2px;">por ${ultimo.operador}</div>` : ''}
+        </div>
+      </div>
+      <!-- Historial previo -->
+      ${resto.length ? `
+        <div style="margin-top:10px;">
+          <div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;">Historial</div>
+          ${resto.map(p => `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f9fafb;">
+              <span style="font-size:13px;color:#374151;">${p.fecha}</span>
+              <span style="font-size:14px;font-weight:700;color:#7c5c1e;">${p.peso_kg} kg</span>
+            </div>`).join('')}
+        </div>` : ''}
+    `;
+  } catch(e) {
+    contenedor.innerHTML = '<p class="sin-historial" style="font-size:13px;">Error al cargar pesos</p>';
   }
 }
 
