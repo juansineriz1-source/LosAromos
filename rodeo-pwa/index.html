@@ -443,14 +443,23 @@
         <!-- Alertas globales -->
         <div id="vac-alertas-container" class="vac-alertas-wrap"></div>
 
-        <!-- Filtro por categoría -->
-        <div class="vac-cat-chips">
+        <!-- Filtro por categoría -->\n        <div class="vac-cat-chips">
           <button class="vac-cat-chip activo" data-cat="">Todos</button>
           <button class="vac-cat-chip" data-cat="Ternero">Terneros</button>
           <button class="vac-cat-chip" data-cat="Ternera">Terneras</button>
           <button class="vac-cat-chip" data-cat="Vaquillona">Vaquillonas</button>
           <button class="vac-cat-chip" data-cat="Vaca">Vacas</button>
           <button class="vac-cat-chip" data-cat="Toro">Toros</button>
+        </div>
+
+        <!-- Buscador por botón / caravana -->
+        <div style="padding:0 0 10px 0;">
+          <input
+            type="text"
+            id="vac-buscar-animal"
+            placeholder="🔍 Buscar por botón o caravana..."
+            style="width:100%;padding:9px 14px;border-radius:12px;border:1.5px solid #e5e7eb;font-size:13px;box-sizing:border-box;outline:none;"
+          >
         </div>
 
         <!-- Lista de animales con estado -->

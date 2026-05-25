@@ -1041,13 +1041,24 @@ function inicializarVacunacion() {
   });
 
   // Chips de categoria
+  let _catVacActual = '';
   document.querySelectorAll('.vac-cat-chip').forEach(chip => {
     chip.addEventListener('click', () => {
       document.querySelectorAll('.vac-cat-chip').forEach(c => c.classList.remove('activo'));
       chip.classList.add('activo');
-      renderizarPanelVacunacion(chip.dataset.cat || '');
+      _catVacActual = chip.dataset.cat || '';
+      renderizarPanelVacunacion(_catVacActual);
     });
   });
+
+  // Buscador de animales en panel vacunacion
+  const vacBuscar = document.getElementById('vac-buscar-animal');
+  if (vacBuscar) {
+    vacBuscar.addEventListener('input', () => {
+      window._busquedaVac = vacBuscar.value.trim();
+      renderizarPanelVacunacion(_catVacActual);
+    });
+  }
 
   // Modal inseminacion
   const modalIns    = document.getElementById('modal-registrar-ins');
@@ -1363,9 +1374,17 @@ function renderizarPanelVacunacion(filtroCategoria = '') {
   const lista = document.getElementById('vac-lista-animales');
   if (!lista) return;
 
+  const q = ((window._busquedaVac) || '').toLowerCase().trim();
+
   let animalesFiltrados = _animales;
   if (filtroCategoria) {
     animalesFiltrados = _animales.filter(a => tipoCategoriaVacLocal(a.tipo) === filtroCategoria);
+  }
+  if (q) {
+    animalesFiltrados = animalesFiltrados.filter(a =>
+      (a.boton    || '').toLowerCase().includes(q) ||
+      (a.caravana || '').toLowerCase().includes(q)
+    );
   }
 
   if (!animalesFiltrados.length) {
