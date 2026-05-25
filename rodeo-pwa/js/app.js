@@ -1540,10 +1540,10 @@ function inicializarPanelPesadas() {
     btn.textContent = 'Guardando...'; btn.disabled = true;
     try {
       const fechaAR = fechaISO ? fechaISO.split('-').reverse().join('/') : new Date().toLocaleDateString('es-AR');
-      const r = await fetch('/api/pesos', {
+      const r = await fetch('/api/animales', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ caravana: _animalPeso.caravana || '', boton: _animalPeso.boton || '', tipo: _animalPeso.tipo || '', fecha: fechaAR, peso_kg: kg, observaciones: obs, operador }),
+        body: JSON.stringify({ modo: 'registro-peso', caravana: _animalPeso.caravana || '', boton: _animalPeso.boton || '', tipo: _animalPeso.tipo || '', fecha: fechaAR, peso_kg: kg, observaciones: obs, operador }),
       });
       const data = await r.json();
       if (data.ok) { mostrarToast(`✅ ${_animalPeso.caravana || _animalPeso.boton} — ${kg} kg guardado`); _resetIndividual(); }
@@ -1665,10 +1665,11 @@ function inicializarPanelPesadas() {
     let ok = 0, err = 0;
     for (const a of _grupoAnimales) {
       try {
-        const r = await fetch('/api/pesos', {
+        const r = await fetch('/api/animales', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            modo: 'registro-peso',
             caravana: a.caravana || '', boton: a.boton || '', tipo: a.tipo || '',
             fecha: fechaAR, peso_kg: por,
             observaciones: obs ? `[Grupal ${_grupoAnimales.length} animales, total ${total}kg] ${obs}` : `Pesada grupal — ${_grupoAnimales.length} animales, total ${total} kg`,

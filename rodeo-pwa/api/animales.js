@@ -195,6 +195,22 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true, registrados: filas.length });
       }
 
+      if (body.modo === 'registro-peso') {
+        const { caravana: car, boton: btn, tipo, fecha, peso_kg, observaciones, operador } = body;
+        if (!car && !btn) return res.status(400).json({ error: 'Se requiere caravana o boton' });
+        if (!peso_kg || peso_kg <= 0 || peso_kg > 1500) return res.status(400).json({ error: 'peso_kg inv\u00e1lido' });
+        const fechaAR = fecha || new Date().toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', day:'2-digit', month:'2-digit', year:'numeric' });
+        const tsAR    = new Date().toLocaleString('es-AR',  { timeZone: 'America/Argentina/Buenos_Aires' });
+        const appendUrlP = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent('Pesos!A:H')}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`;
+        const appendRespP = await fetch(appendUrlP, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ values: [[car||'', btn||'', tipo||'', fechaAR, peso_kg, observaciones||'', operador||'', tsAR]] }),
+        });
+        if (!appendRespP.ok) throw new Error(`Sheets pesos error: ${appendRespP.status}`);
+        return res.status(200).json({ ok: true, peso_kg, fecha: fechaAR });
+      }
+
       return res.status(400).json({ error: 'modo no reconocido' });
     }
 
@@ -228,6 +244,45 @@ export default async function handler(req, res) {
         timestamp:        getCol(fila, 'timestamp'),
       }));
       return res.status(200).json({ vacunas });
+    }
+
+    // ── MODO: pesos de animales desde hoja Pesos ─────────────────────────────
+    if (modo === 'pesos') {
+      const urlP  = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent('Pesos!A:H')}`;
+      const respP = await fetch(urlP, { headers: { Authorization: `Bearer ${token}` } });
+      if (!respP.ok) return res.status(200).json({ pesos: [] });
+      const filasP = (await respP.json()).values || [];
+      if (filasP.length <= 1) return res.status(200).json({ pesos: [], total: 0 });
+      let todos = filasP.slice(1)
+        .filter(f => f[0] || f[1])
+        .map(f => ({
+          caravana:      (f[0]||'').trim(),
+          boton:         (f[1]||'').trim(),
+          tipo:          (f[2]||'').trim(),
+          fecha:         (f[3]||'').trim(),
+          peso_kg:       parseFloat(f[4]) || 0,
+          observaciones: (f[5]||'').trim(),
+          operador:      (f[6]||'').trim(),
+          timestamp:     (f[7]||'').trim(),
+        }))
+        .filter(r => r.peso_kg > 0);
+      // Filtrar por animal si se pide
+      const cLow = (caravana||'').trim().toLowerCase();
+      const bLow = (boton||'').trim().toLowerCase();
+      if (cLow || bLow) {
+        todos = todos.filter(r =>
+          (cLow && r.caravana.toLowerCase() === cLow) ||
+          (bLow && r.boton.toLowerCase()    === bLow)
+        );
+      }
+      todos.sort((a, b) => {
+        const fa = a.fecha.split('/').reverse().join('-');
+        const fb = b.fecha.split('/').reverse().join('-');
+        return fb.localeCompare(fa);
+      });
+      const { limit } = req.query;
+      if (limit) todos = todos.slice(0, parseInt(limit));
+      return res.status(200).json({ pesos: todos, total: todos.length });
     }
 
     // ── MODO: historial de vacunas (fusionado desde historial-vacunas.js) ────
