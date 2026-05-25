@@ -5,7 +5,7 @@
 
 import {
   guardarAnimal, guardarRegistroManga, contarPendientes,
-  historialAnimal, CATEGORIAS, ESTADOS_SANITARIOS, RAZAS,
+  historialAnimal, CATEGORIAS, COLORES, ESTADOS_SANITARIOS, RAZAS, VACUNAS_COMUNES,
   obtenerTodosLosAnimales, obtenerTodosLosRegistros,
   guardarNovedad, obtenerNovedades,
 } from './db.js';
@@ -1010,34 +1010,91 @@ function manejarCambioConectividad(estadoRed, datos = {}) {
 
 // ─── UTILIDADES ───────────────────────────────────────────────────────────────
 function poblarSelects() {
+  // ── Categoría: chips con código real del rodeo ───────────────────────────────
+  const wrapCat = document.getElementById('chips-categoria');
+  if (wrapCat) {
+    wrapCat.innerHTML = CATEGORIAS.map(c =>
+      `<button type="button" class="manga-chip" data-val="${c.valor}">${c.valor}<span style="font-size:10px;font-weight:500;margin-left:3px;opacity:.7">${c.label.split('—')[1]?.trim() || ''}</span></button>`
+    ).join('');
+    // Selección simple
+    wrapCat.querySelectorAll('.manga-chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        wrapCat.querySelectorAll('.manga-chip').forEach(b => b.classList.remove('activo'));
+        btn.classList.add('activo');
+        const hi = document.getElementById('select-categoria');
+        if (hi) hi.value = btn.dataset.val;
+      });
+    });
+    // Seleccionar V por defecto
+    wrapCat.querySelector('[data-val="V"]')?.classList.add('activo');
+  }
+
+  // ── Color: chips con puntito de color ────────────────────────────────────────
+  const COLOR_MAP = {
+    'Negra':       '#1a1a1a',
+    'Colorada':    '#c2440b',
+    'Hosca':       '#8b5e3c',
+    'Bayo':        '#d4a035',
+    'Blanca':      '#e5e7eb',
+    'Sin registrar': '#9ca3af',
+  };
+  const wrapColor = document.getElementById('chips-color');
+  if (wrapColor) {
+    wrapColor.innerHTML = COLORES.map(c =>
+      `<button type="button" class="manga-chip" data-val="${c}">
+        <span class="manga-chip-dot" style="background:${COLOR_MAP[c] || '#9ca3af'}"></span>${c}
+       </button>`
+    ).join('');
+    wrapColor.querySelectorAll('.manga-chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const yaActivo = btn.classList.contains('activo');
+        wrapColor.querySelectorAll('.manga-chip').forEach(b => b.classList.remove('activo'));
+        if (!yaActivo) {
+          btn.classList.add('activo');
+          const hi = document.getElementById('input-color');
+          if (hi) hi.value = btn.dataset.val;
+        } else {
+          const hi = document.getElementById('input-color');
+          if (hi) hi.value = '';
+        }
+      });
+    });
+  }
+
+  // ── Vacunas: chips multi-select ──────────────────────────────────────────────
+  const wrapVac = document.getElementById('chips-vacuna');
+  if (wrapVac) {
+    wrapVac.innerHTML = VACUNAS_COMUNES.map(v =>
+      `<button type="button" class="manga-chip manga-chip-vac" data-val="${v}">${v}</button>`
+    ).join('');
+    wrapVac.querySelectorAll('.manga-chip-vac').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.classList.toggle('activo');
+        // Reconstruye el campo de texto con las seleccionadas
+        const seleccionadas = [...wrapVac.querySelectorAll('.manga-chip-vac.activo')]
+          .map(b => b.dataset.val).join(', ');
+        const inp = document.getElementById('input-vacuna');
+        if (inp) inp.value = seleccionadas;
+      });
+    });
+  }
+
+  // ── Selects legacy (estado, raza, formulario manual) ─────────────────────────
   const agregar = (id, lista) => {
     const sel = $(id);
-    if (!sel) return;
+    if (!sel || sel.options?.length > 0) return; // no duplicar
     lista.forEach(v => {
-      sel.appendChild(Object.assign(document.createElement('option'), {
-        value: v,
-        textContent: v.charAt(0).toUpperCase() + v.slice(1).replace('_', ' '),
-      }));
+      const val  = typeof v === 'object' ? v.valor : v;
+      const text = typeof v === 'object' ? v.label : v.charAt(0).toUpperCase() + v.slice(1).replace('_', ' ');
+      sel.appendChild(Object.assign(document.createElement('option'), { value: val, textContent: text }));
     });
   };
 
-  agregar('select-categoria', CATEGORIAS);
-  agregar('select-raza', RAZAS);
-  agregar('select-estado', ESTADOS_SANITARIOS);
+  agregar('select-estado',    ESTADOS_SANITARIOS);
+  agregar('select-raza',      RAZAS);
   agregar('manual-categoria', CATEGORIAS);
-  agregar('manual-raza', RAZAS);
-  agregar('manual-estado', ESTADOS_SANITARIOS);
-
-  // Filtro de estado en Rodeo (elemento ya no existe, omitir sin crash)
-  const selFiltro = $('rodeo-filtro-estado');
-  if (selFiltro) {
-    ESTADOS_SANITARIOS.forEach(e => {
-      selFiltro.appendChild(Object.assign(document.createElement('option'), {
-        value: e,
-        textContent: e.replace('_', ' '),
-      }));
-    });
-  }
+  agregar('manual-raza',      RAZAS);
+  agregar('manual-estado',    ESTADOS_SANITARIOS);
 }
 
 async function actualizarContadorPendientes() {

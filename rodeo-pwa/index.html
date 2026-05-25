@@ -349,14 +349,15 @@
         </div>
       </div>
 
-      <!-- Card Datos de Manga -->
-      <div class="card card-stitch">
+      <!-- Card Datos de Manga — REDISEÑADO -->
+      <div class="card card-stitch manga-card">
         <div class="card-section-header">
           <span class="card-section-icono">⚖️</span>
           <h2 class="card-section-titulo">Datos de Manga</h2>
         </div>
 
-        <div class="grupo-campo">
+        <!-- PESO — grande y centrado -->
+        <div class="manga-peso-wrap">
           <label class="campo-label" for="input-peso">Peso</label>
           <input
             type="number"
@@ -369,33 +370,58 @@
           <div class="campo-unidad">kilogramos</div>
         </div>
 
-        <div class="grid-2">
-          <div class="grupo-campo">
-            <label class="campo-label" for="select-categoria">Categoría</label>
-            <select id="select-categoria" class="campo-select"></select>
+        <!-- CATEGORÍA — chips visuales -->
+        <div class="manga-seccion">
+          <div class="manga-seccion-label">Categoría</div>
+          <div class="manga-chips-wrap" id="chips-categoria">
+            <!-- Generados por JS -->
           </div>
-          <div class="grupo-campo">
-            <label class="campo-label" for="select-raza">Raza</label>
-            <select id="select-raza" class="campo-select"></select>
-          </div>
+          <input type="hidden" id="select-categoria" value="V">
         </div>
 
-        <div class="grupo-campo">
-          <label class="campo-label" for="select-estado">Estado Sanitario</label>
+        <!-- COLOR — chips visuales -->
+        <div class="manga-seccion">
+          <div class="manga-seccion-label">Color</div>
+          <div class="manga-chips-wrap" id="chips-color">
+            <!-- Generados por JS -->
+          </div>
+          <input type="hidden" id="input-color" value="">
+        </div>
+
+        <!-- VACUNA — chips rápidos + texto libre -->
+        <div class="manga-seccion">
+          <div class="manga-seccion-label">Vacuna / Medicamento</div>
+          <div class="manga-chips-wrap manga-vac-chips" id="chips-vacuna">
+            <!-- Generados por JS -->
+          </div>
+          <input
+            type="text"
+            id="input-vacuna"
+            class="campo-input"
+            placeholder="Escribir otra vacuna o medicamento..."
+            autocomplete="off"
+            style="margin-top:8px;"
+          >
+        </div>
+
+        <!-- ESTADO SANITARIO -->
+        <div class="manga-seccion">
+          <div class="manga-seccion-label">Estado Sanitario</div>
           <select id="select-estado" class="campo-select"></select>
         </div>
 
-        <div class="grupo-campo">
-          <label class="campo-label" for="input-vacuna">Vacuna / Medicamento (opcional)</label>
-          <input type="text" id="input-vacuna" class="campo-input" placeholder="Ej: Fiebre Aftosa, Clostridiosis..." autocomplete="off">
-        </div>
+        <!-- RAZA (oculta en la nueva UI, pero sigue leyéndose por JS para compatibilidad) -->
+        <select id="select-raza" class="campo-select" style="display:none"></select>
 
-        <div class="grupo-campo">
-          <label class="campo-label" for="input-obs">Observaciones</label>
+        <!-- OBSERVACIONES -->
+        <div class="manga-seccion">
+          <div class="manga-seccion-label">Observaciones</div>
           <input type="text" id="input-obs" class="campo-input" placeholder="Ej: cojera leve, oreja rota...">
         </div>
       </div>
 
+
+      <!-- Acciones -->
       <!-- Acciones -->
       <div class="card card-stitch">
         <button class="btn btn-guardar-grande" id="btn-guardar">

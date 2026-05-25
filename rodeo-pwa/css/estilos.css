@@ -3230,6 +3230,72 @@ html { scroll-behavior: smooth; }
   box-sizing: border-box;
 }
 
+/* ─── BASTÓN: Manga card rediseñada ──────────────────────────────────────── */
+.manga-card { display: flex; flex-direction: column; gap: 18px; }
+
+.manga-peso-wrap { display: flex; flex-direction: column; gap: 4px; }
+
+.manga-seccion { display: flex; flex-direction: column; gap: 8px; }
+
+.manga-seccion-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--gris);
+}
+
+/* Grilla de chips horizontal con wrap */
+.manga-chips-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Chip base */
+.manga-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 14px;
+  border-radius: 99px;
+  border: 1.5px solid #d1d5db;
+  background: #ffffff;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .13s;
+  font-family: inherit;
+  white-space: nowrap;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.manga-chip:active { transform: scale(.95); opacity: .8; }
+
+/* Chip activo — categoría/color */
+.manga-chip.activo {
+  background: #1a5c30;
+  border-color: #1a5c30;
+  color: #fff;
+}
+
+/* Chip de vacuna activo — azul */
+.manga-chip-vac.activo {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  color: #fff;
+}
+
+/* Chips de color: puntito de color */
+.manga-chip-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0,0,0,.12);
+  flex-shrink: 0;
+}
+
 .btn-guardar-grande {
   width: 100%;
   height: 60px;

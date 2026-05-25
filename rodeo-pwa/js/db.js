@@ -17,9 +17,35 @@
 import Dexie from 'https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.mjs';
 
 // ─── Constantes ────────────────────────────────────────────────────────────
-export const CATEGORIAS = ['vaca', 'vaquillona', 'toro', 'ternero', 'ternera', 'novillito', 'novillo'];
+// Categorías con código y etiqueta (alineadas con el Rodeo Oficial)
+export const CATEGORIAS = [
+  { valor: 'V',      label: 'V — Vaca' },
+  { valor: 'VQ',     label: 'VQ — Vaquillona' },
+  { valor: 'V1',     label: 'V1 — Ternera 1er año' },
+  { valor: 'V2',     label: 'V2 — Ternera 2do año' },
+  { valor: 'V3',     label: 'V3 — Ternera 3er año' },
+  { valor: 'V4',     label: 'V4 — Ternera 4to año' },
+  { valor: 'V5',     label: 'V5 — Ternera 5to año' },
+  { valor: 'V6',     label: 'V6 — Ternera 6to año' },
+  { valor: 'TH',     label: 'TH — Ternera Hembra' },
+  { valor: 'TM',     label: 'TM — Ternero Macho' },
+  { valor: 'T',      label: 'T — Toro' },
+  { valor: 'V CUT',  label: 'V CUT — Vaca a recría' },
+];
+export const COLORES = ['Negra', 'Colorada', 'Hosca', 'Bayo', 'Blanca', 'Sin registrar'];
 export const ESTADOS_SANITARIOS = ['sano', 'vacunado', 'en_tratamiento', 'cuarentena', 'revisar'];
 export const RAZAS = ['Aberdeen Angus', 'Hereford', 'Shorthorn', 'Brahman', 'Brangus', 'Criolla', 'Holstein', 'Otra'];
+export const VACUNAS_COMUNES = [
+  'Aftosa',
+  'Brucelosis',
+  'Carbunclo',
+  'Mancha',
+  'Queratoconjuntivitis',
+  'Clostridiales',
+  'IBR + DVB + Lepto',
+  'Diarrea Neonatal',
+  'Otra',
+];
 
 // ID único por dispositivo — persiste en localStorage
 export const DEVICE_ID = (() => {
