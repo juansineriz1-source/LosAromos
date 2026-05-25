@@ -45,31 +45,7 @@
         <div class="inicio-operador-name" id="inicio-op-nombre">Operador</div>
       </div>
 
-      <!-- Stats del día -->
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-icono-stitch">📄</div>
-          <div class="stat-numero" id="stat-registros">0</div>
-          <div class="stat-label">Registros hoy</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icono-stitch">🐮</div>
-          <div class="stat-numero" id="stat-animales">0</div>
-          <div class="stat-label">Animales distintos</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icono-stitch">🔄</div>
-          <div class="stat-numero" id="stat-pendientes">0</div>
-          <div class="stat-label">Por sincronizar</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icono-stitch">🔧</div>
-          <div class="stat-numero" id="stat-peso-prom">—</div>
-          <div class="stat-label">Peso promedio</div>
-        </div>
-      </div>
-
-      <!-- Stats del rodeo (desde Sheets) -->
+      <!-- 1. Stats del rodeo (desde Sheets) -->
       <div class="card card-stitch" id="card-rodeo-stats" style="padding: 14px 16px;">
         <div class="card-titulo">🐄 Rodeo</div>
         <div id="rodeo-stats-inicio" style="margin-top: 8px;">
@@ -77,7 +53,15 @@
         </div>
       </div>
 
-      <!-- Comentario del día -->
+      <!-- 2. Avisos y Alertas (vacunas vencidas + tareas próximas) -->
+      <div class="card" style="padding:14px 16px;">
+        <div class="card-titulo" style="margin-bottom:10px;">🔔 Avisos y Alertas</div>
+        <div id="inicio-alertas-container">
+          <div class="inicio-alerta-skeleton">Cargando alertas...</div>
+        </div>
+      </div>
+
+      <!-- 3. Novedades del día -->
       <div class="card">
         <div class="card-titulo">📝 Novedades del día</div>
         <textarea
@@ -91,7 +75,7 @@
         </button>
       </div>
 
-      <!-- Actividad de HOY -->
+      <!-- 4. Actividad de HOY -->
       <div class="card">
         <div class="card-titulo">⚡ Actividad de hoy</div>
         <div id="feed-hoy">
@@ -99,7 +83,7 @@
         </div>
       </div>
 
-      <!-- Historial con calendario -->
+      <!-- 5. Historial con calendario -->
       <div class="card">
         <div class="card-titulo">📅 Historial de novedades</div>
 
@@ -129,8 +113,22 @@
         </div>
       </div>
 
-      <!-- Sync + Actualización -->
+      <!-- 6. Sync + Actualización (al fondo) -->
       <div class="card">
+        <div class="card-titulo" style="margin-bottom:8px;">🔄 Sincronización</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
+          <div style="flex:1;">
+            <div style="font-size:12px;color:#9ca3af;margin-bottom:2px;">Registros locales</div>
+            <div style="font-size:13px;font-weight:700;color:#374151;">
+              <span id="stat-registros">0</span> hoy ·
+              <span id="stat-pendientes" style="color:#f97316;">0</span> por sincronizar
+            </div>
+          </div>
+          <div style="font-size:12px;color:#9ca3af;text-align:right;">
+            <div>Animales distintos</div>
+            <div style="font-size:16px;font-weight:800;color:#1a5c30;"><span id="stat-animales">0</span></div>
+          </div>
+        </div>
         <div class="barra-sync">
           <button class="btn btn-sync" id="btn-sync" style="flex: 1;">
             ☁ Sincronizar ahora

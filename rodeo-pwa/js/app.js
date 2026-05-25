@@ -377,10 +377,12 @@ async function cargarInicio() {
   $('stat-registros').textContent = regHoy.length;
   $('stat-animales').textContent = caravanasHoy.size;
   $('stat-pendientes').textContent = pendientes;
-  $('stat-peso-prom').textContent = pesoProm ? `${pesoProm} kg` : '—';
 
   // Stats del rodeo oficial (desde Sheets)
   cargarStatsRodeoInicio();
+
+  // Avisos y alertas en Inicio
+  cargarAlertasInicio();
 
   // Novedades + Feed de hoy
   await cargarFeedHoy();
@@ -432,6 +434,89 @@ async function cargarStatsRodeoInicio() {
     `;
   } catch {
     contenedor.innerHTML = '<p class="sin-historial" style="font-size:12px;">Sin conexión al rodeo</p>';
+  }
+}
+
+async function cargarAlertasInicio() {
+  const cont = document.getElementById('inicio-alertas-container');
+  if (!cont) return;
+
+  try {
+    // ─ Alertas de vacunas y partos ───────────────────────────────────────────
+    let htmlAlertas = '';
+    const animales  = getAnimales();
+    if (animales && animales.length) {
+      const vacunasData = getVacunasData ? getVacunasData() : [];
+      const insData     = getInseminacionesData ? getInseminacionesData() : [];
+      const alertasVac  = typeof calcularAlertasGlobales === 'function'
+        ? calcularAlertasGlobales(animales, vacunasData) : [];
+      const alertasIns  = typeof alertasInseminacionGlobales === 'function'
+        ? alertasInseminacionGlobales(animales, insData) : [];
+      const todasAlertas = [...alertasVac, ...alertasIns];
+
+      if (todasAlertas.length) {
+        htmlAlertas += '<div class="inicio-alertas-sep">💉 Vacunas y partos</div>';
+        htmlAlertas += todasAlertas.map(a => {
+          const cls = a.nivel === 'urgente' ? 'urgente'
+                    : a.nivel === 'proximo' ? 'advertencia' : 'info';
+          return `<div class="inicio-alerta-item inicio-alerta-${cls}">
+            <span class="inicio-alerta-icono">${a.icono || '💉'}</span>
+            <div class="inicio-alerta-body">
+              <div class="inicio-alerta-titulo">${a.texto}</div>
+            </div>
+          </div>`;
+        }).join('');
+      }
+    }
+
+    // ─ Tareas de la Agenda ───────────────────────────────────────────────────
+    let htmlTareas = '';
+    try {
+      const respT = await fetch('/api/tareas?estado=pendiente&limit=5');
+      if (respT.ok) {
+        const datT = await respT.json();
+        const tareas = (datT.tareas || []).filter(t => t.estado !== 'completada');
+        if (tareas.length) {
+          const hoy = new Date();
+          hoy.setHours(0,0,0,0);
+          const parseFechaT = str => {
+            if (!str) return null;
+            // Puede venir como YYYY-MM-DD o DD/MM/YYYY
+            if (str.includes('-')) return new Date(str + 'T00:00:00');
+            const [d,m,y] = str.split('/');
+            return new Date(+y, +m-1, +d);
+          };
+
+          htmlTareas += '<div class="inicio-alertas-sep">📋 Tareas de la agenda</div>';
+          htmlTareas += tareas.map(t => {
+            const fv = parseFechaT(t.fecha_vencimiento);
+            let subLabel = '';
+            let cls = 'tarea';
+            if (fv) {
+              const dias = Math.round((fv - hoy) / 86400000);
+              if (dias < 0)       { subLabel = `Vencida hace ${Math.abs(dias)} día${Math.abs(dias)>1?'s':''}`;  cls = 'urgente'; }
+              else if (dias === 0){ subLabel = 'Vence HOY';   cls = 'urgente'; }
+              else if (dias <= 3) { subLabel = `Vence en ${dias} días`; cls = 'advertencia'; }
+              else                { subLabel = `Vence ${fv.toLocaleDateString('es-AR')}`; }
+            }
+            const prioridad = t.prioridad === 'alta' ? '🔴' : t.prioridad === 'media' ? '🟡' : '🟢';
+            return `<div class="inicio-alerta-item inicio-alerta-${cls}">
+              <span class="inicio-alerta-icono">${prioridad}</span>
+              <div class="inicio-alerta-body">
+                <div class="inicio-alerta-titulo">${t.titulo || '(sin título)'}</div>
+                ${subLabel ? `<div class="inicio-alerta-sub">${subLabel}${t.asignado ? ' · ' + t.asignado : ''}</div>` : ''}
+              </div>
+            </div>`;
+          }).join('');
+        }
+      }
+    } catch { /* sin conexión — no mostrar tareas */ }
+
+    const todo = htmlAlertas + htmlTareas;
+    cont.innerHTML = todo || '<div class="inicio-alerta-item inicio-alerta-ok"><span class="inicio-alerta-icono">✅</span><div class="inicio-alerta-body"><div class="inicio-alerta-titulo">Sin alertas urgentes al día de hoy</div></div></div>';
+
+  } catch(e) {
+    cont.innerHTML = '<div class="inicio-alerta-skeleton">No se pudieron cargar las alertas</div>';
   }
 }
 
