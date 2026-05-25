@@ -591,12 +591,13 @@ async function cargarHistorialAnimal(caravana) {
 }
 
 async function guardarRegistro() {
-  const caravana = $('input-caravana').value.trim().toUpperCase();
-  const peso = parseFloat($('input-peso').value);
-  const categoria = $('select-categoria').value;
+  const caravana       = $('input-caravana').value.trim().toUpperCase();
+  const peso           = parseFloat($('input-peso').value);
+  const categoria      = $('select-categoria').value; // hidden input actualizado por chips
+  const color          = ($('input-color')?.value || '').trim();
   const estadoSanitario = $('select-estado').value;
-  const vacuna = $('input-vacuna').value.trim();
-  const observaciones = $('input-obs').value.trim();
+  const vacuna         = $('input-vacuna').value.trim();
+  const observaciones  = $('input-obs').value.trim();
 
   if (!caravana) {
     mostrarToast('⚠ Escaneá o ingresá una caravana primero', 'advertencia');
@@ -614,16 +615,35 @@ async function guardarRegistro() {
   btn.textContent = 'Guardando...';
 
   try {
-    await guardarAnimal({ caravana, categoria, raza: $('select-raza').value });
-    await guardarRegistroManga({ caravana, peso_kg: peso, estado_sanitario: estadoSanitario, vacuna_aplicada: vacuna, observaciones, operador: estado.operador });
+    // Guarda animal con categoria, color y raza
+    await guardarAnimal({
+      caravana,
+      categoria,
+      color: color || undefined,
+      raza: $('select-raza').value,
+    });
+    await guardarRegistroManga({
+      caravana,
+      peso_kg:         peso,
+      estado_sanitario: estadoSanitario,
+      vacuna_aplicada: vacuna,
+      observaciones,
+      operador: estado.operador,
+    });
 
     mostrarToast(`✓ Guardado: ${caravana} — ${peso} kg`, 'exito');
     if ('vibrate' in navigator) navigator.vibrate([200]);
     await actualizarContadorPendientes();
 
-    const catActual = $('select-categoria').value;
+    const catActual = categoria; // guardar antes de limpiar
     limpiarFormulario();
-    $('select-categoria').value = catActual;
+    // Restaurar la categoría seleccionada en los chips
+    const chipCat = document.querySelector(`#chips-categoria [data-val="${catActual}"]`);
+    if (chipCat) {
+      document.querySelectorAll('#chips-categoria .manga-chip').forEach(b => b.classList.remove('activo'));
+      chipCat.classList.add('activo');
+      if ($('select-categoria')) $('select-categoria').value = catActual;
+    }
   } catch (e) {
     console.error('[App] Error al guardar:', e);
     mostrarToast(`✗ Error: ${e.message}`, 'error');
@@ -635,10 +655,18 @@ async function guardarRegistro() {
 
 function limpiarFormulario() {
   $('input-caravana').value = '';
-  $('input-peso').value = '';
-  $('input-vacuna').value = '';
-  $('input-obs').value = '';
-  $('historial').innerHTML = '';
+  $('input-peso').value     = '';
+  $('input-vacuna').value   = '';
+  $('input-obs').value      = '';
+  if ($('historial')) $('historial').innerHTML = '';
+
+  // Resetear chips de color
+  document.querySelectorAll('#chips-color .manga-chip').forEach(b => b.classList.remove('activo'));
+  if ($('input-color')) $('input-color').value = '';
+
+  // Resetear chips de vacuna
+  document.querySelectorAll('#chips-vacuna .manga-chip-vac').forEach(b => b.classList.remove('activo'));
+
   $('input-caravana').focus();
 }
 
