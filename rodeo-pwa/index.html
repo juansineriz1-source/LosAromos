@@ -415,14 +415,18 @@
     <section class="tab-panel oculto" id="tab-rodeo">
 
 
-      <!-- Acceso a vacunación -->
-      <div style="padding: 12px 16px 0; display:flex; gap:10px; align-items:center; justify-content:space-between;">
-        <button class="vac-btn-acceso" id="btn-abrir-vacunacion">
-          💉 Ver Vacunación
+      <!-- 3 módulos principales -->
+      <div style="padding:12px 16px 0;display:flex;gap:8px;">
+        <button class="vac-btn-acceso" id="btn-abrir-vacunacion" style="flex:1;font-size:13px;">
+          💉 Vacunación
         </button>
-        <button class="vac-btn-info" id="btn-info-vacunas" title="Manual de vacunas">
-          ℹ️
+        <button class="vac-btn-acceso" id="btn-abrir-inseminacion" style="flex:1;font-size:13px;background:#1d4ed8;">
+          🐄 Inseminación
         </button>
+        <button class="vac-btn-acceso" id="btn-abrir-pesadas" style="flex:1;font-size:13px;background:#7c5c1e;">
+          ⚖️ Pesadas
+        </button>
+        <button class="vac-btn-info" id="btn-info-vacunas" title="Manual de vacunas" style="flex-shrink:0;">ℹ️</button>
       </div>
 
       <!-- ═══════════ PANEL VACUNACION ═══════════ -->
@@ -433,9 +437,6 @@
           <h2 class="vac-titulo">💉 Vacunación</h2>
           <button class="vac-btn-masiva" id="btn-abrir-masiva" title="Vacunacion masiva">
             ⚡ Masiva
-          </button>
-          <button class="vac-btn-masiva" id="btn-abrir-ins-masiva" title="Inseminacion masiva" style="background:#2563eb;">
-            🐄 Ins. Masiva
           </button>
           <button class="vac-btn-cerrar" id="btn-cerrar-vacunacion">✕</button>
         </div>
@@ -469,6 +470,164 @@
 
       </div>
       <!-- ═══════════ FIN PANEL VACUNACION ═══════════ -->
+
+      <!-- ═══════════ PANEL INSEMINACIÓN ═══════════ -->
+      <div id="panel-inseminacion" class="vac-panel oculto">
+        <div class="vac-panel-header" style="background:#1d4ed8;">
+          <h2 class="vac-titulo">🐄 Inseminación</h2>
+          <button class="vac-btn-masiva" id="btn-abrir-ins-masiva" title="Inseminación masiva" style="background:rgba(255,255,255,.2);">
+            ⚡ Masiva
+          </button>
+          <button class="vac-btn-cerrar" id="btn-cerrar-inseminacion">✕</button>
+        </div>
+
+        <!-- Buscar animal -->
+        <div style="padding:14px 16px 0;">
+          <p style="font-size:12px;color:#6b7a6e;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin:0 0 8px;">Animal a inseminar</p>
+          <input type="text" id="ins-panel-buscar"
+            placeholder="🔍 Buscar por botón o caravana..."
+            style="width:100%;padding:10px 14px;border-radius:12px;border:1.5px solid #e5e7eb;font-size:14px;box-sizing:border-box;outline:none;">
+          <div id="ins-panel-animal-info" style="margin-top:10px;"></div>
+        </div>
+
+        <!-- Campos -->
+        <div style="padding:0 16px;">
+          <label class="campo-label" style="margin-top:14px;display:block;">Fecha de inseminación</label>
+          <input type="date" id="ins-panel-fecha" class="vac-input" style="width:100%;box-sizing:border-box;">
+
+          <label class="campo-label" style="margin-top:12px;display:block;">Toro / Código de semen</label>
+          <input type="text" id="ins-panel-semen" class="vac-input" placeholder="Ej: Angus P45" style="width:100%;box-sizing:border-box;">
+
+          <label class="campo-label" style="margin-top:12px;display:block;">Método</label>
+          <select id="ins-panel-metodo" class="vac-select" style="width:100%;">
+            <option value="Inseminacion Artificial">Inseminación Artificial</option>
+            <option value="IATF">IATF (Inseminación a Tiempo Fijo)</option>
+            <option value="Servicio Natural">Servicio Natural</option>
+          </select>
+
+          <label class="campo-label" style="margin-top:12px;display:block;">Observaciones</label>
+          <textarea id="ins-panel-obs" class="vac-textarea" placeholder="Notas opcionales..." style="width:100%;box-sizing:border-box;"></textarea>
+
+          <!-- Calculadora de parto -->
+          <div id="ins-panel-calc" class="vac-ins-calc oculto" style="margin-top:12px;">
+            <div class="vac-ins-calc-titulo">📅 Fecha estimada de parto</div>
+            <div id="ins-panel-fecha-parto" style="font-size:18px;font-weight:800;color:#1a5c30;"></div>
+            <div id="ins-panel-dias-parto" style="font-size:13px;color:#6b7a6e;margin-top:2px;"></div>
+          </div>
+
+          <button id="btn-guardar-ins-panel" class="btn-guardar-grande" style="margin-top:18px;background:#1d4ed8;">
+            💾 Registrar Inseminación
+          </button>
+        </div>
+
+        <!-- Lista animales inseminados recientemente -->
+        <div style="padding:14px 16px 0;">
+          <p style="font-size:12px;color:#6b7a6e;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin:0 0 8px;">Recientes</p>
+          <div id="ins-panel-lista" class="vac-lista-wrap" style="max-height:220px;"></div>
+        </div>
+      </div>
+      <!-- ═══════════ FIN PANEL INSEMINACIÓN ═══════════ -->
+
+      <!-- ═══════════ PANEL PESADAS ═══════════ -->
+      <div id="panel-pesadas" class="vac-panel oculto">
+        <div class="vac-panel-header" style="background:#7c5c1e;">
+          <h2 class="vac-titulo">⚖️ Pesadas</h2>
+          <button class="vac-btn-cerrar" id="btn-cerrar-pesadas">✕</button>
+        </div>
+
+        <!-- Tabs Individual / Grupal -->
+        <div style="display:flex;gap:0;border-bottom:2px solid #e5e7eb;margin:0;">
+          <button id="tab-peso-individual" class="peso-tab activo">👤 Animal Individual</button>
+          <button id="tab-peso-grupal" class="peso-tab">👥 Pesada Grupal</button>
+        </div>
+
+        <!-- PANE: Individual -->
+        <div id="pane-peso-individual" style="padding:16px;">
+          <label class="campo-label">Buscar animal</label>
+          <input type="text" id="peso-ind-buscar" class="vac-input"
+            placeholder="🔍 Botón o caravana..."
+            style="width:100%;box-sizing:border-box;">
+          <div id="peso-ind-resultado" style="margin:8px 0;"></div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;">
+            <div>
+              <label class="campo-label">Peso (kg)</label>
+              <input type="number" id="peso-ind-kg" class="vac-input"
+                placeholder="450" min="1" max="1500" step="0.5"
+                style="width:100%;box-sizing:border-box;font-size:22px;font-weight:800;color:#7c5c1e;">
+            </div>
+            <div>
+              <label class="campo-label">Fecha</label>
+              <input type="date" id="peso-ind-fecha" class="vac-input" style="width:100%;box-sizing:border-box;">
+            </div>
+          </div>
+
+          <label class="campo-label" style="margin-top:12px;display:block;">Observaciones (opcional)</label>
+          <input type="text" id="peso-ind-obs" class="vac-input"
+            placeholder="Notas..."
+            style="width:100%;box-sizing:border-box;">
+
+          <button id="btn-guardar-peso-ind" class="btn-guardar-grande"
+            style="margin-top:18px;background:#7c5c1e;">
+            💾 Guardar peso
+          </button>
+        </div>
+
+        <!-- PANE: Grupal -->
+        <div id="pane-peso-grupal" class="oculto" style="padding:16px;">
+
+          <label class="campo-label">Cantidad de animales en la balanza</label>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+            <button class="peso-grup-cant-btn" data-n="2">2</button>
+            <button class="peso-grup-cant-btn" data-n="3">3</button>
+            <button class="peso-grup-cant-btn" data-n="4">4</button>
+            <button class="peso-grup-cant-btn" data-n="5">5</button>
+            <button class="peso-grup-cant-btn" data-n="6">6</button>
+            <input type="number" id="peso-grup-cant-manual"
+              placeholder="Otro" min="1" max="50"
+              style="width:64px;height:36px;border-radius:10px;border:2px solid #e5e7eb;padding:0 10px;font-size:14px;font-weight:700;text-align:center;">
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div>
+              <label class="campo-label">Peso total en balanza (kg)</label>
+              <input type="number" id="peso-grup-total" class="vac-input"
+                placeholder="2500" min="1" max="50000" step="0.5"
+                style="width:100%;box-sizing:border-box;font-size:20px;font-weight:800;color:#7c5c1e;">
+            </div>
+            <div style="display:flex;flex-direction:column;justify-content:flex-end;">
+              <div style="background:#fff7ed;border-radius:12px;padding:12px;text-align:center;">
+                <div style="font-size:11px;color:#92400e;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">Peso por animal</div>
+                <div id="peso-grup-por-animal" style="font-size:22px;font-weight:800;color:#7c5c1e;">—</div>
+              </div>
+            </div>
+          </div>
+
+          <label class="campo-label" style="margin-top:12px;display:block;">Fecha</label>
+          <input type="date" id="peso-grup-fecha" class="vac-input" style="width:100%;box-sizing:border-box;">
+
+          <!-- Agregar animales al grupo -->
+          <label class="campo-label" style="margin-top:14px;display:block;">
+            Animales del grupo <span id="peso-grup-badge" style="background:#7c5c1e;color:#fff;border-radius:99px;padding:1px 8px;font-size:11px;">0</span>
+          </label>
+          <input type="text" id="peso-grup-buscar" class="vac-input"
+            placeholder="🔍 Buscar y agregar por botón o caravana..."
+            style="width:100%;box-sizing:border-box;">
+          <div id="peso-grup-resultados" style="margin:4px 0 8px;"></div>
+          <div id="peso-grup-lista" style="max-height:180px;overflow-y:auto;"></div>
+
+          <label class="campo-label" style="margin-top:10px;display:block;">Observaciones (opcional)</label>
+          <input type="text" id="peso-grup-obs" class="vac-input"
+            placeholder="Notas..."
+            style="width:100%;box-sizing:border-box;">
+
+          <button id="btn-guardar-peso-grup" class="btn-guardar-grande"
+            style="margin-top:18px;background:#7c5c1e;">
+            💾 Guardar pesada grupal
+          </button>
+        </div>
+      </div>
+      <!-- ═══════════ FIN PANEL PESADAS ═══════════ -->
 
       <!-- Stats + barra de filtros avanzados -->
       <div class="card rodeo-filtros-card filtros-stitch-card" style="padding: 12px 16px;">

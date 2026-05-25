@@ -4371,3 +4371,153 @@ html { scroll-behavior: smooth; }
   color: #795548;
   line-height: 1.4;
 }
+
+/* ─── 3 MÓDULOS: VACUNACIÓN · INSEMINACIÓN · PESADAS ─────────────────────── */
+
+/* Tabs del panel de Pesadas */
+.peso-tab {
+  flex: 1;
+  padding: 12px 8px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  color: #6b7a6e;
+  cursor: pointer;
+  transition: color .15s, border-color .15s;
+}
+.peso-tab.activo {
+  color: #7c5c1e;
+  border-bottom-color: #7c5c1e;
+}
+
+/* Botones de cantidad (2,3,4,5,6) */
+.peso-grup-cant-btn {
+  height: 36px;
+  min-width: 44px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 2px solid #e5e7eb;
+  background: #f9fafb;
+  font-size: 15px;
+  font-weight: 700;
+  color: #374151;
+  cursor: pointer;
+  transition: background .1s, border-color .1s, color .1s;
+}
+.peso-grup-cant-btn.activo {
+  background: #7c5c1e;
+  border-color: #7c5c1e;
+  color: #fff;
+}
+
+/* Card de animal seleccionado (individual) */
+.peso-animal-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1.5px solid #e5e7eb;
+  background: #f9fafb;
+}
+.peso-animal-card.seleccionado {
+  border-color: #7c5c1e;
+  background: #fff7ed;
+}
+.peso-animal-id {
+  font-size: 18px;
+  font-weight: 800;
+  color: #7c5c1e;
+  font-family: 'Manrope', sans-serif;
+}
+.peso-animal-car {
+  font-size: 13px;
+  color: #6b7a6e;
+  flex: 1;
+}
+.peso-no-result {
+  font-size: 13px;
+  color: #9ca3af;
+  padding: 6px 0;
+  margin: 0;
+}
+
+/* Sugerencias de búsqueda en pesada grupal */
+.peso-grup-sugerencia {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: #f9fafb;
+  border: 1px solid #f3f4f6;
+  margin-bottom: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background .1s;
+}
+.peso-grup-sugerencia:active { background: #fff7ed; }
+
+/* Items del grupo en pesada grupal */
+.peso-grup-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  margin-bottom: 6px;
+}
+.peso-grup-item-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #7c5c1e;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.peso-grup-item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.peso-grup-item-info strong { font-size: 14px; color: #7c5c1e; }
+.peso-grup-item-info span   { font-size: 12px; color: #92400e; }
+.peso-grup-item-quitar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(124,92,30,.15);
+  color: #7c5c1e;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.peso-grup-empty {
+  font-size: 13px; color: #9ca3af;
+  text-align: center; padding: 16px 0; margin: 0;
+}
+
+/* Card de animal seleccionado (inseminación) */
+.ins-animal-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1.5px solid #1d4ed8;
+  background: #eff6ff;
+}
+.ins-animal-card strong { font-size: 16px; font-weight: 800; color: #1d4ed8; }
+.ins-animal-card span   { font-size: 13px; color: #1e40af; }

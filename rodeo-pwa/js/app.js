@@ -113,6 +113,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   await inicializarCalendario();
   await actualizarContadorPendientes();
   inicializarVacunacion();
+  inicializarPanelInseminacion();
+  inicializarPanelPesadas();
 
   // Login: mostrar pantalla de selección si no hay operador guardado
   if (!estado.operador) {
@@ -1334,6 +1336,353 @@ function inicializarVacunacion() {
   inicializarRaspado();
   inicializarCastracion();
   inicializarInsMasiva();
+}
+
+
+// ─── PANEL INSEMINACIÓN ───────────────────────────────────────────────────────
+function inicializarPanelInseminacion() {
+  const btnAbrir  = document.getElementById('btn-abrir-inseminacion');
+  const btnCerrar = document.getElementById('btn-cerrar-inseminacion');
+  const panel     = document.getElementById('panel-inseminacion');
+  if (!btnAbrir || !panel) return;
+
+  let _animalIns = null;
+
+  // Abrir panel
+  btnAbrir.addEventListener('click', async () => {
+    // Cerrar otros paneles
+    document.getElementById('panel-vacunacion')?.classList.add('oculto');
+    document.getElementById('panel-pesadas')?.classList.add('oculto');
+    panel.classList.remove('oculto');
+    // Fecha por defecto = hoy
+    const hoy = new Date().toISOString().split('T')[0];
+    document.getElementById('ins-panel-fecha').value = hoy;
+    document.getElementById('ins-panel-fecha').dispatchEvent(new Event('change'));
+    // Cargar inseminaciones recientes
+    await cargarInseminaciones();
+    _renderizarInsRecientes();
+  });
+
+  btnCerrar.addEventListener('click', () => panel.classList.add('oculto'));
+
+  // Buscador de animal
+  const inputBuscar = document.getElementById('ins-panel-buscar');
+  inputBuscar?.addEventListener('input', () => {
+    const q = inputBuscar.value.trim().toLowerCase();
+    const info = document.getElementById('ins-panel-animal-info');
+    if (!q) { info.innerHTML = ''; _animalIns = null; return; }
+    const animales = getAnimales();
+    const encontrado = animales.find(a =>
+      (a.caravana || '').toLowerCase().includes(q) ||
+      (a.boton    || '').toLowerCase().includes(q)
+    );
+    if (encontrado) {
+      _animalIns = encontrado;
+      info.innerHTML = `
+        <div class="ins-animal-card">
+          <strong>${encontrado.boton || '—'}</strong>
+          <span>Car. ${encontrado.caravana || '—'} · ${encontrado.tipo || '?'}</span>
+        </div>`;
+    } else {
+      _animalIns = null;
+      info.innerHTML = `<p class="peso-no-result">No encontrado: "${inputBuscar.value}"</p>`;
+    }
+  });
+
+  // Calculadora de parto al cambiar fecha
+  const fechaInput = document.getElementById('ins-panel-fecha');
+  fechaInput?.addEventListener('change', () => {
+    const calc    = document.getElementById('ins-panel-calc');
+    const fParto  = document.getElementById('ins-panel-fecha-parto');
+    const dParto  = document.getElementById('ins-panel-dias-parto');
+    if (!fechaInput.value) { calc?.classList.add('oculto'); return; }
+    const fechaIns  = new Date(fechaInput.value);
+    const fechaParto= new Date(fechaIns.getTime() + 283 * 86400000);
+    const dias      = Math.floor((fechaParto - new Date()) / 86400000);
+    if (fParto) fParto.textContent = fechaParto.toLocaleDateString('es-AR');
+    if (dParto) dParto.textContent = dias > 0 ? `Faltan ${dias} días` : dias === 0 ? '¡HOY!' : 'Fecha en el pasado';
+    calc?.classList.remove('oculto');
+  });
+
+  // Guardar inseminación individual
+  document.getElementById('btn-guardar-ins-panel')?.addEventListener('click', async () => {
+    if (!_animalIns) { mostrarToast('Primero buscá y seleccioná un animal'); return; }
+    const fecha = document.getElementById('ins-panel-fecha').value;
+    if (!fecha)  { mostrarToast('Ingresá la fecha de inseminación'); return; }
+    const btn = document.getElementById('btn-guardar-ins-panel');
+    btn.textContent = 'Guardando...'; btn.disabled = true;
+    try {
+      const fechaAR = fecha.split('-').reverse().join('/');
+      const result  = await registrarInseminacion({
+        caravana:           _animalIns.caravana || '',
+        boton:              _animalIns.boton    || '',
+        fecha_inseminacion: fechaAR,
+        semen_toro:         document.getElementById('ins-panel-semen').value.trim(),
+        metodo:             document.getElementById('ins-panel-metodo').value,
+        observaciones:      document.getElementById('ins-panel-obs').value.trim(),
+        estado:             'en_servicio',
+      }, typeof estado !== 'undefined' ? estado.operador : (localStorage.getItem('rodeo_operador') || 'sistema'));
+      const parto = result?.fecha_parto_esperada;
+      mostrarToast(parto ? `✅ Guardada. Parto estimado: ${parto}` : '✅ Inseminación registrada');
+      // Limpiar
+      document.getElementById('ins-panel-buscar').value = '';
+      document.getElementById('ins-panel-animal-info').innerHTML = '';
+      document.getElementById('ins-panel-semen').value = '';
+      document.getElementById('ins-panel-obs').value = '';
+      document.getElementById('ins-panel-calc').classList.add('oculto');
+      _animalIns = null;
+      await cargarInseminaciones();
+      _renderizarInsRecientes();
+    } catch(e) {
+      mostrarToast('Error al guardar — intentá de nuevo');
+    } finally {
+      btn.textContent = '💾 Registrar Inseminación'; btn.disabled = false;
+    }
+  });
+
+  function _renderizarInsRecientes() {
+    const lista = document.getElementById('ins-panel-lista');
+    if (!lista) return;
+    const ins = getInseminacionesData();
+    if (!ins || !ins.length) { lista.innerHTML = '<p class="peso-no-result" style="text-align:center;padding:12px 0;">Sin registros aún</p>'; return; }
+    const recientes = [...ins].reverse().slice(0, 8);
+    lista.innerHTML = recientes.map(r => `
+      <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;background:#eff6ff;border:1px solid #bfdbfe;margin-bottom:6px;">
+        <div style="flex:1;">
+          <strong style="font-size:14px;color:#1d4ed8;">${r.boton || r.caravana || '—'}</strong>
+          <span style="font-size:12px;color:#1e40af;margin-left:6px;">Car. ${r.caravana || '—'}</span>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:12px;font-weight:700;color:#1d4ed8;">${r.fecha_inseminacion || ''}</div>
+          <div style="font-size:11px;color:#6b7a6e;">${r.estado || 'en_servicio'}</div>
+        </div>
+      </div>`).join('');
+  }
+}
+
+
+// ─── PANEL PESADAS ────────────────────────────────────────────────────────────
+function inicializarPanelPesadas() {
+  const btnAbrir  = document.getElementById('btn-abrir-pesadas');
+  const btnCerrar = document.getElementById('btn-cerrar-pesadas');
+  const panel     = document.getElementById('panel-pesadas');
+  if (!btnAbrir || !panel) return;
+
+  let _animalPeso    = null;  // animal seleccionado en modo individual
+  let _grupoAnimales = [];    // animales en pesada grupal
+  let _cantGrupal    = 2;     // cantidad en la balanza
+
+  // Abrir panel
+  btnAbrir.addEventListener('click', () => {
+    document.getElementById('panel-vacunacion')?.classList.add('oculto');
+    document.getElementById('panel-inseminacion')?.classList.add('oculto');
+    panel.classList.remove('oculto');
+    _mostrarTabPeso('individual');
+    _resetIndividual();
+    _resetGrupal();
+  });
+  btnCerrar.addEventListener('click', () => panel.classList.add('oculto'));
+
+  // Tabs
+  document.getElementById('tab-peso-individual')?.addEventListener('click', () => _mostrarTabPeso('individual'));
+  document.getElementById('tab-peso-grupal')?.addEventListener('click',     () => _mostrarTabPeso('grupal'));
+
+  function _mostrarTabPeso(tab) {
+    const ind  = document.getElementById('pane-peso-individual');
+    const grup = document.getElementById('pane-peso-grupal');
+    document.getElementById('tab-peso-individual')?.classList.toggle('activo', tab === 'individual');
+    document.getElementById('tab-peso-grupal')?.classList.toggle('activo',    tab === 'grupal');
+    ind?.classList.toggle('oculto',  tab !== 'individual');
+    grup?.classList.toggle('oculto', tab !== 'grupal');
+  }
+
+  // ─── Modo Individual ───────────────────────────────────────────────
+  document.getElementById('peso-ind-buscar')?.addEventListener('input', e => {
+    const q   = e.target.value.trim().toLowerCase();
+    const res = document.getElementById('peso-ind-resultado');
+    if (!q) { res.innerHTML = ''; _animalPeso = null; return; }
+    const encontrado = getAnimales().find(a =>
+      (a.caravana || '').toLowerCase().includes(q) ||
+      (a.boton    || '').toLowerCase().includes(q)
+    );
+    if (encontrado) {
+      _animalPeso = encontrado;
+      res.innerHTML = `
+        <div class="peso-animal-card seleccionado">
+          <span class="peso-animal-id">${encontrado.boton || '—'}</span>
+          <span class="peso-animal-car">Car. ${encontrado.caravana || '—'}</span>
+          <span style="font-size:12px;font-weight:700;background:#e8f5e9;color:#1a5c30;padding:2px 8px;border-radius:6px;">${encontrado.tipo || '?'}</span>
+        </div>`;
+    } else {
+      _animalPeso = null;
+      res.innerHTML = `<p class="peso-no-result">No encontrado: "${e.target.value}"</p>`;
+    }
+  });
+
+  function _resetIndividual() {
+    _animalPeso = null;
+    const hoy = new Date().toISOString().split('T')[0];
+    document.getElementById('peso-ind-buscar').value    = '';
+    document.getElementById('peso-ind-kg').value        = '';
+    document.getElementById('peso-ind-obs').value       = '';
+    document.getElementById('peso-ind-fecha').value     = hoy;
+    document.getElementById('peso-ind-resultado').innerHTML = '';
+  }
+
+  document.getElementById('btn-guardar-peso-ind')?.addEventListener('click', async () => {
+    if (!_animalPeso) { mostrarToast('Buscá y seleccioná un animal'); return; }
+    const kg  = parseFloat(document.getElementById('peso-ind-kg').value);
+    if (!kg || kg <= 0 || kg > 1500) { mostrarToast('Ingresá un peso válido (1–1500 kg)'); return; }
+    const fechaISO = document.getElementById('peso-ind-fecha').value;
+    const obs      = document.getElementById('peso-ind-obs').value.trim();
+    const operador = typeof estado !== 'undefined' ? estado.operador : (localStorage.getItem('rodeo_operador') || 'sistema');
+    const btn = document.getElementById('btn-guardar-peso-ind');
+    btn.textContent = 'Guardando...'; btn.disabled = true;
+    try {
+      const fechaAR = fechaISO ? fechaISO.split('-').reverse().join('/') : new Date().toLocaleDateString('es-AR');
+      const r = await fetch('/api/pesos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ caravana: _animalPeso.caravana || '', boton: _animalPeso.boton || '', tipo: _animalPeso.tipo || '', fecha: fechaAR, peso_kg: kg, observaciones: obs, operador }),
+      });
+      const data = await r.json();
+      if (data.ok) { mostrarToast(`✅ ${_animalPeso.caravana || _animalPeso.boton} — ${kg} kg guardado`); _resetIndividual(); }
+      else mostrarToast('Error: ' + (data.error || 'desconocido'));
+    } catch { mostrarToast('Error de red — intentá de nuevo'); }
+    finally { btn.textContent = '💾 Guardar peso'; btn.disabled = false; }
+  });
+
+  // ─── Modo Grupal ───────────────────────────────────────────────────
+  function _resetGrupal() {
+    _grupoAnimales = [];
+    _cantGrupal    = 2;
+    document.getElementById('peso-grup-total').value  = '';
+    document.getElementById('peso-grup-obs').value    = '';
+    document.getElementById('peso-grup-buscar').value = '';
+    document.getElementById('peso-grup-fecha').value  = new Date().toISOString().split('T')[0];
+    document.getElementById('peso-grup-resultados').innerHTML = '';
+    document.querySelectorAll('.peso-grup-cant-btn').forEach(b => b.classList.toggle('activo', b.dataset.n === '2'));
+    document.getElementById('peso-grup-cant-manual').value = '';
+    _renderGrupo();
+    _recalcular();
+  }
+
+  // Botones de cantidad
+  document.querySelectorAll('.peso-grup-cant-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.peso-grup-cant-btn').forEach(b => b.classList.remove('activo'));
+      btn.classList.add('activo');
+      _cantGrupal = parseInt(btn.dataset.n);
+      document.getElementById('peso-grup-cant-manual').value = '';
+      _recalcular();
+    });
+  });
+  document.getElementById('peso-grup-cant-manual')?.addEventListener('input', e => {
+    const v = parseInt(e.target.value);
+    if (v > 0) {
+      _cantGrupal = v;
+      document.querySelectorAll('.peso-grup-cant-btn').forEach(b => b.classList.remove('activo'));
+      _recalcular();
+    }
+  });
+
+  document.getElementById('peso-grup-total')?.addEventListener('input', _recalcular);
+
+  function _recalcular() {
+    const total = parseFloat(document.getElementById('peso-grup-total').value) || 0;
+    const cant  = _cantGrupal || _grupoAnimales.length || 1;
+    const por   = total > 0 && cant > 0 ? Math.round((total / cant) * 10) / 10 : 0;
+    document.getElementById('peso-grup-por-animal').textContent = por > 0 ? `${por} kg` : '—';
+    document.getElementById('peso-grup-badge').textContent      = _grupoAnimales.length;
+  }
+
+  // Buscador de animales para agregar al grupo
+  document.getElementById('peso-grup-buscar')?.addEventListener('input', e => {
+    const q     = e.target.value.trim().toLowerCase();
+    const lista = document.getElementById('peso-grup-resultados');
+    if (!q) { lista.innerHTML = ''; return; }
+    const res = getAnimales()
+      .filter(a =>
+        ((a.caravana || '').toLowerCase().includes(q) || (a.boton || '').toLowerCase().includes(q)) &&
+        !_grupoAnimales.find(g => g.boton === a.boton && g.caravana === a.caravana)
+      ).slice(0, 6);
+    lista.innerHTML = res.length
+      ? res.map(a => `
+          <div class="peso-grup-sugerencia"
+               onclick="_agregarAlGrupo('${(a.boton||'').replace(/'/g,"\\'")}','${(a.caravana||'').replace(/'/g,"\\'")}')">
+            <strong>${a.boton || '—'}</strong>
+            <span class="peso-animal-car">Car. ${a.caravana || '—'}</span>
+            <span style="font-size:11px;font-weight:700;background:#e8f5e9;color:#1a5c30;padding:2px 6px;border-radius:4px;">${a.tipo || '?'}</span>
+          </div>`).join('')
+      : `<p class="peso-no-result">No encontrado</p>`;
+  });
+
+  window._agregarAlGrupo = function(boton, caravana) {
+    const a = getAnimales().find(x => x.boton === boton || x.caravana === caravana);
+    if (!a || _grupoAnimales.find(g => g.boton === a.boton && g.caravana === a.caravana)) return;
+    _grupoAnimales.push(a);
+    document.getElementById('peso-grup-buscar').value = '';
+    document.getElementById('peso-grup-resultados').innerHTML = '';
+    _renderGrupo();
+    _recalcular();
+  };
+
+  window._quitarDelGrupo = function(idx) {
+    _grupoAnimales.splice(idx, 1);
+    _renderGrupo();
+    _recalcular();
+  };
+
+  function _renderGrupo() {
+    const c = document.getElementById('peso-grup-lista');
+    if (!_grupoAnimales.length) {
+      c.innerHTML = '<p class="peso-grup-empty">Todavía no agregaste animales</p>';
+      return;
+    }
+    c.innerHTML = _grupoAnimales.map((a, i) => `
+      <div class="peso-grup-item">
+        <span class="peso-grup-item-num">${i + 1}</span>
+        <div class="peso-grup-item-info">
+          <strong>${a.boton || '—'}</strong>
+          <span>Car. ${a.caravana || '—'} · ${a.tipo || '?'}</span>
+        </div>
+        <button class="peso-grup-item-quitar" onclick="_quitarDelGrupo(${i})">✕</button>
+      </div>`).join('');
+  }
+
+  document.getElementById('btn-guardar-peso-grup')?.addEventListener('click', async () => {
+    const total   = parseFloat(document.getElementById('peso-grup-total').value);
+    if (!total || total <= 0 || total > 50000) { mostrarToast('Ingresá un peso total válido'); return; }
+    if (!_grupoAnimales.length) { mostrarToast('Agregá al menos un animal al grupo'); return; }
+    const cant    = _cantGrupal || _grupoAnimales.length;
+    const por     = Math.round((total / cant) * 10) / 10;
+    const fechaISO= document.getElementById('peso-grup-fecha').value;
+    const obs     = document.getElementById('peso-grup-obs').value.trim();
+    const fechaAR = fechaISO ? fechaISO.split('-').reverse().join('/') : new Date().toLocaleDateString('es-AR');
+    const operador= typeof estado !== 'undefined' ? estado.operador : (localStorage.getItem('rodeo_operador') || 'sistema');
+    const btn     = document.getElementById('btn-guardar-peso-grup');
+    btn.textContent = 'Guardando...'; btn.disabled = true;
+    let ok = 0, err = 0;
+    for (const a of _grupoAnimales) {
+      try {
+        const r = await fetch('/api/pesos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            caravana: a.caravana || '', boton: a.boton || '', tipo: a.tipo || '',
+            fecha: fechaAR, peso_kg: por,
+            observaciones: obs ? `[Grupal ${_grupoAnimales.length} animales, total ${total}kg] ${obs}` : `Pesada grupal — ${_grupoAnimales.length} animales, total ${total} kg`,
+            operador,
+          }),
+        });
+        const d = await r.json();
+        if (d.ok) ok++; else err++;
+      } catch { err++; }
+    }
+    btn.textContent = '💾 Guardar pesada grupal'; btn.disabled = false;
+    if (ok > 0) { mostrarToast(`✅ ${ok} animal${ok > 1 ? 'es' : ''} registrados — ${por} kg c/u`); _resetGrupal(); }
+    else mostrarToast(`Error al guardar (${err} fallos)`);
+  });
 }
 
 
