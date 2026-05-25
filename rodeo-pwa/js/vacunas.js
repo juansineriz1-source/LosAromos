@@ -29,8 +29,8 @@ const VAC_POR_CATEGORIA = {
 export function tipoCategoriaVac(tipo) {
   const t = (tipo || '').toUpperCase().trim();
   if (t === 'T')  return 'Toro';
-  if (t === 'TH') return 'Torito';
-  if (t === 'TN') return 'Ternero'; // asumir macho hasta tener dato de sexo
+  if (t === 'TH') return 'Ternera';   // TH = Ternera Hembra (necesita Brucelosis)
+  if (t === 'TM') return 'Ternero';   // TM = Ternero Macho
   if (t === 'V')  return 'Vaca';
   if (t === 'VQ') return 'Vaquillona';
   return null;
