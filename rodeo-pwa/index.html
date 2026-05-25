@@ -657,14 +657,7 @@
         <div class="rodeo-filtros-top">
           <div class="rodeo-stat-total rodeo-total-stitch" id="rodeo-oficial-resumen">Cargando...</div>
           <div class="rodeo-filtros-acciones">
-            <button class="rodeo-btn-filtros" id="btn-toggle-filtros" onclick="(function(){
-              var p=document.getElementById('panel-filtros');
-              var b=document.getElementById('btn-toggle-filtros');
-              if(!p)return;
-              var abierto=p.style.display==='block';
-              p.style.display=abierto?'none':'block';
-              b.classList.toggle('activo',!abierto);
-            })()">
+            <button class="rodeo-btn-filtros" id="btn-toggle-filtros" onclick="window._toggleFiltros && window._toggleFiltros()">
               ⚙ Filtros <span id="filtros-badge" class="filtros-badge" style="display:none">0</span>
             </button>
             <button class="rodeo-btn-limpiar" id="btn-limpiar-filtros" style="display:none">✕ Limpiar</button>

@@ -67,8 +67,13 @@ export function inicializarRodeoOficial(onToast, esAdmin) {
       btnToggle.classList.toggle('activo', _panelFiltrosAbierto);
     });
   }
-  // Exponer para emergencias
-  window._toggleFiltros = () => btnToggle?.click();
+  // Exponer para que el onclick del HTML también actualice el estado interno
+  window._toggleFiltros = () => {
+    if (!panel) return;
+    _panelFiltrosAbierto = panel.style.display !== 'block';
+    panel.style.display  = _panelFiltrosAbierto ? 'block' : 'none';
+    btnToggle?.classList.toggle('activo', _panelFiltrosAbierto);
+  };
 
   // Limpiar todos los filtros
   if (btnLimpiar) {
@@ -90,14 +95,18 @@ export function inicializarRodeoOficial(onToast, esAdmin) {
   }
 
   // ── Secciones colapsables ───────────────────────────────────────────────────
+  // Las secciones empiezan ABIERTAS (arrow ▾). Click las cierra, otro click las reabre.
   document.querySelectorAll('.filtro-seccion-header').forEach(header => {
     header.addEventListener('click', () => {
       const seccion = header.dataset.seccion;
       const body    = document.getElementById(`filtro-body-${seccion}`);
       const arrow   = header.querySelector('.filtro-seccion-arrow');
-      const abierta = body.style.display !== 'none';
-      body.style.display  = abierta ? 'none' : 'block';
-      arrow.textContent   = abierta ? '›' : '▾';
+      if (!body) return;
+      // Usamos data-abierta para no depender de style.display inline
+      const estaAbierta = body.dataset.abierta !== 'false';
+      body.style.display     = estaAbierta ? 'none' : '';
+      body.dataset.abierta   = estaAbierta ? 'false' : 'true';
+      arrow.textContent      = estaAbierta ? '›' : '▾';
     });
   });
 
