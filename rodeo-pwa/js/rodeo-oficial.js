@@ -177,7 +177,7 @@ export async function cargarRodeoOficial() {
     // Resetear el flag para que los chips de tipo se regeneren con datos actualizados
     const wrapTipo = document.getElementById('filtro-chips-tipo');
     if (wrapTipo) wrapTipo.dataset.generado = 'false';
-    renderizarRodeo(animales, total);
+    renderizarRodeo(animales, total, /* actualizarResumen */ true);
   } catch (err) {
     contenedor.innerHTML = `<p class="sin-historial">Sin conexión — datos no disponibles</p>`;
     if (_onToast) _onToast('No se pudo cargar el rodeo oficial', 'advertencia', 3000);
@@ -185,18 +185,15 @@ export async function cargarRodeoOficial() {
 }
 
 // ─── Renderizar lista ─────────────────────────────────────────────────────────
-function renderizarRodeo(animales, total) {
+function renderizarRodeo(animales, total, actualizarResumen = false) {
   const contenedor = document.getElementById('rodeo-oficial-lista');
   const resumen    = document.getElementById('rodeo-oficial-resumen');
   if (!contenedor) return;
 
-  // Stats usando el listado COMPLETO (no el filtrado)
-  const hayFiltros = _filtros.tipos.size || _filtros.estados.size ||
-                     _filtros.vacunaEstAño !== null || _filtros.vacunas.size;
-  if (resumen) {
-    resumen.innerHTML = hayFiltros
-      ? `<span class="rodeo-stat-total">${animales.length} <span style="color:var(--gris);font-size:12px;">de ${_animales.length}</span></span>`
-      : `<span class="rodeo-stat-total">${total} animales</span>`;
+  // El resumen solo se actualiza aquí cuando se llama desde cargarRodeoOficial
+  // (actualizarResumen=true). Desde aplicarFiltros, ya se actualiza antes de llamar aquí.
+  if (actualizarResumen && resumen) {
+    resumen.innerHTML = `<span class="rodeo-stat-total">${total} animales</span>`;
   }
 
   // Generar chips de Tipo dinámicamente desde los datos reales
