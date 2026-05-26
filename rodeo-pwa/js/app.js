@@ -97,6 +97,35 @@ const estado = {
 // ─── Selector rápido ──────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
 
+// ─── Migración de versión ──────────────────────────────────────────────────────
+// Si la versión guardada no coincide con la actual, limpiamos el storage local
+// para evitar que datos de versiones anteriores rompan la UI.
+const APP_VERSION = '53';
+(async () => {
+  const versionGuardada = localStorage.getItem('rodeo_app_version');
+  if (versionGuardada !== APP_VERSION) {
+    console.log(`[App] Nueva versión ${APP_VERSION} (antes: ${versionGuardada}). Limpiando storage...`);
+    // Limpiar caches del SW
+    if ('caches' in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
+    }
+    // Limpiar IndexedDB (Dexie databases de la app)
+    const dbs = ['RodeoDB', 'rodeo-db', 'rodeo_db'];
+    for (const name of dbs) {
+      try { indexedDB.deleteDatabase(name); } catch {}
+    }
+    // Guardar operador y rol para no perder la sesión al actualizar
+    const operadorGuardado = localStorage.getItem('rodeo_operador');
+    const rolGuardado      = localStorage.getItem('rodeo_rol');
+    localStorage.clear();
+    if (operadorGuardado) localStorage.setItem('rodeo_operador', operadorGuardado);
+    if (rolGuardado)      localStorage.setItem('rodeo_rol', rolGuardado);
+    localStorage.setItem('rodeo_app_version', APP_VERSION);
+    console.log('[App] Storage limpiado correctamente.');
+  }
+})();
+
 // ─── Init ─────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
   await registrarServiceWorker();
