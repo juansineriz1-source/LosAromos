@@ -349,6 +349,16 @@ function aplicarFiltros() {
     );
   }
 
+  // Actualizar contador — siempre muestra "X de Y" si hay cualquier filtro activo
+  const hayAlgunFiltro = _filtros.tipos.size || _filtros.estados.size ||
+                         _filtros.vacunaEstAño !== null || _filtros.vacunas.size || texto;
+  const resumen = document.getElementById('rodeo-oficial-resumen');
+  if (resumen) {
+    resumen.innerHTML = hayAlgunFiltro
+      ? `<span class="rodeo-stat-total">${filtrados.length} <span style="color:var(--gris);font-size:12px;">de ${_animales.length}</span></span>`
+      : `<span class="rodeo-stat-total">${_animales.length} animales</span>`;
+  }
+
   renderizarRodeo(filtrados, _animales.length);
 }
 
