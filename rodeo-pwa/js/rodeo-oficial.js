@@ -58,14 +58,15 @@ export function inicializarRodeoOficial(onToast, esAdmin) {
   const btnLimpiar = document.getElementById('btn-limpiar-filtros');
   const panel      = document.getElementById('panel-filtros');
 
-  // Toggle abrir/cerrar
+  // Toggle abrir/cerrar — manejado por onclick en HTML (window._toggleFiltros)
   window._toggleFiltros = () => {
     if (!panel) return;
     _panelFiltrosAbierto = panel.style.display !== 'block';
     panel.style.display  = _panelFiltrosAbierto ? 'block' : 'none';
     btnToggle?.classList.toggle('activo', _panelFiltrosAbierto);
   };
-  btnToggle?.addEventListener('click', window._toggleFiltros);
+  // NO agregar addEventListener aquí — el HTML ya tiene onclick="window._toggleFiltros()"
+
 
   // Limpiar filtros
   btnLimpiar?.addEventListener('click', () => {
