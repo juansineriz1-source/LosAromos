@@ -244,23 +244,9 @@ function _actualizarChipsTipo() {
   wrap.innerHTML = tiposOrdenados.map(([t, n]) =>
     `<button class="filtro-chip" data-grupo="tipo" data-val="${t}">${t} <b>${n}</b></button>`
   ).join('');
-  wrap.dataset.generado = 'true';
 
-  // Agregar listeners
-  wrap.querySelectorAll('[data-grupo="tipo"]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const val = btn.dataset.val;
-      if (_filtros.tipos.has(val)) {
-        _filtros.tipos.delete(val);
-        btn.classList.remove('activo');
-      } else {
-        _filtros.tipos.add(val);
-        btn.classList.add('activo');
-      }
-      _actualizarBarraFiltros();
-      aplicarFiltros();
-    });
-  });
+  wrap.dataset.generado = 'true';
+  // Los clicks son manejados por el listener delegado del panel-filtros
 }
 
 // ─── Barra de filtros activos (chips resumen) ──────────────────────────────────
