@@ -25,17 +25,26 @@ let _filtros = {
 let _panelFiltrosAbierto = false;
 
 // ─── Opciones de campo ────────────────────────────────────────────────────────
-const ESTADOS          = ['P', 'V', 'I'];          // hembras
-const ESTADOS_MACHO    = ['S', 'F', 'E', 'R'];     // machos
+const ESTADOS       = ['P', 'V', 'I'];        // hembras (Vaca, VQ, V1-V6, TH)
+const ESTADOS_TORO  = ['S', 'F', 'D'];        // Toro: En servicio, Fuera servicio, Descartado
+const ESTADOS_TM    = ['C', 'SC'];             // Ternero Macho: Castrado, Sin castrar
+
 const ETIQUETAS_ESTADO = {
-  P: 'Preñada', V: 'Vacía', I: 'Inseminada',          // hembras
-  S: 'En servicio', F: 'Fuera servicio', E: 'En engorde', R: 'Retirado',  // machos
+  // Hembras
+  P: 'Preñada', V: 'Vacía', I: 'Inseminada',
+  // Toro
+  S: 'En servicio', F: 'Fuera servicio', D: 'Descartado',
+  // Ternero Macho
+  C: 'Castrado', SC: 'Sin castrar',
 };
-// Tipos macho: Toro (T), Torito (TH? no — TH es ternera hembra), Ternero Macho (TM)
-const TIPOS_MACHO = new Set(['T', 'TM']);
-const isMacho = tipo => TIPOS_MACHO.has((tipo || '').toUpperCase().trim());
-// Estados según sexo
-const estadosPorTipo = tipo => isMacho(tipo) ? ESTADOS_MACHO : ESTADOS;
+
+// Estados según tipo de animal
+const estadosPorTipo = tipo => {
+  const t = (tipo || '').toUpperCase().trim();
+  if (t === 'T')  return ESTADOS_TORO;
+  if (t === 'TM') return ESTADOS_TM;
+  return ESTADOS; // todo lo demás es hembra
+};
 
 const TIPOS = ['V', 'VQ', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'V CUT', 'TH', 'TM', 'T'];
 
