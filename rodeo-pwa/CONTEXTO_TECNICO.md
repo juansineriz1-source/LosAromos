@@ -1,5 +1,6 @@
 # CONTEXTO TÉCNICO — RodeoApp Los Aromos
-**Última actualización:** 2026-05-27  
+**Última actualización:** 2026-05-27 (layout desktop)
+
 **Repo:** https://github.com/juansineriz1-source/LosAromos  
 **Cuenta GitHub:** juansineriz1-source  
 **URL producción:** https://los-aromos.vercel.app  

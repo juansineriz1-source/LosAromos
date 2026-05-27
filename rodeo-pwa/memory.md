@@ -129,3 +129,5 @@ panel.addEventListener('click', e => {
 | 2026-05 | CATEGORIAS eran strings planos | Cambiadas a objetos `{ valor, label }` con los códigos reales del rodeo (V/VQ/V1-V6/TH/TM/T) |
 | 2026-05-27 | Toros tenían estados E(engorde) y R(retirado) | Ahora: Toro→S/F/D(descartado); TM→C(castrado)/SC(sin castrar) |
 | 2026-05-27 | No se actualizaban los docs después de cambios | Regla: siempre actualizar CONTEXTO_TECNICO.md + memory.md en cada commit |
+| 2026-05-27 | Wrappers desktop rompen layout mobile | Usar `display:contents` en mobile para que sean invisibles; sobreescribir en media query |
+| 2026-05-27 | Paneles se abrían full-screen en desktop | `inicializarDesktopPanels()` usa MutationObserver para moverlos al panel derecho |
