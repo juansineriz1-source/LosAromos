@@ -127,6 +127,61 @@ const APP_VERSION = '53';
 })();
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
+
+// Helper: detectar si estamos en pantalla desktop
+function esDesktop() { return window.innerWidth >= 1024; }
+
+// En desktop: mover paneles de Sanidad/Inseminación/Pesadas al panel derecho
+function inicializarDesktopPanels() {
+  if (!esDesktop()) return;
+
+  const panelDerecho = document.getElementById('rodeo-desktop-panel');
+  const vacio = document.getElementById('rodeo-panel-vacio');
+  if (!panelDerecho) return;
+
+  function moverPanelAlDerecho(panelId) {
+    const panel = document.getElementById(panelId);
+    if (!panel) return;
+
+    // Observar cuando el panel se vuelve visible
+    const observer = new MutationObserver(() => {
+      if (!panel.classList.contains('oculto') && !panelDerecho.contains(panel)) {
+        panelDerecho.innerHTML = '';
+        panelDerecho.appendChild(panel);
+        panel.style.position = 'relative';
+        panel.style.maxHeight = 'none';
+        panel.style.overflowY = 'visible';
+        if (vacio) vacio.style.display = 'none';
+      }
+      if (panel.classList.contains('oculto') && panelDerecho.contains(panel)) {
+        // Devolver al lugar original al cerrar
+        const tabRodeo = document.getElementById('tab-rodeo');
+        if (tabRodeo) tabRodeo.insertBefore(panel, document.getElementById('rodeo-desktop-panel')?.closest('.rodeo-desktop-cols') || null);
+        if (vacio) vacio.style.display = 'flex';
+      }
+    });
+    observer.observe(panel, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  moverPanelAlDerecho('panel-vacunacion');
+  moverPanelAlDerecho('panel-inseminacion');
+  moverPanelAlDerecho('panel-pesadas');
+
+  // Re-evaluar en resize
+  window.addEventListener('resize', () => {
+    if (!esDesktop()) {
+      // Devolver paneles al flujo normal si se achica la ventana
+      ['panel-vacunacion','panel-inseminacion','panel-pesadas'].forEach(id => {
+        const p = document.getElementById(id);
+        if (p && panelDerecho.contains(p)) {
+          const cols = document.querySelector('.rodeo-desktop-cols');
+          if (cols) cols.parentNode.insertBefore(p, cols);
+        }
+      });
+    }
+  });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   await registrarServiceWorker();
   // Cargar usuarios desde Sheets en paralelo (no bloquea el init)
@@ -144,6 +199,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   inicializarVacunacion();
   inicializarPanelInseminacion();
   inicializarPanelPesadas();
+  inicializarDesktopPanels();
 
   // Login: mostrar pantalla de selección si no hay operador guardado
   if (!estado.operador) {

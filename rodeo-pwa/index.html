@@ -759,123 +759,118 @@
       </div>
       <!-- ═══════════ FIN PANEL PESADAS ═══════════ -->
 
-      <!-- Stats + barra de filtros avanzados -->
-      <div class="card rodeo-filtros-card filtros-stitch-card" style="padding: 12px 16px;">
+      <!-- Wrapper desktop de dos columnas -->
+      <div class="rodeo-desktop-cols">
 
-        <!-- Resumen: total + chips activos -->
-        <div class="rodeo-filtros-top">
-          <div class="rodeo-stat-total rodeo-total-stitch" id="rodeo-oficial-resumen">Cargando...</div>
-          <div class="rodeo-filtros-acciones">
-            <button class="rodeo-btn-filtros" id="btn-toggle-filtros" onclick="window._toggleFiltros && window._toggleFiltros()">
-              ⚙ Filtros <span id="filtros-badge" class="filtros-badge" style="display:none">0</span>
-            </button>
-            <button class="rodeo-btn-limpiar" id="btn-limpiar-filtros" style="display:none">✕ Limpiar</button>
-          </div>
-        </div>
-
-        <!-- Chips de filtros activos (resumen visual) -->
-        <div id="filtros-activos-chips" style="display:none; margin-top:8px; flex-wrap:wrap; gap:6px;"></div>
-
-        <!-- Panel de filtros (colapsable) -->
-        <div id="panel-filtros" class="panel-filtros" style="display:none;">
-
-          <!-- SECCIÓN: TIPO -->
-          <div class="filtro-seccion">
-            <div class="filtro-seccion-header" data-seccion="tipo">
-              <span class="filtro-seccion-label">🐄 Tipo de animal</span>
-              <span class="filtro-seccion-arrow">▾</span>
-            </div>
-            <div class="filtro-seccion-body" id="filtro-body-tipo">
-              <div id="filtro-chips-tipo" class="filtro-chips-wrap"></div>
-            </div>
+        <!-- Columna izquierda: filtros + lista -->
+        <div class="rodeo-desktop-lista">
+          <!-- Header lista desktop -->
+          <div class="rodeo-desktop-lista-header">
+            <span>🐄 Animales</span>
+            <span id="rodeo-desktop-count" style="font-size:12px;font-weight:500;opacity:.8;"></span>
           </div>
 
-          <div class="filtro-divisor"></div>
-
-          <!-- SECCIÓN: ESTADO -->
-          <div class="filtro-seccion">
-            <div class="filtro-seccion-header" data-seccion="estado">
-              <span class="filtro-seccion-label">❤️ Estado reproductivo</span>
-              <span class="filtro-seccion-arrow">▾</span>
-            </div>
-            <div class="filtro-seccion-body" id="filtro-body-estado">
-              <div id="filtro-chips-estado" class="filtro-chips-wrap">
-                <!-- Hembras (V, VQ, V1-V6, TH) -->
-                <button class="filtro-chip" data-grupo="estado" data-val="P">P · Preñada</button>
-                <button class="filtro-chip" data-grupo="estado" data-val="V">V · Vacía</button>
-                <button class="filtro-chip" data-grupo="estado" data-val="I">I · Inseminada</button>
-                <!-- Toro (T) -->
-                <button class="filtro-chip" data-grupo="estado" data-val="S">S · En servicio</button>
-                <button class="filtro-chip" data-grupo="estado" data-val="F">F · Fuera servicio</button>
-                <button class="filtro-chip" data-grupo="estado" data-val="D">D · Descartado</button>
-                <!-- Ternero Macho (TM) -->
-                <button class="filtro-chip" data-grupo="estado" data-val="C">C · Castrado</button>
-                <button class="filtro-chip" data-grupo="estado" data-val="SC">SC · Sin castrar</button>
+          <!-- Stats + barra de filtros (movido dentro de la columna izquierda en desktop) -->
+          <div style="padding:12px 14px 0;">
+            <div class="rodeo-filtros-top">
+              <div class="rodeo-stat-total rodeo-total-stitch" id="rodeo-oficial-resumen">Cargando...</div>
+              <div class="rodeo-filtros-acciones">
+                <button class="rodeo-btn-filtros" id="btn-toggle-filtros" onclick="window._toggleFiltros && window._toggleFiltros()">
+                  ⚙ Filtros <span id="filtros-badge" class="filtros-badge" style="display:none">0</span>
+                </button>
+                <button class="rodeo-btn-limpiar" id="btn-limpiar-filtros" style="display:none">✕ Limpiar</button>
               </div>
             </div>
-          </div>
 
-          <div class="filtro-divisor"></div>
+            <div id="filtros-activos-chips" style="display:none; margin-top:8px; flex-wrap:wrap; gap:6px;"></div>
 
-          <!-- SECCIÓN: VACUNAS -->
-          <div class="filtro-seccion">
-            <div class="filtro-seccion-header" data-seccion="vacunas">
-              <span class="filtro-seccion-label">💉 Vacunas este año</span>
-              <span class="filtro-seccion-arrow">▾</span>
-            </div>
-            <div class="filtro-seccion-body" id="filtro-body-vacunas">
-
-              <!-- Toggle SÍ / NO vacunadas -->
-              <div class="filtro-toggle-row">
-                <span class="filtro-toggle-label">Vacunadas este año:</span>
-                <div class="filtro-toggle-btns">
-                  <button class="filtro-toggle-btn" data-grupo="vac-toggle" data-val="si" id="vac-toggle-si">Sí</button>
-                  <button class="filtro-toggle-btn" data-grupo="vac-toggle" data-val="no" id="vac-toggle-no">No</button>
+            <div id="panel-filtros" class="panel-filtros" style="display:none;">
+              <div class="filtro-seccion">
+                <div class="filtro-seccion-header" data-seccion="tipo">
+                  <span class="filtro-seccion-label">🐄 Tipo de animal</span>
+                  <span class="filtro-seccion-arrow">▾</span>
+                </div>
+                <div class="filtro-seccion-body" id="filtro-body-tipo">
+                  <div id="filtro-chips-tipo" class="filtro-chips-wrap"></div>
                 </div>
               </div>
-
-              <!-- Chips de vacunas (solo visible si SÍ activo) -->
-              <div id="filtro-vacunas-detalle" style="display:none; margin-top:10px;">
-                <div class="filtro-toggle-label" style="margin-bottom:6px;">¿Cuál vacuna?</div>
-                <div class="filtro-chips-wrap">
-                  <button class="filtro-chip" data-grupo="vacuna" data-val="vac_aftosa">Aftosa</button>
-                  <button class="filtro-chip" data-grupo="vacuna" data-val="vac_brucelosis">Brucelosis</button>
-                  <button class="filtro-chip" data-grupo="vacuna" data-val="vac_carbunclo">Carbunclo</button>
-                  <button class="filtro-chip" data-grupo="vacuna" data-val="vac_mancha">Mancha</button>
-                  <button class="filtro-chip" data-grupo="vacuna" data-val="vac_queratoconjuntivitis">Queratoconjuntivitis</button>
-                  <button class="filtro-chip" data-grupo="vacuna" data-val="vac_otras">Otras</button>
+              <div class="filtro-divisor"></div>
+              <div class="filtro-seccion">
+                <div class="filtro-seccion-header" data-seccion="estado">
+                  <span class="filtro-seccion-label">❤️ Estado reproductivo</span>
+                  <span class="filtro-seccion-arrow">▾</span>
                 </div>
-                <div class="filtro-toggle-label" style="margin-top:10px; margin-bottom:6px;">Aplicadas en los últimos:</div>
-                <div class="filtro-chips-wrap">
-                  <button class="filtro-chip" data-grupo="periodo" data-val="30">30 días</button>
-                  <button class="filtro-chip" data-grupo="periodo" data-val="90">90 días</button>
-                  <button class="filtro-chip" data-grupo="periodo" data-val="180">6 meses</button>
-                  <button class="filtro-chip activo" data-grupo="periodo" data-val="365">Este año</button>
+                <div class="filtro-seccion-body" id="filtro-body-estado">
+                  <div id="filtro-chips-estado" class="filtro-chips-wrap">
+                    <button class="filtro-chip" data-grupo="estado" data-val="P">P · Preñada</button>
+                    <button class="filtro-chip" data-grupo="estado" data-val="V">V · Vacía</button>
+                    <button class="filtro-chip" data-grupo="estado" data-val="I">I · Inseminada</button>
+                    <button class="filtro-chip" data-grupo="estado" data-val="S">S · En servicio</button>
+                    <button class="filtro-chip" data-grupo="estado" data-val="F">F · Fuera servicio</button>
+                    <button class="filtro-chip" data-grupo="estado" data-val="D">D · Descartado</button>
+                    <button class="filtro-chip" data-grupo="estado" data-val="C">C · Castrado</button>
+                    <button class="filtro-chip" data-grupo="estado" data-val="SC">SC · Sin castrar</button>
+                  </div>
                 </div>
               </div>
+              <div class="filtro-divisor"></div>
+              <div class="filtro-seccion">
+                <div class="filtro-seccion-header" data-seccion="vacunas">
+                  <span class="filtro-seccion-label">💉 Vacunas este año</span>
+                  <span class="filtro-seccion-arrow">▾</span>
+                </div>
+                <div class="filtro-seccion-body" id="filtro-body-vacunas">
+                  <div class="filtro-toggle-row">
+                    <span class="filtro-toggle-label">Vacunadas este año:</span>
+                    <div class="filtro-toggle-btns">
+                      <button class="filtro-toggle-btn" data-grupo="vac-toggle" data-val="si" id="vac-toggle-si">Sí</button>
+                      <button class="filtro-toggle-btn" data-grupo="vac-toggle" data-val="no" id="vac-toggle-no">No</button>
+                    </div>
+                  </div>
+                  <div id="filtro-vacunas-detalle" style="display:none; margin-top:10px;">
+                    <div class="filtro-toggle-label" style="margin-bottom:6px;">¿Cuál vacuna?</div>
+                    <div class="filtro-chips-wrap">
+                      <button class="filtro-chip" data-grupo="vacuna" data-val="vac_aftosa">Aftosa</button>
+                      <button class="filtro-chip" data-grupo="vacuna" data-val="vac_brucelosis">Brucelosis</button>
+                      <button class="filtro-chip" data-grupo="vacuna" data-val="vac_carbunclo">Carbunclo</button>
+                      <button class="filtro-chip" data-grupo="vacuna" data-val="vac_mancha">Mancha</button>
+                      <button class="filtro-chip" data-grupo="vacuna" data-val="vac_queratoconjuntivitis">Queratoconjuntivitis</button>
+                      <button class="filtro-chip" data-grupo="vacuna" data-val="vac_otras">Otras</button>
+                    </div>
+                    <div class="filtro-toggle-label" style="margin-top:10px; margin-bottom:6px;">Aplicadas en los últimos:</div>
+                    <div class="filtro-chips-wrap">
+                      <button class="filtro-chip" data-grupo="periodo" data-val="30">30 días</button>
+                      <button class="filtro-chip" data-grupo="periodo" data-val="90">90 días</button>
+                      <button class="filtro-chip" data-grupo="periodo" data-val="180">6 meses</button>
+                      <button class="filtro-chip activo" data-grupo="periodo" data-val="365">Este año</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div><!-- /panel-filtros -->
 
+            <div class="search-wrapper" style="margin-top:10px;margin-bottom:10px;">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="rodeo-of-buscar" class="campo-input search-input-stitch" placeholder="Buscar por botón, caravana..." autocomplete="off">
             </div>
           </div>
 
-        </div><!-- /panel-filtros -->
+          <!-- Lista animales -->
+          <div id="rodeo-oficial-lista">
+            <p class="sin-historial" style="margin: 24px 0;">Cargando...</p>
+          </div>
+        </div><!-- /rodeo-desktop-lista -->
 
-        <!-- Buscador siempre visible -->
-        <div class="search-wrapper">
-          <span class="search-icon">🔍</span>
-          <input
-            type="text"
-            id="rodeo-of-buscar"
-            class="campo-input search-input-stitch"
-            placeholder="Buscar por botón, caravana..."
-            autocomplete="off"
-          >
-        </div>
-      </div>
+        <!-- Columna derecha: panel activo -->
+        <div class="rodeo-desktop-panel" id="rodeo-desktop-panel">
+          <div class="rodeo-desktop-panel-vacio" id="rodeo-panel-vacio">
+            <span style="font-size:48px;">🐄</span>
+            <span>Selecioná un animal o abrí un módulo</span>
+          </div>
+        </div><!-- /rodeo-desktop-panel -->
 
-      <!-- Lista oficial (desde Sheets) -->
-      <div id="rodeo-oficial-lista">
-        <p class="sin-historial" style="margin: 24px 0;">Cargando...</p>
-      </div>
+      </div><!-- /rodeo-desktop-cols -->
+
 
       <!-- Botón flotante + para agregar animal (solo admins) -->
       <button id="btn-agregar-animal" class="btn-flotante-agregar" title="Agregar animal" style="display:none">

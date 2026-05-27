@@ -4682,3 +4682,363 @@ html { scroll-behavior: smooth; }
   0%   { background: #dbeafe; transform: scale(1.02); }
   100% { background: #fff7ed; transform: scale(1); }
 }
+
+/* ─── Desktop wrapper classes — neutras en mobile ──────────────────────────── */
+/* En mobile estos divs son transparentes — no cambian el layout */
+.rodeo-desktop-cols,
+.rodeo-desktop-lista,
+.rodeo-desktop-panel,
+.rodeo-desktop-lista-header,
+.inicio-desktop-cols,
+.agenda-desktop-cols,
+.agenda-desktop-lista,
+.agenda-desktop-detalle {
+  display: contents; /* invisible en mobile */
+}
+.rodeo-desktop-panel-vacio { display: none; } /* solo se ve en desktop */
+
+/* ═══════════════════════════════════════════════════════════════════
+   LAYOUT DESKTOP (≥ 1024px)
+   El layout móvil NO cambia. Todo lo de abajo es exclusivo para
+   pantallas grandes (iPad horizontal, laptop, desktop).
+═══════════════════════════════════════════════════════════════════ */
+@media (min-width: 1024px) {
+
+  /* ── Body y estructura general ───────────────────────────────── */
+  body {
+    display: flex;
+    flex-direction: row;
+    min-height: 100vh;
+    background: #f1f5f0;
+  }
+
+  /* Sobreescribir display:contents para que funcionen en desktop */
+  .rodeo-desktop-cols  { display: grid; }
+  .rodeo-desktop-lista { display: block; }
+  .rodeo-desktop-panel { display: block; }
+  .rodeo-desktop-lista-header { display: flex; }
+  .rodeo-desktop-panel-vacio  { display: flex; }
+  .inicio-desktop-cols  { display: grid; }
+  .agenda-desktop-cols  { display: grid; }
+  .agenda-desktop-lista { display: block; }
+  .agenda-desktop-detalle { display: block; }
+
+  /* ── Sidebar de navegación izquierdo ─────────────────────────── */
+  .bottom-nav {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 200px;
+    height: 100vh;
+    max-width: 200px;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    border-top: none;
+    border-right: 1px solid rgba(229,231,235,0.6);
+    background: rgba(255,255,255,0.96);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 2px 0 16px rgba(0,0,0,0.06);
+    padding-bottom: 0;
+    padding-top: 80px;
+    transform: none;
+    z-index: 200;
+  }
+
+  /* Logo / branding en el sidebar */
+  .bottom-nav::before {
+    content: '🐄 RodeoApp';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background: #0f5228;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    padding-left: 20px;
+    letter-spacing: -0.3px;
+  }
+
+  .nav-item {
+    flex: none;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 20px;
+    border-radius: 0;
+    text-align: left;
+    width: 100%;
+    border-bottom: 1px solid rgba(229,231,235,0.35);
+  }
+
+  .nav-icon {
+    font-size: 20px;
+    width: 28px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .nav-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  .nav-item.active {
+    background: rgba(15, 82, 40, 0.08);
+    border-left: 3px solid #0f5228;
+  }
+
+  .nav-item.active::before { display: none; }
+
+  .nav-item.active .nav-label {
+    color: #0f5228;
+    font-weight: 700;
+  }
+
+  .nav-item.active .nav-icon {
+    transform: none;
+  }
+
+  .nav-item:not(.active) .nav-icon {
+    filter: none;
+  }
+
+  /* ── Header ─────────────────────────────────────────────────── */
+  .header {
+    position: fixed;
+    top: 0;
+    left: 200px;
+    right: 0;
+    z-index: 190;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 28px;
+    gap: 0;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .header-info {
+    order: 2;
+    gap: 12px;
+  }
+
+  .header-top {
+    order: 1;
+    flex: 1;
+  }
+
+  /* ── Main content — desplazado del sidebar y header ─────────── */
+  .main {
+    margin-left: 200px;
+    margin-top: 64px;
+    padding: 24px 28px 40px;
+    min-height: calc(100vh - 64px);
+    max-width: none;
+    width: calc(100vw - 200px);
+    box-sizing: border-box;
+    gap: 20px;
+  }
+
+  /* ── Tab panels ─────────────────────────────────────────────── */
+  .tab-panel {
+    gap: 20px;
+  }
+
+  /* ── Cards más anchas en desktop ─────────────────────────────── */
+  .card {
+    border-radius: 16px;
+  }
+
+  /* ═══════════ RODEO DESKTOP — dos columnas ══════════════════════ */
+  #tab-rodeo {
+    display: grid !important;
+    grid-template-rows: auto auto 1fr;
+    grid-template-columns: 1fr;
+  }
+
+  /* Barra de botones de módulos (Sanidad / Inseminación / Pesadas) */
+  #tab-rodeo > div:first-child {
+    grid-column: 1 / -1;
+  }
+
+  /* Contenedor de dos columnas */
+  .rodeo-desktop-cols {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    gap: 20px;
+    align-items: start;
+    min-height: calc(100vh - 180px);
+  }
+
+  /* Columna izquierda: lista animales */
+  .rodeo-desktop-lista {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.07);
+    overflow: hidden;
+    position: sticky;
+    top: 84px;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+  }
+
+  /* Header de la lista en desktop */
+  .rodeo-desktop-lista-header {
+    background: #0f5228;
+    color: #fff;
+    padding: 14px 18px;
+    font-weight: 700;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+
+  /* Filas de animales estilo tabla en desktop */
+  .rodeo-item {
+    margin: 0;
+    border-radius: 0;
+    border-bottom: 1px solid #f3f4f6;
+    padding: 10px 14px;
+    gap: 8px;
+  }
+
+  .rodeo-item:last-child { border-bottom: none; }
+
+  /* Columna derecha: panel activo */
+  .rodeo-desktop-panel {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.07);
+    overflow: hidden;
+    min-height: 300px;
+    position: sticky;
+    top: 84px;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+  }
+
+  .rodeo-desktop-panel-vacio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    color: #9ca3af;
+    gap: 12px;
+    font-size: 15px;
+  }
+
+  /* Paneles de Sanidad/Inseminación/Pesadas en desktop: sin overlay */
+  .vac-panel {
+    position: relative !important;
+    max-height: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    height: 100%;
+  }
+
+  /* ═══════════ INICIO DESKTOP — dos columnas ═════════════════════ */
+  #tab-inicio {
+    gap: 20px;
+  }
+
+  /* Stats en fila horizontal */
+  #card-rodeo-stats .card-titulo {
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+
+  #rodeo-stats-inicio {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  /* Grid de dos columnas para inicio */
+  .inicio-desktop-cols {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 20px;
+    align-items: start;
+  }
+
+  /* Hero de inicio más compacto */
+  .inicio-hero {
+    padding: 24px 28px;
+    border-radius: 16px;
+  }
+
+  /* ═══════════ AGENDA DESKTOP — dos columnas ═════════════════════ */
+  .agenda-desktop-cols {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 20px;
+    align-items: start;
+    min-height: calc(100vh - 180px);
+  }
+
+  .agenda-desktop-lista {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.07);
+    overflow: hidden;
+    position: sticky;
+    top: 84px;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+  }
+
+  .agenda-desktop-detalle {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.07);
+    min-height: 300px;
+    position: sticky;
+    top: 84px;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+  }
+
+  /* ── Misc desktop ─────────────────────────────────────────────── */
+
+  /* Modales más centrados y no full-screen */
+  .vac-modal-card {
+    max-width: 560px;
+    border-radius: 20px;
+    max-height: 85vh;
+  }
+
+  /* Ocultar header-info duplicada en sidebar */
+  .header-info .estado-bt {
+    display: flex;
+  }
+
+  /* Scrollbars más lindos en desktop */
+  .rodeo-desktop-lista::-webkit-scrollbar,
+  .rodeo-desktop-panel::-webkit-scrollbar,
+  .agenda-desktop-lista::-webkit-scrollbar,
+  .agenda-desktop-detalle::-webkit-scrollbar {
+    width: 6px;
+  }
+  .rodeo-desktop-lista::-webkit-scrollbar-thumb,
+  .rodeo-desktop-panel::-webkit-scrollbar-thumb,
+  .agenda-desktop-lista::-webkit-scrollbar-thumb,
+  .agenda-desktop-detalle::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+  }
+
+} /* fin @media (min-width: 1024px) */
