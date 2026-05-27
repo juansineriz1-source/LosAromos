@@ -211,6 +211,39 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true, peso_kg, fecha: fechaAR });
       }
 
+      if (body.modo === 'registro-sangrado') {
+        const {
+          fecha, tipo_estudio, veterinario,
+          total_rodeo, animales_muestreados,
+          resultado, reactores, accion,
+          proxima_fecha, comentarios, operador
+        } = body;
+        if (!fecha || !tipo_estudio || !resultado)
+          return res.status(400).json({ error: 'fecha, tipo_estudio y resultado son obligatorios' });
+        const tsAR = new Date().toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' });
+        const appendUrlS = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent('Sangrado!A:L')}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`;
+        const appendRespS = await fetch(appendUrlS, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ values: [[
+            fecha,
+            tipo_estudio,
+            veterinario    || '',
+            total_rodeo    || '',
+            animales_muestreados || '',
+            resultado,
+            reactores      || 0,
+            accion         || 'Ninguna',
+            proxima_fecha  || '',
+            comentarios    || '',
+            operador       || '',
+            tsAR,
+          ]] }),
+        });
+        if (!appendRespS.ok) throw new Error(`Sheets sangrado error: ${appendRespS.status}`);
+        return res.status(200).json({ ok: true, fecha, resultado });
+      }
+
       return res.status(400).json({ error: 'modo no reconocido' });
     }
 
@@ -244,6 +277,35 @@ export default async function handler(req, res) {
         timestamp:        getCol(fila, 'timestamp'),
       }));
       return res.status(200).json({ vacunas });
+    }
+
+    // ── MODO: sangrados desde hoja Sangrado ────────────────────────────────────────
+    if (modo === 'sangrados') {
+      const urlS  = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent('Sangrado!A:L')}`;
+      const respS = await fetch(urlS, { headers: { Authorization: `Bearer ${token}` } });
+      if (!respS.ok) return res.status(200).json({ sangrados: [] });
+      const filasS = (await respS.json()).values || [];
+      if (filasS.length <= 1) return res.status(200).json({ sangrados: [] });
+      const headersS = filasS[0].map(h => (h || '').toLowerCase().trim());
+      const getS = (fila, col) => fila[headersS.indexOf(col)] || '';
+      const sangrados = filasS.slice(1)
+        .filter(f => f[0]) // debe tener fecha
+        .map(fila => ({
+          fecha:                getS(fila, 'fecha'),
+          tipo_estudio:         getS(fila, 'tipo_estudio'),
+          veterinario:          getS(fila, 'veterinario'),
+          total_rodeo:          getS(fila, 'total_rodeo'),
+          animales_muestreados: getS(fila, 'animales_muestreados'),
+          resultado:            getS(fila, 'resultado'),
+          reactores:            getS(fila, 'reactores') || '0',
+          accion:               getS(fila, 'accion'),
+          proxima_fecha:        getS(fila, 'proxima_fecha'),
+          comentarios:          getS(fila, 'comentarios'),
+          operador:             getS(fila, 'operador'),
+          timestamp:            getS(fila, 'timestamp'),
+        }))
+        .reverse(); // más reciente primero
+      return res.status(200).json({ sangrados });
     }
 
     // ── MODO: pesos de animales desde hoja Pesos ─────────────────────────────

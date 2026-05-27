@@ -444,7 +444,7 @@
       <!-- 3 módulos principales -->
       <div style="padding:12px 16px 0;display:flex;gap:8px;">
         <button class="vac-btn-acceso" id="btn-abrir-vacunacion" style="flex:1;font-size:13px;">
-          💉 Vacunación
+          🩺 Sanidad
         </button>
         <button class="vac-btn-acceso" id="btn-abrir-inseminacion" style="flex:1;font-size:13px;background:#1d4ed8;">
           🐄 Inseminación
@@ -455,22 +455,31 @@
         <button class="vac-btn-info" id="btn-info-vacunas" title="Manual de vacunas" style="flex-shrink:0;">ℹ️</button>
       </div>
 
-      <!-- ═══════════ PANEL VACUNACION ═══════════ -->
+      <!-- ═══════════ PANEL SANIDAD ═══════════ -->
       <div id="panel-vacunacion" class="vac-panel oculto">
 
         <!-- Header -->
         <div class="vac-panel-header">
-          <h2 class="vac-titulo">💉 Vacunación</h2>
+          <h2 class="vac-titulo">🩺 Sanidad</h2>
           <button class="vac-btn-masiva" id="btn-abrir-masiva" title="Vacunacion masiva">
             ⚡ Masiva
           </button>
           <button class="vac-btn-cerrar" id="btn-cerrar-vacunacion">✕</button>
         </div>
 
+        <!-- Tabs: Vacunación / Sangrado -->
+        <div style="display:flex;gap:0;border-bottom:2px solid #e5e7eb;margin-bottom:14px;">
+          <button id="sanidad-tab-vac" onclick="window._sanidadTab('vac')" style="flex:1;padding:10px 0;font-size:13px;font-weight:700;border:none;background:none;cursor:pointer;color:#0f5228;border-bottom:3px solid #0f5228;margin-bottom:-2px;">💉 Vacunación</button>
+          <button id="sanidad-tab-sangrado" onclick="window._sanidadTab('sangrado')" style="flex:1;padding:10px 0;font-size:13px;font-weight:700;border:none;background:none;cursor:pointer;color:#6b7280;border-bottom:3px solid transparent;margin-bottom:-2px;">🩸 Sangrado</button>
+        </div>
         <!-- Alertas globales -->
         <div id="vac-alertas-container" class="vac-alertas-wrap"></div>
 
-        <!-- Filtro por categoría -->\n        <div class="vac-cat-chips">
+        <!-- SECCIÓN VACUNACIÓN -->
+        <div id="sanidad-seccion-vac">
+
+        <!-- Filtro por categoría -->
+        <div class="vac-cat-chips">
           <button class="vac-cat-chip activo" data-cat="">Todos</button>
           <button class="vac-cat-chip" data-cat="Ternero">Terneros</button>
           <button class="vac-cat-chip" data-cat="Ternera">Terneras</button>
@@ -494,8 +503,82 @@
           <p class="sin-historial">Cargando...</p>
         </div>
 
+        </div><!-- /sanidad-seccion-vac -->
+
+        <!-- SECCIÓN SANGRADO -->
+        <div id="sanidad-seccion-sangrado" class="oculto">
+
+          <div style="background:#fff8f8;border:1.5px solid #fca5a5;border-radius:14px;padding:14px 16px;margin-bottom:16px;">
+            <div style="font-size:12px;color:#7f1d1d;font-weight:600;margin-bottom:4px;">🩸 ¿Qué es el sangrado?</div>
+            <div style="font-size:12px;color:#991b1b;line-height:1.5;">Muestreo de sangre obligatorio por SENASA (Res. 67/2019). Se toma un % del rodeo; si es negativo queda libre. Si hay reactores, se sangra todo el rodeo y se eliminan los positivos.</div>
+          </div>
+
+          <!-- Formulario nuevo sangrado -->
+          <div style="background:#fff;border:1.5px solid #e5e7eb;border-radius:16px;padding:16px;margin-bottom:18px;">
+            <div style="font-weight:700;font-size:14px;color:#0f5228;margin-bottom:14px;">➕ Registrar sangrado</div>
+
+            <label class="campo-label">Tipo de estudio *</label>
+            <select id="sg-tipo" class="vac-select">
+              <option value="Brucelosis">Brucelosis</option>
+              <option value="Tuberculosis">Tuberculosis</option>
+              <option value="Leucosis">Leucosis</option>
+              <option value="Otro">Otro</option>
+            </select>
+
+            <label class="campo-label">Fecha del sangrado *</label>
+            <input type="date" id="sg-fecha" class="vac-input">
+
+            <label class="campo-label">Veterinario</label>
+            <input type="text" id="sg-veterinario" class="vac-input" placeholder="Med. Vet. Micone">
+
+            <div style="display:flex;gap:10px;">
+              <div style="flex:1;">
+                <label class="campo-label">Total rodeo</label>
+                <input type="number" id="sg-total" class="vac-input" placeholder="190" min="0">
+              </div>
+              <div style="flex:1;">
+                <label class="campo-label">Muestreados</label>
+                <input type="number" id="sg-muestreados" class="vac-input" placeholder="28" min="0">
+              </div>
+            </div>
+
+            <label class="campo-label">Resultado *</label>
+            <select id="sg-resultado" class="vac-select">
+              <option value="Negativo">✅ Negativo — Rodeo libre</option>
+              <option value="Con reactores">⚠️ Con reactores</option>
+              <option value="Pendiente">⏳ Pendiente de laboratorio</option>
+            </select>
+
+            <div id="sg-reactores-wrap" style="display:none;">
+              <label class="campo-label">Cantidad de reactores</label>
+              <input type="number" id="sg-reactores" class="vac-input" placeholder="0" min="0">
+              <label class="campo-label">Acción tomada</label>
+              <select id="sg-accion" class="vac-select">
+                <option value="Sangrado total del rodeo">Sangrado total del rodeo</option>
+                <option value="Eliminación de reactores">Eliminación de reactores</option>
+                <option value="Sangrado total + Eliminación">Sangrado total + Eliminación</option>
+              </select>
+            </div>
+
+            <label class="campo-label">Próxima fecha estimada</label>
+            <input type="date" id="sg-proxima" class="vac-input">
+
+            <label class="campo-label">Comentarios</label>
+            <textarea id="sg-comentarios" class="vac-textarea" placeholder="Laboratorio, nro de protocolo SENASA, observaciones..."></textarea>
+
+            <button id="btn-guardar-sangrado" class="btn-guardar-grande" style="margin-top:16px;">🩸 Guardar sangrado</button>
+          </div>
+
+          <!-- Historial -->
+          <div style="font-weight:700;font-size:14px;color:#0f5228;margin-bottom:10px;">📋 Historial de sangrados</div>
+          <div id="sg-historial" style="display:flex;flex-direction:column;gap:10px;">
+            <p class="sin-historial">Cargando...</p>
+          </div>
+
+        </div><!-- /sanidad-seccion-sangrado -->
+
       </div>
-      <!-- ═══════════ FIN PANEL VACUNACION ═══════════ -->
+      <!-- ═══════════ FIN PANEL SANIDAD ═══════════ -->
 
       <!-- ═══════════ PANEL INSEMINACIÓN ═══════════ -->
       <div id="panel-inseminacion" class="vac-panel oculto">

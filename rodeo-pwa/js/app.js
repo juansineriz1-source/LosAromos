@@ -3072,3 +3072,162 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+// ─── MÓDULO SANGRADO ─────────────────────────────────────────────────────────
+
+window._sanidadTab = function(tab) {
+  const secVac      = document.getElementById('sanidad-seccion-vac');
+  const secSangrado = document.getElementById('sanidad-seccion-sangrado');
+  const btnVac      = document.getElementById('sanidad-tab-vac');
+  const btnSangrado = document.getElementById('sanidad-tab-sangrado');
+  if (!secVac || !secSangrado) return;
+
+  if (tab === 'vac') {
+    secVac.classList.remove('oculto');
+    secSangrado.classList.add('oculto');
+    btnVac.style.color = '#0f5228';
+    btnVac.style.borderBottom = '3px solid #0f5228';
+    btnSangrado.style.color = '#6b7280';
+    btnSangrado.style.borderBottom = '3px solid transparent';
+  } else {
+    secVac.classList.add('oculto');
+    secSangrado.classList.remove('oculto');
+    btnVac.style.color = '#6b7280';
+    btnVac.style.borderBottom = '3px solid transparent';
+    btnSangrado.style.color = '#991b1b';
+    btnSangrado.style.borderBottom = '3px solid #991b1b';
+    cargarHistorialSangrado();
+  }
+};
+
+async function cargarHistorialSangrado() {
+  const contenedor = document.getElementById('sg-historial');
+  if (!contenedor) return;
+  contenedor.innerHTML = '<p class="sin-historial">Cargando...</p>';
+  try {
+    const resp = await fetch('/api/animales?modo=sangrados');
+    if (!resp.ok) throw new Error('Error al cargar sangrados');
+    const { sangrados } = await resp.json();
+    if (!sangrados || sangrados.length === 0) {
+      contenedor.innerHTML = '<p class="sin-historial">📋 Sin sangrados registrados</p>';
+      return;
+    }
+    contenedor.innerHTML = sangrados.map(s => {
+      const esNeg = s.resultado === 'Negativo';
+      const esReact = s.resultado === 'Con reactores';
+      const color = esNeg ? '#d4edda' : esReact ? '#f8d7da' : '#fff3cd';
+      const colorT = esNeg ? '#155724' : esReact ? '#721c24' : '#856404';
+      const icono = esNeg ? '✅' : esReact ? '⚠️' : '⏳';
+      const pct = s.total_rodeo && s.animales_muestreados
+        ? ` · ${Math.round(s.animales_muestreados / s.total_rodeo * 100)}% muestreado`
+        : '';
+      return `
+        <div style="background:${color};border:1.5px solid ${colorT}33;border-radius:14px;padding:14px 16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <span style="font-weight:700;font-size:14px;color:${colorT};">${icono} ${s.tipo_estudio}</span>
+            <span style="font-size:12px;color:${colorT};font-weight:600;">${s.fecha}</span>
+          </div>
+          <div style="font-size:12px;color:${colorT};margin-bottom:2px;">
+            ${icono} <strong>${s.resultado}</strong>${s.reactores && s.reactores !== '0' ? ` · ${s.reactores} reactores` : ''}${pct}
+          </div>
+          ${s.veterinario ? `<div style="font-size:11px;color:${colorT};opacity:.8;">🩺 ${s.veterinario}</div>` : ''}
+          ${s.accion && s.accion !== 'Ninguna' ? `<div style="font-size:11px;color:${colorT};margin-top:4px;">📌 ${s.accion}</div>` : ''}
+          ${s.proxima_fecha ? `<div style="font-size:11px;color:${colorT};margin-top:2px;">🗓 Próxima: ${s.proxima_fecha}</div>` : ''}
+          ${s.comentarios ? `<div style="font-size:11px;color:${colorT};margin-top:4px;opacity:.85;">${s.comentarios}</div>` : ''}
+        </div>`;
+    }).join('');
+  } catch (e) {
+    contenedor.innerHTML = '<p class="sin-historial">Error al cargar historial</p>';
+  }
+}
+
+function inicializarSangrado() {
+  // Mostrar/ocultar campo reactores según resultado
+  const sgResultado = document.getElementById('sg-resultado');
+  const sgReactoresWrap = document.getElementById('sg-reactores-wrap');
+  if (sgResultado && sgReactoresWrap) {
+    sgResultado.addEventListener('change', () => {
+      sgReactoresWrap.style.display =
+        sgResultado.value === 'Con reactores' ? 'block' : 'none';
+    });
+  }
+
+  // Setear fecha de hoy por defecto
+  const sgFecha = document.getElementById('sg-fecha');
+  if (sgFecha && !sgFecha.value) {
+    sgFecha.value = new Date().toISOString().split('T')[0];
+  }
+
+  // Guardar sangrado
+  const btnGuardar = document.getElementById('btn-guardar-sangrado');
+  if (!btnGuardar) return;
+
+  btnGuardar.addEventListener('click', async () => {
+    const fecha        = document.getElementById('sg-fecha')?.value;
+    const tipo_estudio = document.getElementById('sg-tipo')?.value;
+    const resultado    = document.getElementById('sg-resultado')?.value;
+
+    if (!fecha || !tipo_estudio || !resultado) {
+      mostrarToast('Completá fecha, tipo de estudio y resultado', 'advertencia', 3000);
+      return;
+    }
+
+    const payload = {
+      modo:                 'registro-sangrado',
+      fecha,
+      tipo_estudio,
+      veterinario:          document.getElementById('sg-veterinario')?.value || '',
+      total_rodeo:          parseInt(document.getElementById('sg-total')?.value) || '',
+      animales_muestreados: parseInt(document.getElementById('sg-muestreados')?.value) || '',
+      resultado,
+      reactores:            resultado === 'Con reactores'
+                              ? (parseInt(document.getElementById('sg-reactores')?.value) || 0)
+                              : 0,
+      accion:               resultado === 'Con reactores'
+                              ? (document.getElementById('sg-accion')?.value || 'Ninguna')
+                              : 'Ninguna',
+      proxima_fecha:        document.getElementById('sg-proxima')?.value || '',
+      comentarios:          document.getElementById('sg-comentarios')?.value || '',
+      operador:             estado.operador || '',
+    };
+
+    btnGuardar.textContent = 'Guardando...';
+    btnGuardar.disabled = true;
+
+    try {
+      const resp = await fetch('/api/animales', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!resp.ok) throw new Error('Error al guardar');
+      mostrarToast(`✅ Sangrado (${tipo_estudio}) guardado — ${resultado}`, 'exito', 4000);
+
+      // Limpiar formulario
+      document.getElementById('sg-fecha').value = new Date().toISOString().split('T')[0];
+      document.getElementById('sg-tipo').value = 'Brucelosis';
+      document.getElementById('sg-veterinario').value = '';
+      document.getElementById('sg-total').value = '';
+      document.getElementById('sg-muestreados').value = '';
+      document.getElementById('sg-resultado').value = 'Negativo';
+      document.getElementById('sg-reactores-wrap').style.display = 'none';
+      document.getElementById('sg-reactores').value = '';
+      document.getElementById('sg-proxima').value = '';
+      document.getElementById('sg-comentarios').value = '';
+
+      // Recargar historial
+      cargarHistorialSangrado();
+    } catch (e) {
+      mostrarToast('Error al guardar sangrado', 'error', 3000);
+    } finally {
+      btnGuardar.textContent = '🩸 Guardar sangrado';
+      btnGuardar.disabled = false;
+    }
+  });
+}
+
+// Inicializar sangrado cuando se abre el panel de sanidad
+document.addEventListener('DOMContentLoaded', () => {
+  inicializarSangrado();
+});
+
