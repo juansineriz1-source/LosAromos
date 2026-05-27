@@ -1,0 +1,123 @@
+# 🧠 Memory — Lecciones Aprendidas (Rodeo PWA)
+
+> Este archivo NO es documentación del proyecto.
+> Es un registro de errores cometidos, correcciones del usuario, y reglas que hay que recordar
+> para no repetir los mismos problemas una y otra vez.
+
+---
+
+## ⚠️ REGLAS CRÍTICAS QUE NO SE PUEDEN OLVIDAR
+
+### 1. Vercel tiene límite de 12 funciones serverless en el plan gratuito
+- Cada archivo dentro de `/api/` cuenta como 1 función
+- Si se crean más de 12 archivos en `/api/`, el deploy falla
+- **Solución:** Reutilizar funciones existentes con parámetros (`?modo=xxx`) en lugar de crear archivos nuevos
+- Antes de crear cualquier archivo nuevo en `/api/`, contar cuántos hay y verificar que no se supere el límite
+- Archivos actuales que ya existen: animales.js, sincronizar.js, subir-media.js, tareas.js, novedades.js, vacunas.js, etc.
+
+### 2. Siempre revisar el código del subagente antes de hacer push
+- Los subagentes en general rompen algo al hacer cambios — siempre revisar qué tocaron antes de pushear
+- Nunca hacer push ciego de lo que genera un subagente
+
+### 3. El Service Worker cachea agresivamente — siempre subir la revisión
+- Cada vez que se modifica cualquier archivo JS, CSS o HTML, hay que subir el número de revisión en `sw.js`
+- Si no se sube la revisión, los usuarios siguen viendo la versión vieja cacheada
+- Formato: `revision: 'N'` donde N es el número actual + 1
+- La revisión actual está en `sw.js` en el array `precacheAndRoute([...])`
+
+### 4. El `style="display:none"` inline bloquea las clases CSS
+- El sistema de tabs usa solo la clase `.oculto` para mostrar/ocultar
+- Si un elemento tiene `style="display:none"` inline, el CSS de la clase no puede sobreescribirlo (inline > class)
+- **Bug real:** El tab Agenda estuvo invisible por tener `style="display:none"` en el HTML además de `class="oculto"`
+- **Regla:** Nunca poner `style="display:none"` en tabs — solo usar `class="oculto"`
+
+---
+
+## 🐛 BUGS REPETIDOS Y SUS CAUSAS
+
+### Bug: Event listeners que se llaman dos veces (doble disparo)
+**Cómo pasó:**
+- Se registraba el mismo handler en DOS lugares al mismo tiempo:
+  1. `onclick="window._toggleFiltros()"` en el HTML
+  2. `btnToggle.addEventListener('click', window._toggleFiltros)` en el JS
+- Resultado: cada click ejecutaba la función dos veces → toggle abría y cerraba en el mismo click
+- **También pasó** con los chips de tipo: tenían `addEventListener` individual + el nuevo listener delegado del panel → click agregaba el filtro y el segundo lo borraba inmediatamente
+
+**Regla:** Antes de agregar un `addEventListener`, verificar si ya existe un `onclick` en el HTML para el mismo elemento. Nunca tener ambos.
+
+**Solución definitiva para los filtros:** Un único `addEventListener` delegado en el contenedor padre (`panel-filtros`) que captura todos los clicks con `e.target.closest('[data-grupo]')`. Infalible porque:
+- No importa cuándo se generaron los chips
+- No puede haber duplicados
+- Funciona aunque el DOM se reconstruya
+
+### Bug: Una función sobreescribe el resultado de otra
+**Cómo pasó (contador del buscador):**
+- `aplicarFiltros()` actualizaba el contador correctamente a "X de 190"
+- Inmediatamente después llamaba a `renderizarRodeo()` que sobreescribía el contador con el valor incorrecto
+- Resultado: el contador siempre mostraba el valor incorrecto al final
+
+**Regla:** Cuando dos funciones actualizan el mismo elemento del DOM, decidir cuál es la "dueña" y que la otra no lo toque. En este caso `aplicarFiltros` es dueña del contador.
+
+### Bug: Storage corrupto entre versiones
+**Cómo pasó:**
+- Al deployar una nueva versión con cambios de estructura, los datos viejos en IndexedDB/localStorage quedaban incompatibles
+- Resultado: la Agenda aparecía en blanco, el contador mostraba valores incorrectos
+- Los usuarios con datos viejos veían bugs que con storage limpio no existían
+
+**Solución implementada:** `APP_VERSION` en `app.js` — al arrancar la app compara la versión guardada en localStorage con la actual. Si no coincide, limpia automáticamente caches, IndexedDB y localStorage (preservando sesión). Cada deploy importante debe subir `APP_VERSION`.
+
+---
+
+## ✅ PATRONES QUE FUNCIONAN BIEN
+
+### Event delegation para filtros/chips
+En lugar de poner `addEventListener` en cada chip individual:
+```js
+// MAL — listener en cada elemento
+document.querySelectorAll('[data-grupo="estado"]').forEach(btn => {
+  btn.addEventListener('click', () => { ... });
+});
+
+// BIEN — un solo listener delegado en el contenedor
+panel.addEventListener('click', e => {
+  const btn = e.target.closest('[data-grupo]');
+  if (!btn) return;
+  const grupo = btn.dataset.grupo;
+  // manejar todos los grupos acá
+});
+```
+
+### Chips con `data-grupo` + `data-val`
+- Todos los chips de filtro tienen `data-grupo="tipo|estado|vacuna|periodo|vac-toggle"` y `data-val="..."`
+- El listener delegado detecta el grupo y actúa en consecuencia
+- Para agregar un nuevo tipo de filtro: solo agregar el `data-grupo` al HTML, el listener ya lo captura
+
+### Chips visuales en bastón
+- Categoría y Color: single-select (un solo chip activo a la vez)
+- Vacunas: multi-select (varios chips activos, se concatenan en el textbox)
+- El valor seleccionado se guarda en un `<input type="hidden">` para que `guardarRegistro()` lo lea
+
+---
+
+## 📋 CHECKLIST ANTES DE CADA PUSH
+
+- [ ] ¿Se subió la revisión en `sw.js`?
+- [ ] ¿Se corrió `node --check` en los archivos JS modificados?
+- [ ] ¿Se revisó el código si lo generó un subagente?
+- [ ] ¿Se creó algún archivo nuevo en `/api/`? Si sí, ¿cuántos hay ahora en total? ¿Más de 12?
+- [ ] ¿Se agregó algún `addEventListener` que ya existía como `onclick` en el HTML?
+- [ ] Si hubo cambios de estructura en datos, ¿se subió `APP_VERSION` en `app.js`?
+
+---
+
+## 📅 Historial de correcciones
+
+| Fecha | Error | Corrección |
+|---|---|---|
+| 2026-05 | Filtros de chips no funcionaban | Reescritura con event delegation en el panel contenedor |
+| 2026-05 | Toggle de filtros abría y cerraba solo | Eliminado addEventListener duplicado (ya existía onclick en HTML) |
+| 2026-05 | Chips de tipo no filtraban | Eliminado addEventListener individual que duplicaba el delegado |
+| 2026-05 | Tab Agenda completamente en blanco | Removido `style="display:none"` del HTML del tab |
+| 2026-05 | Contador buscador no actualizaba | `renderizarRodeo()` sobreescribía el contador de `aplicarFiltros()` |
+| 2026-05 | Bugs de storage entre versiones | Implementado sistema de migración automática con `APP_VERSION` |
+| 2026-05 | CATEGORIAS eran strings planos | Cambiadas a objetos `{ valor, label }` con los códigos reales del rodeo (V/VQ/V1-V6/TH/TM/T) |
