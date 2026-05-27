@@ -1,5 +1,5 @@
 # CONTEXTO TÉCNICO — RodeoApp Los Aromos
-**Última actualización:** 2026-05-25  
+**Última actualización:** 2026-05-27  
 **Repo:** https://github.com/juansineriz1-source/LosAromos  
 **Cuenta GitHub:** juansineriz1-source  
 **URL producción:** https://los-aromos.vercel.app  
@@ -226,6 +226,19 @@ Como está en el límite de funciones, `animales.js` es la función central que 
 
 ## 8. MÓDULOS DEL TAB RODEO (3 paneles)
 
+### Estados por tipo de animal (rodeo-oficial.js)
+
+| Tipo | Código | Estados disponibles |
+|---|---|---|
+| V, VQ, V1-V6, TH | Hembras | `P` Preñada · `V` Vacía · `I` Inseminada |
+| T | Toro | `S` En servicio · `F` Fuera servicio · `D` Descartado |
+| TM | Ternero Macho | `C` Castrado · `SC` Sin castrar |
+
+> Los estados `E` (En engorde) y `R` (Retirado) fueron eliminados (reemplazados por `D` Descartado en Toros).  
+> La función `estadosPorTipo(tipo)` en `rodeo-oficial.js` devuelve el array correcto según el tipo.
+
+### Paneles de acción (botones superiores del tab)
+
 Desde Mayo 2026, el tab Rodeo tiene 3 botones en la parte superior que abren paneles independientes:
 
 ```
@@ -382,6 +395,17 @@ Reproducción: <video> con src=/api/media-proxy?key=video/...
 - **Bastones compatibles:** Herdsman HR4 ✓, Tru-Test XRS2 ✓, Allflex RS420 (UUID propietario ⚠)
 - Al leer caravana → `caravanaRecibida()` en `app.js` → llena input + vibración + foco salta a peso
 
+### Formulario del Bastón (chips rediseñados — Mayo 2026)
+
+| Campo | Tipo | Opciones |
+|---|---|---|
+| Categoría | Chips single-select | V, VQ, V1, V2, V3, V4, V5, V6, TH, TM, T, V CUT |
+| Color | Chips single-select | ⚫ Negra, 🟠 Colorada |
+| Vacuna | Chips multi-select | Aftosa, Brucelosis, Carbunclo, Mancha, Queratoconjuntivitis, Clostridiales, IBR+DVB+Lepto, Diarrea Neonatal, Otra |
+| Estado sanitario | Select | Sano, Vacunado, En tratamiento, Cuarentena, Revisar |
+| Peso | Input número | kg |
+| Caravana | Input texto | puede venir del BLE o manual |
+
 ---
 
 ## 16. BUGS RESUELTOS
@@ -397,6 +421,11 @@ Reproducción: <video> con src=/api/media-proxy?key=video/...
 | Botón filtros no respondía | Listener JS no enganchaba | `onclick` inline en HTML como fallback |
 | **Deploy falla silenciosamente** | **13+ funciones en /api superan límite Vercel Hobby** | **Fusionar en animales.js con modos** |
 | Inseminación masiva se perdió | `btn-abrir-ins-masiva` se movió al panel Inseminación | Botón ahora en header de `panel-inseminacion` |
+| Toggle filtros abría y cerraba solo | `onclick` HTML + `addEventListener` JS = doble disparo | Eliminado `addEventListener`, dejado solo `onclick` en HTML |
+| Chips de tipo no filtraban | `addEventListener` individual duplicaba el delegado del panel | Eliminados listeners individuales, solo event delegation |
+| Tab Agenda completamente en blanco | `style="display:none"` inline bloqueaba clase `.oculto` | Removido style inline, solo `class="oculto"` |
+| Contador buscador no actualizaba | `renderizarRodeo()` sobreescribía el contador de `aplicarFiltros()` | `renderizarRodeo` solo actualiza resumen con flag `actualizarResumen=true` |
+| Bugs raros en usuarios con datos viejos | Storage local incompatible entre versiones | `APP_VERSION` en `app.js` — limpia storage automáticamente al detectar versión nueva |
 
 ---
 
@@ -407,6 +436,12 @@ Reproducción: <video> con src=/api/media-proxy?key=video/...
 3. **Confirmar preñez / tacto** — interfaz para registrar el resultado del tacto rectal (preñada/vacía/dudosa)
 4. **Dev local** — recrear `.env.local` con variables de entorno de producción (no se pueden descargar automáticamente de Vercel)
 5. **videos.js** — verificar si aún usa lógica de presigned PUT o ya está migrado a `/api/subir-media`
+
+### Sistema APP_VERSION (migración automática de storage)
+En `app.js`, al inicio hay una IIFE que compara `localStorage['rodeo_app_version']` con `APP_VERSION`.  
+Si no coincide → limpia caches SW + IndexedDB + localStorage (preservando sesión) → guarda nueva versión.  
+**⚠️ Cada vez que haya cambios de estructura de datos, subir `APP_VERSION` en `app.js`.**  
+Versions actual: `'53'` (último cambio Mayo 2026)
 
 ---
 
@@ -423,6 +458,12 @@ Reproducción: <video> con src=/api/media-proxy?key=video/...
 | `a8e59ab` | api/pesos.js — primer intento de endpoint separado (luego fusionado) |
 | `1866503` | 3 módulos en Rodeo (Vacunación/Inseminación/Pesadas) — deploy falló por límite funciones |
 | `57ed984` | **FIX: fusion pesos en animales.js** — solución al límite de 12 funciones |
+| `3bf9da2` | Fix toggle filtros — eliminado addEventListener duplicado (doble disparo) |
+| `8ef8e30` | Fix chips tipo — eliminado addEventListener individual que duplicaba el delegado |
+| `2e9ce32` | Fix Agenda en blanco (style=display:none) + fix contador buscador |
+| `7584052` | APP_VERSION migration system — limpia storage stale automáticamente |
+| `82991d0` | Agrega memory.md — registro de errores y lecciones aprendidas |
+| `88b8003` | Estados por tipo: Toro→S/F/D, TM→C/SC; elimina E(engorde) y R(retirado) |
 
 ---
 

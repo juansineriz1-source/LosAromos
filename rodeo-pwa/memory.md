@@ -8,6 +8,12 @@
 
 ## ⚠️ REGLAS CRÍTICAS QUE NO SE PUEDEN OLVIDAR
 
+### 0. Siempre actualizar CONTEXTO_TECNICO.md y memory.md al final de cada cambio
+- El usuario lo pide explícitamente: actualizar ambos archivos después de CADA cambio
+- `CONTEXTO_TECNICO.md` → cómo funciona el proyecto, estructura, lógica
+- `memory.md` → errores cometidos, correcciones, lecciones aprendidas
+- Ambos van en el mismo commit del push final
+
 ### 1. Vercel tiene límite de 12 funciones serverless en el plan gratuito
 - Cada archivo dentro de `/api/` cuenta como 1 función
 - Si se crean más de 12 archivos en `/api/`, el deploy falla
@@ -121,3 +127,5 @@ panel.addEventListener('click', e => {
 | 2026-05 | Contador buscador no actualizaba | `renderizarRodeo()` sobreescribía el contador de `aplicarFiltros()` |
 | 2026-05 | Bugs de storage entre versiones | Implementado sistema de migración automática con `APP_VERSION` |
 | 2026-05 | CATEGORIAS eran strings planos | Cambiadas a objetos `{ valor, label }` con los códigos reales del rodeo (V/VQ/V1-V6/TH/TM/T) |
+| 2026-05-27 | Toros tenían estados E(engorde) y R(retirado) | Ahora: Toro→S/F/D(descartado); TM→C(castrado)/SC(sin castrar) |
+| 2026-05-27 | No se actualizaban los docs después de cambios | Regla: siempre actualizar CONTEXTO_TECNICO.md + memory.md en cada commit |
