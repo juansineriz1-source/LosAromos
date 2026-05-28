@@ -4897,7 +4897,7 @@ html { scroll-behavior: smooth; }
     min-height: calc(100vh - 180px);
   }
 
-  /* Columna izquierda: lista animales */
+  /* Columna DERECHA: lista de animales (siempre visible) */
   .rodeo-desktop-lista {
     background: #fff;
     border-radius: 16px;
@@ -4907,6 +4907,8 @@ html { scroll-behavior: smooth; }
     top: 84px;
     max-height: calc(100vh - 100px);
     overflow-y: auto;
+    z-index: 1; /* mismo nivel que panel-col, sin superposición */
+    align-self: start;
   }
 
   /* Header de la lista en desktop */
@@ -4935,44 +4937,20 @@ html { scroll-behavior: smooth; }
 
   .rodeo-item:last-child { border-bottom: none; }
 
-  /* Columna derecha: panel activo */
-  .rodeo-desktop-panel {
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 1px 8px rgba(0,0,0,0.07);
-    overflow: hidden;
-    min-height: 300px;
-    position: sticky;
-    top: 84px;
-    max-height: calc(100vh - 100px);
-    overflow-y: auto;
-  }
-
-  .rodeo-desktop-panel-vacio {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 300px;
-    color: #9ca3af;
-    gap: 12px;
-    font-size: 15px;
-  }
+  /* Columna derecha ELIMINADA: el placeholder antiguo ya no se usa */
 
   /* ── Columna IZQUIERDA: panel de módulos (Sanidad/Ins/Pesadas) ──────── */
   .rodeo-desktop-panel-col {
-    position: sticky;
-    top: 84px;
-    max-height: calc(100vh - 100px);
-    overflow-y: auto;
-    /* Scrollbar fino */
-    scrollbar-width: thin;
-    scrollbar-color: #d1d5db transparent;
+    align-self: start;
+    /* NO sticky — la página puede scrollear para ver el contenido del panel */
+    position: relative;
+    overflow: hidden; /* el panel NO debe salirse de su columna */
+    z-index: 0;
   }
-  .rodeo-desktop-panel-col::-webkit-scrollbar { width: 6px; }
-  .rodeo-desktop-panel-col::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
 
-  /* Placeholder: mostrado cuando ningún panel está abierto */
+  /* Placeholder: visible via JS cuando ningún panel está abierto */
+  /* El placeholder se controla con la clase .activo que JS agrega/remueve */
+  /* Por defecto visible en desktop (JS lo oculta cuando abre panel) */
   .rodeo-panel-placeholder {
     display: flex;
     flex-direction: column;
@@ -4988,11 +4966,9 @@ html { scroll-behavior: smooth; }
     padding: 20px;
   }
 
-  /* Ocultar placeholder cuando algún panel está abierto */
-  /* Los paneles son hermanos anteriores al placeholder en el DOM */
-  #panel-vacunacion:not(.oculto) ~ .rodeo-panel-placeholder,
-  #panel-inseminacion:not(.oculto) ~ .rodeo-panel-placeholder,
-  #panel-pesadas:not(.oculto) ~ .rodeo-panel-placeholder {
+  /* Ocultar placeholder cuando cualquier panel está abierto */
+  /* Usamos :has() donde esté soportado (Chrome 105+, Safari 15.4+) */
+  .rodeo-desktop-panel-col:has(.vac-panel:not(.oculto)) .rodeo-panel-placeholder {
     display: none;
   }
 
@@ -5000,9 +4976,11 @@ html { scroll-behavior: smooth; }
   .rodeo-desktop-panel-col .vac-panel:not(.oculto) {
     border-radius: 16px;
     box-shadow: 0 2px 16px rgba(0,0,0,0.10);
-    min-height: auto;
+    min-height: auto !important; /* override del min-height:100% del estilo base */
     overflow: visible;
     animation: panelSlideIn 0.2s ease;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
   }
 
   @keyframes panelSlideIn {
