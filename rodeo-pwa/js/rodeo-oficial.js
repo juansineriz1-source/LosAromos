@@ -220,11 +220,17 @@ function renderizarRodeo(animales, total, actualizarResumen = false) {
     const tipoClass   = (a.tipo   || '').toLowerCase().replace(' ', '-');
     const colorDot    = a.color === 'Negra' ? '⚫' : a.color === 'Colorada' ? '🟠' : '';
 
+    // Emoji según categoría (igual que Sanidad)
+    const tipoUp  = (a.tipo || '').toUpperCase().trim();
+    const esToro  = tipoUp === 'T';
+    const sTerneroM = tipoUp === 'TM';
+    const emojiAnimal = esToro ? '🐂' : sTerneroM ? '🐃' : '🐄';
+
     return `
       <div class="rodeo-of-item rodeo-of-item-tap" data-idx="${idx}" onclick="abrirDetalleAnimal(${idx})">
         <div class="rodeo-of-ids">
           <div class="rodeo-of-ids-row">
-            ${a.boton    ? `<span class="rodeo-of-boton">🐄 ${a.boton}</span>`    : ''}
+            ${a.boton    ? `<span class="rodeo-of-boton">${emojiAnimal} ${a.boton}</span>`    : ''}
             ${a.caravana ? `<span class="rodeo-of-caravana">🏷 ${a.caravana}</span>` : ''}
           </div>
           <div class="rodeo-of-badges-row">

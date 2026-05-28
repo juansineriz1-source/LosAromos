@@ -5058,6 +5058,17 @@ html { scroll-behavior: smooth; }
     border-radius: 3px;
   }
 
+  /* ── Todos los tabs: cards usan ancho completo en desktop ───────── */
+  .card {
+    margin: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Scrollbar para la lista fija de animales de Rodeo */
+  .rodeo-desktop-lista::-webkit-scrollbar { width: 6px; }
+  .rodeo-desktop-lista::-webkit-scrollbar-thumb { background: #c8d5c8; border-radius: 3px; }
+
 } /* fin @media (min-width: 1024px) */
 
 /* ═══════════════════════════════════════════════════════════════════
