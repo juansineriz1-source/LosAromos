@@ -3067,9 +3067,27 @@ function sectionHeader(doc, texto, y, color) {
 document.addEventListener('DOMContentLoaded', () => {
   const btnPDF = document.getElementById('btn-descargar-pdf-vac');
   if (btnPDF) {
-    btnPDF.addEventListener('click', () => {
-      btnPDF.textContent = 'Generando...';
+    btnPDF.addEventListener('click', async () => {
+      btnPDF.textContent = 'Cargando PDF...';
       btnPDF.disabled = true;
+
+      // Carga jsPDF bajo demanda (no se carga en la página hasta que se necesita)
+      if (!window.jspdf) {
+        await new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+          s.onload = resolve;
+          s.onerror = reject;
+          document.head.appendChild(s);
+        }).catch(() => {
+          mostrarToast('No se pudo cargar el generador de PDF. ¿Tenés conexión?');
+          btnPDF.textContent = '📄 PDF';
+          btnPDF.disabled = false;
+          return;
+        });
+      }
+
+      btnPDF.textContent = 'Generando...';
       setTimeout(() => {
         try {
           generarPDFManualVacunacion();

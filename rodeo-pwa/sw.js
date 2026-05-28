@@ -26,24 +26,28 @@ core.skipWaiting();
 core.clientsClaim();
 
 // ─── Pre-caché ───────────────────────────────────────────────────────────────
-// Revisión 28 — Restauración estado estable post-subagente
+// Revisión 70 — fix bugs db.js + carga on-demand jsPDF + fuentes via HTML + sw cache /api/*
 precaching.precacheAndRoute([
-  { url: '/', revision: '69' },
-  { url: '/index.html', revision: '69' },
-  { url: '/css/estilos.css', revision: '69' },
-  { url: '/js/app.js', revision: '69' },
-  { url: '/js/rodeo-oficial.js', revision: '69' },
-  { url: '/js/vacunas.js', revision: '69' },
-  { url: '/js/inseminaciones.js', revision: '69' },
-  { url: '/js/db.js', revision: '69' },
-  { url: '/js/bluetooth.js', revision: '69' },
-  { url: '/js/sync.js', revision: '69' },
-  { url: '/js/recorrida.js', revision: '69' },
-  { url: '/js/fotos.js', revision: '69' },
-  { url: '/js/videos.js', revision: '69' },
-  { url: '/js/push.js', revision: '69' },
-  { url: '/js/calendario.js', revision: '69' },
-  { url: '/manifest.json', revision: '69' },
+  { url: '/', revision: '70' },
+  { url: '/index.html', revision: '70' },
+  { url: '/css/estilos.css', revision: '70' },
+  { url: '/css/rodeo-chips.css', revision: '70' },
+  { url: '/js/app.js', revision: '70' },
+  { url: '/js/rodeo-oficial.js', revision: '70' },
+  { url: '/js/vacunas.js', revision: '70' },
+  { url: '/js/inseminaciones.js', revision: '70' },
+  { url: '/js/db.js', revision: '70' },
+  { url: '/js/bluetooth.js', revision: '70' },
+  { url: '/js/sync.js', revision: '70' },
+  { url: '/js/recorrida.js', revision: '70' },
+  { url: '/js/fotos.js', revision: '70' },
+  { url: '/js/fotos-animal.js', revision: '70' },
+  { url: '/js/videos.js', revision: '70' },
+  { url: '/js/push.js', revision: '70' },
+  { url: '/js/calendario.js', revision: '70' },
+  { url: '/js/pesos-modulo.js', revision: '70' },
+  { url: '/js/agenda.js', revision: '70' },
+  { url: '/manifest.json', revision: '70' },
 ]);
 
 // ─── Estrategia Cache First para assets estáticos ──────────────────────────
@@ -135,6 +139,22 @@ routing.registerRoute(
     plugins: [bgSyncPlugin],
   }),
   'POST'
+);
+
+// ─── NetworkFirst para el resto de /api/* (animales, vacunas, pesos, etc.) ──
+// Muestra datos cacheados cuando el usuario está offline en lugar de pantalla vacía
+routing.registerRoute(
+  ({ url }) => url.pathname.startsWith('/api/') && !url.pathname.startsWith('/api/sincronizar'),
+  new strategies.NetworkFirst({
+    cacheName: 'rodeo-api-v1',
+    networkTimeoutSeconds: 8, // si no responde en 8s, usa caché
+    plugins: [
+      new expiration.ExpirationPlugin({
+        maxEntries: 30,
+        maxAgeSeconds: 24 * 60 * 60, // 1 día
+      }),
+    ],
+  })
 );
 
 // ─── Estrategia Network First para Google Sheets API ───────────────────────

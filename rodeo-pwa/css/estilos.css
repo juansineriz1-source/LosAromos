@@ -2,47 +2,41 @@
    estilos.css — RodeoApp — Stitch redesign
    ═══════════════════════════════════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Inter:wght@400;600;700&display=swap');
+/* Fuentes cargadas via <link> en index.html con preconnect para mejor rendimiento */
+/* Google Fonts: Inter (400,600,700) + Manrope (700,800) — cargadas en el <head> */
 
-/* Material Symbols */
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* ── Paleta Stitch ───────────────────────────────────────────────── */
-  --verde-oscuro:  #1a5c30;    /* primario — header, botones, tabs activos */
+  /* ── Paleta principal ─────────────────────────────────────────────── */
+  --verde-oscuro:  #1a5c30;    /* primario — botones, tabs activos, texto */
+  --verde-header:  #0f5228;    /* header y sidebar (verde más oscuro) */
   --verde-medio:   #2e7d52;    /* hover, chips activos */
   --verde-suave:   #e8f5e9;    /* fondos soft */
-  --verde:         #1a5c30;    /* alias para compatibilidad */
-  --verde-claro:   #e8f5e9;    /* alias --verde-suave */
-  --verde-ui:      #1a5c30;    /* tint uniforme para UI */
   --tierra:        #7c5c1e;    /* acento cálido */
   --tierra-claro:  hsl(25, 40%, 96%);
 
-  /* ── Semánticos ───────────────────────────────────────────── */
+  /* ── Semánticos ─────────────────────────────────────────────────── */
   --amarillo:      hsl(38, 92%, 50%);
   --rojo:          #dc2626;
   --azul:          hsl(217, 72%, 48%);
-  --azul-bt:       hsl(217, 72%, 48%);
 
-  /* ── Backgrounds ──────────────────────────────────────────── */
+  /* ── Backgrounds ────────────────────────────────────────────────── */
   --bg-app:        #f4f6f4;    /* fondo general */
-  --bg:            #f4f6f4;    /* alias --bg-app */
   --bg-card:       #ffffff;    /* cards */
   --blanco:        #FFFFFF;
 
-  /* ── Texto ────────────────────────────────────────────────── */
-  --texto:         #1a5c30;    /* texto principal oscuro (verde) */
+  /* ── Texto ──────────────────────────────────────────────────────── */
+  --texto:         #1a5c30;    /* texto principal */
   --texto-secundario: #6b7a6e; /* texto secundario */
-  --gris:          #6b7a6e;    /* alias --texto-secundario */
   --gris-claro:    #f3f4f6;    /* fondos suaves */
   --gris-borde:    rgba(60,60,67,.12);
 
-  /* ── Bordes ───────────────────────────────────────────────── */
+  /* ── Bordes ─────────────────────────────────────────────────────── */
   --borde:         #e5e7eb;
 
-  /* ── Radios Stitch ────────────────────────────────────────── */
+  /* ── Radios ─────────────────────────────────────────────────────── */
   --radio:         12px;
   --radio-grande:  18px;
   --radio-xl:      20px;       /* cards */

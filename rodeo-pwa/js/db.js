@@ -205,10 +205,12 @@ export async function guardarAnimal(datos) {
  * Registra un evento de manga (pesaje + sanidad) para un animal.
  */
 export async function guardarRegistroManga(datos) {
+  const TZ = 'America/Argentina/Buenos_Aires';
   const registro = {
     ...crearMetadatos(),
-    fecha: new Date().toISOString().split('T')[0],
-    hora: new Date().toTimeString().slice(0, 5),
+    // Usar timezone Argentina (no UTC) para que la fecha sea correcta a las 23hs
+    fecha: new Date().toLocaleDateString('en-CA', { timeZone: TZ }),
+    hora:  new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: TZ }),
     ...datos,
   };
   const id = await db.registros_manga.add(registro);
@@ -262,10 +264,13 @@ export async function contarPendientes() {
  * Obtiene el historial de pesajes de un animal por su caravana.
  */
 export async function historialAnimal(caravana) {
-  return db.registros_manga
+  // NOTA: Dexie's .reverse().sortBy() no funciona correctamente—
+  // .sortBy() re-ordena en memoria ignorando la dirección del cursor.
+  // Usamos toArray() + sort() manual para orden descendente real.
+  const registros = await db.registros_manga
     .where('caravana').equals(caravana)
-    .reverse()
-    .sortBy('timestamp_local');
+    .toArray();
+  return registros.sort((a, b) => (b.timestamp_local || 0) - (a.timestamp_local || 0));
 }
 
 /**
