@@ -347,38 +347,81 @@ export default async function handler(req, res) {
       return res.status(200).json({ pesos: todos, total: todos.length });
     }
 
-    // ── MODO: historial de vacunas (fusionado desde historial-vacunas.js) ────
+    // ── MODO: historial de vacunas — lee de la misma hoja Vacunacion donde se guarda ──
     if (modo === 'historial-vacunas') {
       if (!boton && !caravana) return res.status(400).json({ error: 'Se requiere boton o caravana' });
 
-      const url  = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent('Vacunas!A:F')}`;
+      // Lee de Vacunacion!A:O — misma hoja donde registro-vacuna escribe
+      // Columnas: A=caravana, B=boton, C=categoria, D=vacuna, E=tipo_frecuencia,
+      //           F=fecha_aplicacion, G=fecha_proxima, H=dias_alerta, I=estado,
+      //           J=lote, K=veterinario, L=operador, M=observaciones, N=timestamp, O=uuid_animal
+      const url  = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent('Vacunacion!A:O')}`;
       const resp = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
       if (!resp.ok) throw new Error(`Sheets error: ${resp.status}`);
       const filas = (await resp.json()).values || [];
 
+      const headers = filas[0]?.map(h => (h || '').toLowerCase().trim()) || [];
+      const gc = (fila, col) => fila[headers.indexOf(col)] || '';
+
       const historial = filas.slice(1)
         .filter(f => {
-          const fb = (f[1] || '').trim().toLowerCase();
-          const fc = (f[2] || '').trim().toLowerCase();
+          const fb = (gc(f, 'boton')    || '').trim().toLowerCase();
+          const fc = (gc(f, 'caravana') || '').trim().toLowerCase();
           return (boton    && fb === boton.trim().toLowerCase()) ||
                  (caravana && fc === caravana.trim().toLowerCase());
         })
         .map(f => ({
-          fecha:     f[0] || '',
-          vacuna:    f[3] || '',
-          comentario: f[4] || '',
-          usuario:   f[5] || '',
-          campo_key: (() => {
-            const MAP = { aftosa:'vac_aftosa', brucelosis:'vac_brucelosis', carbunclo:'vac_carbunclo',
-                          mancha:'vac_mancha', queratoconjuntivitis:'vac_queratoconjuntivitis', otras:'vac_otras' };
-            return MAP[(f[3]||'').toLowerCase().replace(/\s/g,'')] || (f[3]||'').toLowerCase();
+          fecha:      gc(f, 'fecha_aplicacion') || gc(f, 'timestamp') || '',
+          vacuna:     gc(f, 'vacuna') || '',
+          comentario: gc(f, 'observaciones') || '',
+          usuario:    gc(f, 'operador') || '',
+          campo_key:  (() => {
+            const normalize = s => s.toLowerCase()
+              .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // quita acentos: ñ→n, á→a, etc.
+              .replace(/\s+/g, '');                              // quita espacios
+            const v = normalize(gc(f, 'vacuna') || '');
+            // Mapa exacto (después de normalizar)
+            const MAP = {
+              'aftosa':                              'vac_aftosa',
+              'aftosa(campana1)':                    'vac_aftosa',
+              'aftosa(campana2)':                    'vac_aftosa',
+              'aftosa-campana1':                     'vac_aftosa',
+              'aftosa-campana2':                     'vac_aftosa',
+              'brucelosis':                          'vac_brucelosis',
+              'brucelosis(cepa19)':                  'vac_brucelosis',
+              'carbunclo':                           'vac_carbunclo',
+              'carbunclo(antrax)':                   'vac_carbunclo',
+              'mancha':                              'vac_mancha',
+              'queratoconjuntivitis':                'vac_queratoconjuntivitis',
+              'otras':                               'vac_otras',
+              'desparasitante':                      'vac_desparasitante',
+              'cobre':                               'vac_cobre',
+              'vacunareproductiva(ibr+dvb+lepto+campy)': 'vac_reproductiva',
+              'tripleclostridial':                   'vac_clostridial',
+              'refuerzoclostridial':                 'vac_refuerzo_clostridial',
+              'vacunaviral(ibr+dvb)':                'vac_viral',
+              'refuerzoviral':                       'vac_refuerzo_viral',
+            };
+            if (MAP[v]) return MAP[v];
+            // Fallback: keyword matching
+            if (v.includes('aftosa'))           return 'vac_aftosa';
+            if (v.includes('brucelosis'))       return 'vac_brucelosis';
+            if (v.includes('carbunclo'))        return 'vac_carbunclo';
+            if (v.includes('mancha'))           return 'vac_mancha';
+            if (v.includes('queratoconjunt'))   return 'vac_queratoconjuntivitis';
+            if (v.includes('desparasit'))       return 'vac_desparasitante';
+            if (v.includes('cobre'))            return 'vac_cobre';
+            if (v.includes('reproductiva'))     return 'vac_reproductiva';
+            if (v.includes('clostridial'))      return 'vac_clostridial';
+            if (v.includes('viral'))            return 'vac_viral';
+            return v; // fallback: usar el nombre normalizado
           })(),
         }));
 
       const porVacuna = {};
       historial.forEach(h => {
         if (!porVacuna[h.campo_key]) porVacuna[h.campo_key] = [];
-        porVacuna[h.campo_key].push({ fecha: h.fecha, comentario: h.comentario, usuario: h.usuario });
+        porVacuna[h.campo_key].push({ fecha: h.fecha, comentario: h.comentario, usuario: h.usuario, vacuna: h.vacuna });
       });
 
       return res.status(200).json({ historial, porVacuna });
