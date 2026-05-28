@@ -4683,17 +4683,26 @@ html { scroll-behavior: smooth; }
   100% { background: #fff7ed; transform: scale(1); }
 }
 
-/* ─── Desktop wrapper classes — neutras en mobile ──────────────────────────── */
-/* En mobile estos divs son transparentes — no cambian el layout */
-.rodeo-desktop-cols,
-.rodeo-desktop-lista,
-.rodeo-desktop-panel,
-.rodeo-desktop-lista-header,
+/* ─── Desktop wrapper classes — neutras en mobile (compatible con Safari/iOS) ── */
+/* Estos divs son visualmente transparentes en mobile — NO usan display:contents
+   ya que tiene bugs en Safari iOS. En su lugar usan block sin estilos visuales. */
+.rodeo-desktop-cols {
+  display: block;
+}
+.rodeo-desktop-lista {
+  display: block;
+}
+.rodeo-desktop-panel {
+  display: none; /* oculto en mobile — el panel derecho no existe en mobile */
+}
+.rodeo-desktop-lista-header {
+  display: none; /* oculto en mobile — el header "Animales" es solo para desktop */
+}
 .inicio-desktop-cols,
 .agenda-desktop-cols,
 .agenda-desktop-lista,
 .agenda-desktop-detalle {
-  display: contents; /* invisible en mobile */
+  display: block;
 }
 .rodeo-desktop-panel-vacio { display: none; } /* solo se ve en desktop */
 
