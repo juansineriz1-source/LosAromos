@@ -4693,19 +4693,20 @@ html { scroll-behavior: smooth; }
 }
 
 /* ─── Desktop wrapper classes — neutras en mobile (compatible con Safari/iOS) ── */
-/* Estos divs son visualmente transparentes en mobile — NO usan display:contents
-   ya que tiene bugs en Safari iOS. En su lugar usan block sin estilos visuales. */
 .rodeo-desktop-cols {
   display: block;
 }
 .rodeo-desktop-lista {
   display: block;
 }
-.rodeo-desktop-panel {
-  display: none; /* oculto en mobile — el panel derecho no existe en mobile */
+.rodeo-desktop-panel-col {
+  display: block; /* en mobile: los paneles se apilan encima de la lista */
 }
 .rodeo-desktop-lista-header {
-  display: none; /* oculto en mobile — el header "Animales" es solo para desktop */
+  display: none; /* solo en desktop */
+}
+.rodeo-panel-placeholder {
+  display: none; /* solo en desktop, cuando ningún panel está abierto */
 }
 .inicio-desktop-cols,
 .agenda-desktop-cols,
@@ -4713,7 +4714,6 @@ html { scroll-behavior: smooth; }
 .agenda-desktop-detalle {
   display: block;
 }
-.rodeo-desktop-panel-vacio { display: none; } /* solo se ve en desktop */
 
 /* ═══════════════════════════════════════════════════════════════════
    LAYOUT DESKTOP (≥ 1024px)
@@ -4876,22 +4876,22 @@ html { scroll-behavior: smooth; }
     border-radius: 16px;
   }
 
-  /* ═══════════ RODEO DESKTOP — dos columnas ══════════════════════ */
-  #tab-rodeo {
-    display: grid !important;
-    grid-template-rows: auto auto 1fr;
-    grid-template-columns: 1fr;
-  }
+  /* ═══════════ RODEO DESKTOP — panel izquierda + lista derecha ═══════════ */
+  /* En desktop: columna izquierda = paneles (Sanidad/Ins/Pesadas), derecha = lista animales */
 
-  /* Barra de botones de módulos (Sanidad / Inseminación / Pesadas) */
-  #tab-rodeo > div:first-child {
-    grid-column: 1 / -1;
-  }
+  /* Overrides de display para desktop */
+  .rodeo-desktop-cols       { display: grid; }
+  .rodeo-desktop-lista      { display: block; }
+  .rodeo-desktop-panel-col  { display: block; }
+  .rodeo-desktop-lista-header { display: flex; }
+  .inicio-desktop-cols      { display: grid; }
+  .agenda-desktop-cols      { display: grid; }
+  .agenda-desktop-lista     { display: block; }
+  .agenda-desktop-detalle   { display: block; }
 
-  /* Contenedor de dos columnas */
+  /* Grid: panel izquierda (1fr) + lista derecha (420px) */
   .rodeo-desktop-cols {
-    display: grid;
-    grid-template-columns: 420px 1fr;
+    grid-template-columns: 1fr 420px;
     gap: 20px;
     align-items: start;
     min-height: calc(100vh - 180px);
@@ -4959,9 +4959,56 @@ html { scroll-behavior: smooth; }
     font-size: 15px;
   }
 
-  /* Paneles de Sanidad/Inseminación/Pesadas en desktop: sin overlay */
-  /* vac-panel: en desktop el posicionamiento lo manejan las reglas
-     #panel-*:not(.oculto) en el segundo bloque @media al final del archivo */
+  /* ── Columna IZQUIERDA: panel de módulos (Sanidad/Ins/Pesadas) ──────── */
+  .rodeo-desktop-panel-col {
+    position: sticky;
+    top: 84px;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    /* Scrollbar fino */
+    scrollbar-width: thin;
+    scrollbar-color: #d1d5db transparent;
+  }
+  .rodeo-desktop-panel-col::-webkit-scrollbar { width: 6px; }
+  .rodeo-desktop-panel-col::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+
+  /* Placeholder: mostrado cuando ningún panel está abierto */
+  .rodeo-panel-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 320px;
+    background: rgba(255,255,255,0.6);
+    border-radius: 16px;
+    border: 2px dashed #c8e6c9;
+    color: #7aaa7a;
+    text-align: center;
+    padding: 20px;
+  }
+
+  /* Ocultar placeholder cuando algún panel está abierto */
+  /* Los paneles son hermanos anteriores al placeholder en el DOM */
+  #panel-vacunacion:not(.oculto) ~ .rodeo-panel-placeholder,
+  #panel-inseminacion:not(.oculto) ~ .rodeo-panel-placeholder,
+  #panel-pesadas:not(.oculto) ~ .rodeo-panel-placeholder {
+    display: none;
+  }
+
+  /* Paneles dentro de la columna izquierda — estilos desktop */
+  .rodeo-desktop-panel-col .vac-panel:not(.oculto) {
+    border-radius: 16px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+    min-height: auto;
+    overflow: visible;
+    animation: panelSlideIn 0.2s ease;
+  }
+
+  @keyframes panelSlideIn {
+    from { opacity: 0; transform: translateX(-12px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
 
   /* ═══════════ INICIO DESKTOP — dos columnas ═════════════════════ */
   #tab-inicio {

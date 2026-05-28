@@ -455,8 +455,21 @@
         <button class="vac-btn-info" id="btn-info-vacunas" title="Manual de vacunas" style="flex-shrink:0;">ℹ️</button>
       </div>
 
+      <!-- ═══════ COLUMNA IZQUIERDA: paneles Sanidad / Inseminación / Pesadas ═══════ -->
+      <!-- En desktop ocupa el lado izquierdo; en mobile se apilan arriba de la lista -->
+      <div class="rodeo-desktop-cols">
+        <div class="rodeo-desktop-panel-col" id="rodeo-desktop-panel-col">
+
+          <!-- Placeholder visible solo en desktop cuando ningún panel está abierto -->
+          <div class="rodeo-panel-placeholder" id="rodeo-panel-placeholder">
+            <span style="font-size:48px;">🐄</span>
+            <span style="font-size:15px;color:#5a7a5a;font-weight:600;">Abrí Sanidad, Inseminación o Pesadas</span>
+            <span style="font-size:13px;color:#8aaa8a;">Los módulos se mostrarán aquí</span>
+          </div>
+
       <!-- ═══════════ PANEL SANIDAD ═══════════ -->
       <div id="panel-vacunacion" class="vac-panel oculto">
+
 
         <!-- Header -->
         <div class="vac-panel-header">
@@ -759,10 +772,9 @@
       </div>
       <!-- ═══════════ FIN PANEL PESADAS ═══════════ -->
 
-      <!-- Wrapper desktop de dos columnas -->
-      <div class="rodeo-desktop-cols">
+        </div><!-- /rodeo-desktop-panel-col -->
 
-        <!-- Columna izquierda: filtros + lista -->
+        <!-- ═══════ COLUMNA DERECHA: lista de animales (siempre visible) ═══════ -->
         <div class="rodeo-desktop-lista">
           <!-- Header lista desktop -->
           <div class="rodeo-desktop-lista-header">
@@ -860,14 +872,6 @@
             <p class="sin-historial" style="margin: 24px 0;">Cargando...</p>
           </div>
         </div><!-- /rodeo-desktop-lista -->
-
-        <!-- Columna derecha: panel activo -->
-        <div class="rodeo-desktop-panel" id="rodeo-desktop-panel">
-          <div class="rodeo-desktop-panel-vacio" id="rodeo-panel-vacio">
-            <span style="font-size:48px;">🐄</span>
-            <span>Selecioná un animal o abrí un módulo</span>
-          </div>
-        </div><!-- /rodeo-desktop-panel -->
 
       </div><!-- /rodeo-desktop-cols -->
 
