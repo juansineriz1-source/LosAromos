@@ -4942,13 +4942,8 @@ html { scroll-behavior: smooth; }
   }
 
   /* Paneles de Sanidad/Inseminación/Pesadas en desktop: sin overlay */
-  .vac-panel {
-    position: relative !important;
-    max-height: none !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-    height: 100%;
-  }
+  /* vac-panel: en desktop el posicionamiento lo manejan las reglas
+     #panel-*:not(.oculto) en el segundo bloque @media al final del archivo */
 
   /* ═══════════ INICIO DESKTOP — dos columnas ═════════════════════ */
   #tab-inicio {
@@ -5042,3 +5037,51 @@ html { scroll-behavior: smooth; }
   }
 
 } /* fin @media (min-width: 1024px) */
+
+/* ═══════════════════════════════════════════════════════════════════
+   PANELES DESKTOP — position:fixed cuando están abiertos (≥1024px)
+   Los paneles (Sanidad/Inseminación/Pesadas) se posicionan sobre la
+   columna derecha del layout de dos columnas. Sin mover el DOM.
+═══════════════════════════════════════════════════════════════════ */
+@media (min-width: 1024px) {
+
+  /* Cuando un panel está abierto: aparece fijo sobre la columna derecha */
+  /* sidebar(200) + padding(28) + lista(420) + gap(20) = 668px desde izquierda */
+  #panel-vacunacion:not(.oculto),
+  #panel-inseminacion:not(.oculto),
+  #panel-pesadas:not(.oculto) {
+    position: fixed !important;
+    left: 668px;
+    right: 20px;
+    top: 84px;   /* header fijo (64px) + pequeño margen */
+    bottom: 20px;
+    z-index: 300;
+    border-radius: 16px !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18) !important;
+    overflow-y: auto;
+    padding-bottom: 20px;
+    /* Animación de entrada */
+    animation: panelSlideIn 0.2s ease;
+  }
+
+  @keyframes panelSlideIn {
+    from { opacity: 0; transform: translateX(16px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  /* Placeholder del panel derecho: ocultar si hay un panel abierto */
+  /* CSS sibling trick: panels vienen ANTES de rodeo-desktop-cols en el HTML */
+  #panel-vacunacion:not(.oculto) ~ .rodeo-desktop-cols .rodeo-desktop-panel-vacio,
+  #panel-inseminacion:not(.oculto) ~ .rodeo-desktop-cols .rodeo-desktop-panel-vacio,
+  #panel-pesadas:not(.oculto) ~ .rodeo-desktop-cols .rodeo-desktop-panel-vacio {
+    display: none;
+  }
+
+  /* Fondo semi-transparente detrás del panel (click para cerrar) */
+  #panel-vacunacion:not(.oculto)::before,
+  #panel-inseminacion:not(.oculto)::before,
+  #panel-pesadas:not(.oculto)::before {
+    display: none; /* sin overlay — el panel derecho es visible detrás */
+  }
+
+} /* fin paneles desktop */

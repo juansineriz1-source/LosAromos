@@ -131,103 +131,11 @@ const APP_VERSION = '53';
 // Helper: detectar si estamos en pantalla desktop
 function esDesktop() { return window.innerWidth >= 1024; }
 
-// En desktop: mover paneles de Sanidad/Inseminación/Pesadas al panel derecho
+// Desktop panels: el posicionamiento lo hace el CSS con position:fixed.
+// Esta función no hace nada — se deja para no romper la llamada en DOMContentLoaded.
 function inicializarDesktopPanels() {
-  if (!esDesktop()) return;
-
-  const panelDerecho = document.getElementById('rodeo-desktop-panel');
-  if (!panelDerecho) return;
-
-  const MAPA = [
-    { btnId: 'btn-abrir-vacunacion',   panelId: 'panel-vacunacion'   },
-    { btnId: 'btn-abrir-inseminacion', panelId: 'panel-inseminacion' },
-    { btnId: 'btn-abrir-pesadas',      panelId: 'panel-pesadas'      },
-  ];
-
-  function mostrarPanelDerecho(panelId) {
-    const panel = document.getElementById(panelId);
-    if (!panel) return;
-
-    // 1. Ocultar todos los paneles que estén en el panel derecho
-    MAPA.forEach(({ panelId: pid }) => {
-      const p = document.getElementById(pid);
-      if (p) p.classList.add('oculto');
-    });
-
-    // 2. Mover el panel al contenedor derecho
-    panelDerecho.innerHTML = '';
-    panelDerecho.appendChild(panel);
-
-    // 3. Mostrarlo
-    panel.classList.remove('oculto');
-  }
-
-  // Sobreescribir los listeners de los botones DESPUÉS de que los initializers originales corrieron
-  // Usamos un setTimeout(0) para estar seguros de correr al final del call stack
-  setTimeout(() => {
-    MAPA.forEach(({ btnId, panelId }) => {
-      const btn = document.getElementById(btnId);
-      if (!btn) return;
-
-      // Guardar referencia al handler original clonando el botón y re-ejecutando
-      // Estrategia: clonar btn (elimina todos los listeners), mover panel, luego simular click en el clon invisible
-      const btnClon = btn.cloneNode(true); // clon sin listeners
-      btn.parentNode.replaceChild(btnClon, btn);
-
-      // El clon también hereda estilos/texto, pero ahora le ponemos el nuevo handler
-      btnClon.addEventListener('click', () => {
-        mostrarPanelDerecho(panelId);
-        // Disparar el evento 'desktop-panel-open' que los initializers originales escuchan
-        // Como los initializers ya no escuchan nada (clonamos el btn), re-ejecutamos manualmente
-        // la lógica de apertura equivalente a través del evento change/carga
-        const evt = new CustomEvent('desktop-abrir-panel', { detail: { panelId } });
-        document.dispatchEvent(evt);
-      });
-    });
-
-    // Escuchar los eventos de apertura y ejecutar la lógica async correspondiente
-    document.addEventListener('desktop-abrir-panel', async (e) => {
-      const { panelId } = e.detail;
-      try {
-        if (panelId === 'panel-vacunacion') {
-          await cargarVacunas();
-          await cargarInseminaciones();
-          renderizarPanelVacunacion();
-        }
-        if (panelId === 'panel-inseminacion') {
-          const hoy = new Date().toISOString().split('T')[0];
-          const fi = document.getElementById('ins-panel-fecha');
-          if (fi) { fi.value = hoy; fi.dispatchEvent(new Event('change')); }
-          await cargarInseminaciones();
-        }
-        // panel-pesadas no necesita lógica async de apertura
-      } catch(err) {
-        console.warn('[desktop-panel]', err);
-      }
-    });
-
-    // Interceptar cierres: al cerrar, volver al placeholder
-    ['btn-cerrar-vacunacion','btn-cerrar-inseminacion','btn-cerrar-pesadas'].forEach(btnId => {
-      const btn = document.getElementById(btnId);
-      if (!btn) return;
-      btn.addEventListener('click', () => {
-        setTimeout(() => {
-          const hayAbierto = MAPA.some(({ panelId }) => {
-            const p = document.getElementById(panelId);
-            return p && panelDerecho.contains(p) && !p.classList.contains('oculto');
-          });
-          if (!hayAbierto) {
-            panelDerecho.innerHTML = `
-              <div class="rodeo-desktop-panel-vacio">
-                <span style="font-size:48px;">🐄</span>
-                <span>Seleccioná un animal o abrí un módulo</span>
-              </div>`;
-          }
-        }, 80);
-      });
-    });
-
-  }, 0); // setTimeout(0) → corre después de todos los initializers
+  // No-op: el CSS se encarga de posicionar los paneles en desktop.
+  // Ver estilos.css @media (min-width: 1024px) → #panel-vacunacion:not(.oculto) etc.
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
