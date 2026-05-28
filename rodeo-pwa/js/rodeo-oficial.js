@@ -8,6 +8,7 @@
  */
 import { obtenerOCrearAnimalUuid, renderizarGaleriaAnimal } from './fotos-animal.js';
 import { getInseminacionAnimal, getInseminacionesData, calcularGestacion } from './inseminaciones.js';
+import { getVacunasData } from './vacunas.js';
 
 // ─── Estado ───────────────────────────────────────────────────────────────────
 let _animales   = [];
@@ -612,23 +613,55 @@ const LISTA_VACUNAS = [
   { key: 'vac_otras',               id: 'otras',               label: 'Otras' },
 ];
 
+// Normaliza nombre de vacuna a campo_key igual que el API
+function _vacunaNameToKey(nombre) {
+  const v = nombre.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, '');
+  if (v.includes('aftosa'))          return 'vac_aftosa';
+  if (v.includes('brucelosis'))      return 'vac_brucelosis';
+  if (v.includes('carbunclo'))       return 'vac_carbunclo';
+  if (v.includes('mancha'))          return 'vac_mancha';
+  if (v.includes('queratoconjunt'))  return 'vac_queratoconjuntivitis';
+  if (v.includes('otras'))           return 'vac_otras';
+  if (v.includes('desparasit'))      return 'vac_desparasitante';
+  if (v.includes('cobre'))           return 'vac_cobre';
+  return v;
+}
+
 function _renderizarVacunas(a, idx) {
   const grid = document.getElementById(`vac-grid-${idx}`);
   if (!grid) return;
 
+  // Cache de vacunas del módulo vacunas.js (hoja Vacunacion)
+  const vacData = (typeof getVacunasData === 'function' ? getVacunasData() : []) || [];
+
   grid.innerHTML = LISTA_VACUNAS.map(v => {
-    const fecha     = a[v.key] || '';
-    const aplicada  = !!fecha;
-    const esOtras   = v.id === 'otras';
-    const subtitulo = aplicada
-      ? (esOtras && a.vac_comentario_otras ? `✓ ${fecha} — ${a.vac_comentario_otras}` : `✓ ${fecha}`)
-      : (_esAdmin ? '+ Registrar' : 'Sin aplicar');
+    // 1. Buscar en el cache de Vacunacion (fuente principal)
+    const registros = vacData.filter(r =>
+      ((r.boton    && r.boton    === a.boton)    ||
+       (r.caravana && r.caravana === a.caravana)) &&
+      _vacunaNameToKey(r.vacuna || '') === v.key
+    ).sort((x, y) => {
+      // ordenar por fecha_aplicacion desc
+      const fx = (x.fecha_aplicacion || '').split('/').reverse().join('-');
+      const fy = (y.fecha_aplicacion || '').split('/').reverse().join('-');
+      return fy.localeCompare(fx);
+    });
+
+    const ultRegistro = registros[0];
+    const ultFecha    = ultRegistro?.fecha_aplicacion || a[v.key] || '';
+    const aplicada    = !!ultFecha;
 
     return `
       <div class="vac-chip ${aplicada ? 'vac-ok' : 'vac-pendiente'} ${_esAdmin ? 'vac-clickable' : ''}"
            onclick="${_esAdmin ? `window._abrirVacunaModal(${idx},'${v.id}')` : ''}">
         <span class="vac-nombre">${v.label}</span>
-        <span class="vac-fecha ${aplicada ? '' : 'vac-sin'}">${subtitulo}</span>
+        ${aplicada
+          ? `<span class="vac-fecha">Últ. dosis: ${ultFecha}</span>
+             ${_esAdmin ? '<span class="vac-accion">+ Registrar nueva</span>' : ''}`
+          : `<span class="vac-fecha vac-sin">${_esAdmin ? '+ Registrar' : 'Sin aplicar'}</span>`
+        }
       </div>
     `;
   }).join('');

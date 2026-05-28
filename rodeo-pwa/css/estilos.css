@@ -2495,6 +2495,15 @@ body {
   font-weight: 500;
 }
 
+/* Acción "+ Registrar nueva" debajo de la fecha en chips aplicados */
+.vac-accion {
+  font-size: 10px;
+  font-weight: 600;
+  color: #2d9c5b;
+  opacity: 0.75;
+  margin-top: 1px;
+}
+
 /* ══════════════════════════════════════════════════
    AGENDA / TAREAS
 ══════════════════════════════════════════════════ */
