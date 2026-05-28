@@ -1,5 +1,5 @@
 # CONTEXTO TÉCNICO — RodeoApp Los Aromos
-**Última actualización:** 2026-05-27 (layout desktop)
+**Última actualización:** 2026-05-28 (auditoría .agent_skills + fixes db.js + layout desktop)
 
 **Repo:** https://github.com/juansineriz1-source/LosAromos  
 **Cuenta GitHub:** juansineriz1-source  
@@ -43,8 +43,10 @@ node --check rodeo-pwa/js/app.js
 Hacerlo para TODOS los archivos tocados antes del commit.
 
 ### 3. NO TOCAR EL CSS SIN VER EL ARCHIVO PRIMERO
-El CSS está en `rodeo-pwa/css/estilos.css` (4500+ líneas) y `rodeo-pwa/css/rodeo-chips.css`.  
+El CSS está en `rodeo-pwa/css/estilos.css` (~5100+ líneas) y `rodeo-pwa/css/rodeo-chips.css`.  
 **NO existe** `style.css` ni `rodeo-oficial.js` con funciones de inseminación — todo está en `app.js`.
+
+**Sobre las @import de fuentes:** Las fuentes Inter y Manrope se cargan con `<link>` en `index.html` (NO con `@import` en CSS). Cambiar eso reintroduce un bloqueo de render.
 
 ### 4. LAS FUNCIONES DE INSEMINACIÓN Y VACUNACIÓN ESTÁN EN app.js
 Las funciones `abrirRegistroInseminacion`, `inicializarVacunacion`, `inicializarInsMasiva` están en `app.js`, NO en `rodeo-oficial.js`. `rodeo-oficial.js` solo maneja el rodeo/lista.
@@ -61,6 +63,19 @@ Siempre verificar con `Get-ChildItem` antes de buscar con grep. El archivo está
 
 ### 7. VARIABLES DE ENTORNO NO SE PUEDEN DESCARGAR
 `vercel env pull` no descarga las secretas. Si se necesita dev local, recrear `.env.local` manualmente desde el dashboard de Vercel.
+
+### 8. DEXIE.JS DEBE TENER `defer` — NO QUITAR
+- Dexie se carga con `<script defer>` en `index.html` para no bloquear el primer render.
+- Si se quita el `defer`, el script vuelve a ser bloqueante (~400ms de penalización).
+
+### 9. jsPDF SE CARGA BAJO DEMANDA — NO AGREGAR AL HEAD
+- jsPDF (63KB) NO está en el `<head>`. Se inyecta dinámicamente al hacer click en "📄 PDF".
+- Si se agrega estáticamente al head, vuelve a cargar 63KB en cada visita aunque no se use.
+
+### 10. VARIABLES CSS: USAR ALIAS, NO DUPLICAR VALORES
+- Las variables `--verde`, `--verde-ui`, `--verde-claro`, `--azul-bt`, `--bg`, `--gris`, `--sombra` son aliases definidos al final de `:root`. **No modificar sus valores** — apuntan a las variables primarias.
+- Nueva variable `--verde-header: #0f5228` para el header/sidebar. **Distinta** de `--verde-oscuro: #1a5c30`.
+- Las fuentes se cargan desde HTML con `<link>` + `preconnect` — NO usar `@import` en CSS.
 
 ---
 
@@ -306,8 +321,16 @@ Los dropdowns en el modal de vacunación están organizados por estas categoría
 
 ## 10. DISEÑO Y CSS
 
-- **Paleta:** verde oscuro `#1a5c30` (acento principal), azul `#1d4ed8` (inseminación), marrón `#7c5c1e` (pesadas)
-- **Tipografía:** Inter + Manrope (Google Fonts)
+- **Paleta:** verde oscuro `#1a5c30` (acento principal — `--verde-oscuro`), verde header `#0f5228` (`--verde-header`), azul `hsl(217,72%,48%)` (inseminación), marrón `#7c5c1e` (pesadas)
+- **Tipografía:** Inter + Manrope — cargadas vía `<link>` en `index.html` con preconnect (no @import en CSS)
+- **Fuentes Google CDN:** fonts.googleapis.com + fonts.gstatic.com (preconnect declarado en HTML)
+- **Variables CSS principales (`:root` en estilos.css):**
+  - `--verde-oscuro: #1a5c30` — botones, texto, tabs activos
+  - `--verde-header: #0f5228` — header y sidebar (verde más oscuro)
+  - `--verde-medio: #2e7d52` — hover states
+  - `--verde-suave: #e8f5e9` — fondos soft
+  - `--texto-secundario: #6b7a6e` — texto gris
+  - Aliases (para compatibilidad, apuntan a las anteriores): `--verde`, `--verde-ui`, `--verde-claro`, `--azul-bt`, `--bg`, `--gris`, `--sombra`
 - **Componentes clave CSS:**
   - `.vac-btn-acceso` — botones de acceso a módulos (verde oscuro, flex:1)
   - `.vac-panel` / `.vac-panel-header` — estructura de los paneles
@@ -427,6 +450,10 @@ Reproducción: <video> con src=/api/media-proxy?key=video/...
 | Tab Agenda completamente en blanco | `style="display:none"` inline bloqueaba clase `.oculto` | Removido style inline, solo `class="oculto"` |
 | Contador buscador no actualizaba | `renderizarRodeo()` sobreescribía el contador de `aplicarFiltros()` | `renderizarRodeo` solo actualiza resumen con flag `actualizarResumen=true` |
 | Bugs raros en usuarios con datos viejos | Storage local incompatible entre versiones | `APP_VERSION` en `app.js` — limpia storage automáticamente al detectar versión nueva |
+| **`historialAnimal` devolvía orden incorrecto** | **`.reverse().sortBy()` en Dexie — sortBy ignora cursor direction** | **`.toArray().sort()` manual (db.js)** |
+| **Fecha de registro manga con día equivocado** | **`new Date().toISOString()` devuelve UTC → en Argentina noche = día siguiente** | **`toLocaleDateString('en-CA', {timeZone:'America/Argentina/Buenos_Aires'})`** |
+| **`pesos-modulo.js`, `fotos-animal.js`, `agenda.js` no precacheados** | **Faltaban en la lista del SW** | **Agregados a `precaching.precacheAndRoute` en sw.js rev 70** |
+| **Datos del rodeo en blanco cuando offline** | **`/api/*` sin estrategia de caché en SW** | **`NetworkFirst` para `/api/*` (excepto `/api/sincronizar`) en sw.js** |
 
 ---
 
@@ -443,6 +470,83 @@ En `app.js`, al inicio hay una IIFE que compara `localStorage['rodeo_app_version
 Si no coincide → limpia caches SW + IndexedDB + localStorage (preservando sesión) → guarda nueva versión.  
 **⚠️ Cada vez que haya cambios de estructura de datos, subir `APP_VERSION` en `app.js`.**  
 Versions actual: `'53'` (último cambio Mayo 2026)
+
+---
+
+## 21. LAYOUT DESKTOP (≥1024px) — Mayo 2026
+
+En pantallas anchas el layout cambia completamente para aprovechar el espacio:
+
+```
+[Sidebar 200px] | [Lista Rodeo 420px — fixed left] | [Contenido / Paneles — resto del ancho]
+```
+
+### Cómo funciona
+- **Sidebar** (`.sidebar`): `position: fixed`, 200px izquierda, full height.
+- **Lista de animales** (`.rodeo-desktop-lista`): `position: fixed`, `left: 200px`, `width: 420px`, scrollable independiente.
+- **Área de contenido** (`.rodeo-desktop-panel-col`): `margin-left: 620px` (200+420), ocupa el resto del ancho.
+- En mobile (`< 1024px`): todos los wrappers desktop usan `display: contents` para ser invisibles al layout.
+
+### Paneles en desktop
+- Vacunación, Inseminación y Pesadas se abren a la **derecha** de la lista (en el panel-col).
+- El panel vacío por defecto dice "Seleccioná un panel arriba".
+- Al abrir uno, el otro se cierra automáticamente (toggle exclusivo).
+
+---
+
+## 22. LISTA DEL RODEO — EMOJIS POR CATEGORÍA
+
+En `rodeo-oficial.js`, la función que renderiza cada fila de la lista usa emoji según el tipo:
+
+```js
+const tipoUp  = (a.tipo || '').toUpperCase().trim();
+const esToro  = tipoUp === 'T';         // 🐂
+const sTerneroM = tipoUp === 'TM';      // 🐃
+const emojiAnimal = esToro ? '🐂' : sTerneroM ? '🐃' : '🐄';  // resto = 🐄
+```
+
+Igual que en el panel de Sanidad (`app.js` línea ~2174). Consistencia total.
+
+---
+
+## 23. CHIP DE VACUNA EN DETALLE ANIMAL
+
+Cuando se abre el modal de detalle de un animal en el Rodeo, la sección de vacunas muestra:
+- **Chip verde** con nombre de la vacuna + última fecha aplicada ("Ult. dosis: DD/MM/AAAA").
+- **Botón "+ Registrar"** para abrir directamente el modal de registro de esa vacuna.
+
+La lógica está en `rodeo-oficial.js` → función `_renderizarVacunas()`. Lee de `vacunasData` (cache cargado con `cargarVacunas()` de `app.js`).
+
+---
+
+## 24. RENDIMIENTO PWA — CAMBIOS 2026-05-28
+
+### Carga de recursos (index.html `<head>`)
+```html
+<!-- Preconnect DNS adelantado -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+
+<!-- Fuentes no-blocking -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@700;800&display=swap">
+
+<!-- Dexie con defer (no bloquea render) -->
+<script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js" defer></script>
+```
+
+### jsPDF bajo demanda
+El PDF del manual sanitario pesa 63KB. Se carga **sólo cuando el usuario hace click** en el botón PDF:
+```js
+// En app.js — DOMContentLoaded del btn-descargar-pdf-vac
+if (!window.jspdf) {
+  await new Promise((resolve, reject) => { /* inject <script> tag */ });
+}
+```
+
+### Service Worker — revision 70
+- **Archivos precacheados completos:** todos los módulos JS incluyendo `pesos-modulo.js`, `fotos-animal.js`, `agenda.js`, `rodeo-chips.css`.
+- **NetworkFirst para `/api/*`:** rodeo, vacunas y pesos ahora muestran datos cacheados cuando offline (timeout 8s, caché 24h).
 
 ---
 
@@ -465,6 +569,11 @@ Versions actual: `'53'` (último cambio Mayo 2026)
 | `7584052` | APP_VERSION migration system — limpia storage stale automáticamente |
 | `82991d0` | Agrega memory.md — registro de errores y lecciones aprendidas |
 | `88b8003` | Estados por tipo: Toro→S/F/D, TM→C/SC; elimina E(engorde) y R(retirado) |
+| `cb27705` | Fix historial vacunas: leía de hoja Vacunas (legacy) → corregido a Vacunacion |
+| `27432ca` | Chip vacuna en detalle animal: ult. dosis + fecha + botón Registrar |
+| `596910b` | Fix layout desktop: lista fija izquierda (200px sidebar + 420px lista) |
+| `ac0c36e` | Emoji toro 🐂 en lista Rodeo (T=🐂, TM=🐃, resto=🐄) + cards ancho completo desktop |
+| `9ae2882` | **Auditoría .agent_skills:** fuentes no-blocking + Dexie defer + jsPDF on-demand + fix db.js (historialAnimal + TZ Argentina) + SW rev70 (precache completo + NetworkFirst /api/*) |
 
 ---
 

@@ -30,12 +30,37 @@
 - Si no se sube la revisión, los usuarios siguen viendo la versión vieja cacheada
 - Formato: `revision: 'N'` donde N es el número actual + 1
 - La revisión actual está en `sw.js` en el array `precacheAndRoute([...])`
+- **Revisión actual: 70**
 
 ### 4. El `style="display:none"` inline bloquea las clases CSS
 - El sistema de tabs usa solo la clase `.oculto` para mostrar/ocultar
 - Si un elemento tiene `style="display:none"` inline, el CSS de la clase no puede sobreescribirlo (inline > class)
 - **Bug real:** El tab Agenda estuvo invisible por tener `style="display:none"` en el HTML además de `class="oculto"`
 - **Regla:** Nunca poner `style="display:none"` en tabs — solo usar `class="oculto"`
+
+### 5. DEXIE: `.reverse().sortBy()` es un antipatrón
+- En Dexie.js, `.reverse()` afecta el cursor de IndexedDB pero `.sortBy()` descarga en memoria y re-ordena ignorando el cursor.
+- **Resultado:** la lista siempre viene en orden ascendente aunque se use `.reverse()` antes.
+- **Corrección:** usar `.toArray()` + `.sort()` manual:
+  ```js
+  const registros = await db.tabla.where('campo').equals(valor).toArray();
+  return registros.sort((a, b) => b.timestamp_local - a.timestamp_local);
+  ```
+
+### 6. Fechas con `new Date().toISOString()` devuelven UTC — usar TZ Argentina
+- `new Date().toISOString().split('T')[0]` da la fecha en UTC (no local).
+- En Argentina (UTC-3), a las 23:00 esto devuelve el día siguiente.
+- **Siempre usar:**
+  ```js
+  const TZ = 'America/Argentina/Buenos_Aires';
+  new Date().toLocaleDateString('en-CA', { timeZone: TZ });        // fecha YYYY-MM-DD
+  new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: TZ }); // hora HH:mm
+  ```
+
+### 7. Los archivos JS nuevos deben agregarse al precache del SW
+- Si se agrega un módulo JS nuevo (o se descubre que faltaba), **también hay que agregarlo al array `precacheAndRoute` en `sw.js`**.
+- Sin precache, el archivo no estará disponible si el usuario va offline sin haberlo visitado.
+- Lista actual completa en sw.js (rev 70): app.js, rodeo-oficial.js, vacunas.js, inseminaciones.js, db.js, bluetooth.js, sync.js, recorrida.js, fotos.js, fotos-animal.js, videos.js, push.js, calendario.js, pesos-modulo.js, agenda.js, rodeo-chips.css.
 
 ---
 
@@ -72,6 +97,13 @@
 
 **Solución implementada:** `APP_VERSION` en `app.js` — al arrancar la app compara la versión guardada en localStorage con la actual. Si no coincide, limpia automáticamente caches, IndexedDB y localStorage (preservando sesión). Cada deploy importante debe subir `APP_VERSION`.
 
+### Bug: CSS bloqueante por `@import` de fuentes
+**Cómo pasó:**
+- El CSS tenía `@import url('https://fonts.googleapis.com/...')` al inicio.
+- Los `@import` en CSS son bloqueantes: el browser descarga el CSS, lo parsea, encuentra el `@import`, hace otra petición, y solo entonces sigue renderizando.
+
+**Corrección:** Mover las fuentes a `<link rel="stylesheet">` en el `<head>` del HTML, con `<link rel="preconnect">` previos. Así las peticiones se hacen en paralelo con el CSS principal.
+
 ---
 
 ## ✅ PATRONES QUE FUNCIONAN BIEN
@@ -103,16 +135,41 @@ panel.addEventListener('click', e => {
 - Vacunas: multi-select (varios chips activos, se concatenan en el textbox)
 - El valor seleccionado se guarda en un `<input type="hidden">` para que `guardarRegistro()` lo lea
 
+### Carga de scripts pesados bajo demanda
+```js
+// Patrón para cargar una lib solo cuando se necesita (ej: jsPDF)
+async function cargarLibSiNoEsta(src) {
+  return new Promise((resolve, reject) => {
+    if (window.jspdf) { resolve(); return; }
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+```
+
+### Fechas en Argentina (no UTC)
+```js
+const TZ = 'America/Argentina/Buenos_Aires';
+const fecha = new Date().toLocaleDateString('en-CA', { timeZone: TZ }); // "2026-05-28"
+const hora  = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: TZ }); // "23:45"
+```
+
 ---
 
 ## 📋 CHECKLIST ANTES DE CADA PUSH
 
-- [ ] ¿Se subió la revisión en `sw.js`?
+- [ ] ¿Se subió la revisión en `sw.js`? (revisión actual: 70)
 - [ ] ¿Se corrió `node --check` en los archivos JS modificados?
 - [ ] ¿Se revisó el código si lo generó un subagente?
 - [ ] ¿Se creó algún archivo nuevo en `/api/`? Si sí, ¿cuántos hay ahora en total? ¿Más de 12?
 - [ ] ¿Se agregó algún `addEventListener` que ya existía como `onclick` en el HTML?
 - [ ] Si hubo cambios de estructura en datos, ¿se subió `APP_VERSION` en `app.js`?
+- [ ] Si se agrega un JS nuevo, ¿se agregó al precache del `sw.js`?
+- [ ] ¿Las fechas nuevas usan TZ Argentina (no `toISOString()`)?
+- [ ] ¿Se actualizó `CONTEXTO_TECNICO.md` y este `memory.md`?
 
 ---
 
@@ -131,3 +188,8 @@ panel.addEventListener('click', e => {
 | 2026-05-27 | No se actualizaban los docs después de cambios | Regla: siempre actualizar CONTEXTO_TECNICO.md + memory.md en cada commit |
 | 2026-05-27 | Wrappers desktop rompen layout mobile | Usar `display:contents` en mobile para que sean invisibles; sobreescribir en media query |
 | 2026-05-27 | Paneles se abrían full-screen en desktop | `inicializarDesktopPanels()` usa MutationObserver para moverlos al panel derecho |
+| 2026-05-28 | CSS bloqueaba render por @import de fuentes | Movido a `<link>` en HTML con `preconnect` |
+| 2026-05-28 | `historialAnimal` devolvía orden ascendente | `.reverse().sortBy()` antipatrón Dexie → corregido a `.toArray().sort()` |
+| 2026-05-28 | Fecha de registro manga con día equivocado (noche ARG) | `toISOString()` = UTC → corregido a TZ Argentina |
+| 2026-05-28 | 3 módulos JS faltaban en precache SW | Agregados `pesos-modulo.js`, `fotos-animal.js`, `agenda.js`, `rodeo-chips.css` al precache |
+| 2026-05-28 | Datos del rodeo en blanco offline | `/api/*` sin estrategia de caché en SW → agregado `NetworkFirst` (8s timeout, 24h caché) |
