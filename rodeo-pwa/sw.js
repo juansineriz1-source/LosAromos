@@ -28,22 +28,22 @@ core.clientsClaim();
 // ─── Pre-caché ───────────────────────────────────────────────────────────────
 // Revisión 28 — Restauración estado estable post-subagente
 precaching.precacheAndRoute([
-  { url: '/', revision: '58' },
-  { url: '/index.html', revision: '58' },
-  { url: '/css/estilos.css', revision: '58' },
-  { url: '/js/app.js', revision: '58' },
-  { url: '/js/rodeo-oficial.js', revision: '58' },
-  { url: '/js/vacunas.js', revision: '58' },
-  { url: '/js/inseminaciones.js', revision: '58' },
-  { url: '/js/db.js', revision: '58' },
-  { url: '/js/bluetooth.js', revision: '58' },
-  { url: '/js/sync.js', revision: '58' },
-  { url: '/js/recorrida.js', revision: '58' },
-  { url: '/js/fotos.js', revision: '58' },
-  { url: '/js/videos.js', revision: '58' },
-  { url: '/js/push.js', revision: '58' },
-  { url: '/js/calendario.js', revision: '58' },
-  { url: '/manifest.json', revision: '58' },
+  { url: '/', revision: '59' },
+  { url: '/index.html', revision: '59' },
+  { url: '/css/estilos.css', revision: '59' },
+  { url: '/js/app.js', revision: '59' },
+  { url: '/js/rodeo-oficial.js', revision: '59' },
+  { url: '/js/vacunas.js', revision: '59' },
+  { url: '/js/inseminaciones.js', revision: '59' },
+  { url: '/js/db.js', revision: '59' },
+  { url: '/js/bluetooth.js', revision: '59' },
+  { url: '/js/sync.js', revision: '59' },
+  { url: '/js/recorrida.js', revision: '59' },
+  { url: '/js/fotos.js', revision: '59' },
+  { url: '/js/videos.js', revision: '59' },
+  { url: '/js/push.js', revision: '59' },
+  { url: '/js/calendario.js', revision: '59' },
+  { url: '/manifest.json', revision: '59' },
 ]);
 
 // ─── Estrategia Cache First para assets estáticos ──────────────────────────

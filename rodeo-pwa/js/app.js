@@ -136,46 +136,72 @@ function inicializarDesktopPanels() {
   if (!esDesktop()) return;
 
   const panelDerecho = document.getElementById('rodeo-desktop-panel');
-  const vacio = document.getElementById('rodeo-panel-vacio');
   if (!panelDerecho) return;
 
-  function moverPanelAlDerecho(panelId) {
-    const panel = document.getElementById(panelId);
-    if (!panel) return;
+  const PANELES = {
+    'btn-abrir-vacunacion':   'panel-vacunacion',
+    'btn-abrir-inseminacion': 'panel-inseminacion',
+    'btn-abrir-pesadas':      'panel-pesadas',
+  };
+  const CERRAR = {
+    'btn-cerrar-vacunacion':   'panel-vacunacion',
+    'btn-cerrar-inseminacion': 'panel-inseminacion',
+    'btn-cerrar-pesadas':      'panel-pesadas',
+  };
+  const IDS = Object.values(PANELES);
 
-    // Observar cuando el panel se vuelve visible
-    const observer = new MutationObserver(() => {
-      if (!panel.classList.contains('oculto') && !panelDerecho.contains(panel)) {
-        panelDerecho.innerHTML = '';
-        panelDerecho.appendChild(panel);
-        panel.style.position = 'relative';
-        panel.style.maxHeight = 'none';
-        panel.style.overflowY = 'visible';
-        if (vacio) vacio.style.display = 'none';
-      }
-      if (panel.classList.contains('oculto') && panelDerecho.contains(panel)) {
-        // Devolver al lugar original al cerrar
-        const tabRodeo = document.getElementById('tab-rodeo');
-        if (tabRodeo) tabRodeo.insertBefore(panel, document.getElementById('rodeo-desktop-panel')?.closest('.rodeo-desktop-cols') || null);
-        if (vacio) vacio.style.display = 'flex';
-      }
-    });
-    observer.observe(panel, { attributes: true, attributeFilter: ['class'] });
+  // Placeholder vacío
+  function mostrarVacio() {
+    if (!panelDerecho.querySelector('.rodeo-desktop-panel-vacio')) {
+      panelDerecho.innerHTML = `
+        <div class="rodeo-desktop-panel-vacio">
+          <span style="font-size:48px;">🐄</span>
+          <span>Seleccioná un animal o abrí un módulo</span>
+        </div>`;
+    }
   }
 
-  moverPanelAlDerecho('panel-vacunacion');
-  moverPanelAlDerecho('panel-inseminacion');
-  moverPanelAlDerecho('panel-pesadas');
+  // Mover panel al panel derecho ANTES de que el handler original lo muestre
+  // (capture: true → dispara antes que el listener de burbuja)
+  Object.entries(PANELES).forEach(([btnId, panelId]) => {
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      const panel = document.getElementById(panelId);
+      if (!panel) return;
+      // Ocultar los demás panels que estén en el panel derecho
+      IDS.forEach(id => {
+        const p = document.getElementById(id);
+        if (p && id !== panelId) p.classList.add('oculto');
+      });
+      // Mover al panel derecho si no está ya ahí
+      if (!panelDerecho.contains(panel)) {
+        panelDerecho.innerHTML = '';
+        panelDerecho.appendChild(panel);
+      }
+      // El handler original (burbuja) quitará 'oculto' — ya está en el lugar correcto
+    }, true); // ← capture phase
+  });
 
-  // Re-evaluar en resize
+  // Interceptar cierres para volver al placeholder
+  Object.entries(CERRAR).forEach(([btnId, panelId]) => {
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      // Pequeño delay para que el handler original corra primero
+      setTimeout(mostrarVacio, 50);
+    });
+  });
+
+  // Re-evaluar en resize (devolver paneles si se pasa a mobile)
   window.addEventListener('resize', () => {
     if (!esDesktop()) {
-      // Devolver paneles al flujo normal si se achica la ventana
-      ['panel-vacunacion','panel-inseminacion','panel-pesadas'].forEach(id => {
+      IDS.forEach(id => {
         const p = document.getElementById(id);
         if (p && panelDerecho.contains(p)) {
           const cols = document.querySelector('.rodeo-desktop-cols');
           if (cols) cols.parentNode.insertBefore(p, cols);
+          p.classList.add('oculto');
         }
       });
     }
