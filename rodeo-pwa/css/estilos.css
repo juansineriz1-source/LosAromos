@@ -4866,40 +4866,41 @@ html { scroll-behavior: smooth; }
     border-radius: 16px;
   }
 
-  /* ═══════════ RODEO DESKTOP — lista fija a la derecha ═══════════════ */
+  /* ═══════════ RODEO DESKTOP — lista fija a la IZQUIERDA ══════════════ */
   /*
-   * Enfoque simple:
-   *  - La lista de animales queda FIJA a la derecha (position: fixed)
-   *  - Los paneles (Sanidad/Ins/Pesadas) se abren en el espacio de la izquierda
-   *  - El contenedor principal tiene padding-right para hacerle lugar a la lista
-   *
-   * Esto evita cualquier problema de stacking context / z-index / grid overlaps.
+   * Lista de animales: FIJA a la izquierda (después del sidebar)
+   * Paneles (Sanidad/Ins/Pesadas): se abren a la DERECHA en el espacio libre
    */
 
-  /* Contenedor rodeo-desktop-cols: ahora solo es un wrapper semántico */
-  .rodeo-desktop-cols {
-    display: block; /* SIN grid — la lista usa position:fixed */
-    padding-right: 460px; /* espacio para la lista fija: 420px + 40px margen */
+  /* Botones (Sanidad/Ins/Pesadas): desplazados a la derecha de la lista */
+  #tab-rodeo > div:first-child {
+    padding-left: 444px; /* 420px lista + 24px gap */
   }
 
-  /* Columna izquierda: área donde se muestran los paneles */
+  /* Contenedor rodeo-desktop-cols: deja espacio a la izquierda para la lista */
+  .rodeo-desktop-cols {
+    display: block;
+    padding-left: 444px; /* 420px lista + 24px gap */
+  }
+
+  /* Columna de paneles: flujo normal, a la derecha de la lista */
   .rodeo-desktop-panel-col {
     display: block;
   }
 
-  /* Lista de animales: FIJA en el lado derecho de la pantalla */
+  /* Lista de animales: FIJA a la izquierda, después del sidebar */
   .rodeo-desktop-lista {
     position: fixed !important;
-    right: 24px;
-    top: 84px;
+    left: 200px;   /* inmediatamente después del sidebar */
+    top: 84px;     /* debajo del header fijo */
     bottom: 24px;
     width: 420px;
     background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 2px 16px rgba(0,0,0,0.12);
+    border-radius: 0 16px 16px 0; /* esquinas redondeadas solo a la derecha */
+    box-shadow: 2px 0 16px rgba(0,0,0,0.10);
     overflow-y: auto;
     overflow-x: hidden;
-    z-index: 50; /* sobre los paneles */
+    z-index: 50;
     display: flex !important;
     flex-direction: column;
   }
