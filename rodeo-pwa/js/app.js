@@ -138,74 +138,96 @@ function inicializarDesktopPanels() {
   const panelDerecho = document.getElementById('rodeo-desktop-panel');
   if (!panelDerecho) return;
 
-  const PANELES = {
-    'btn-abrir-vacunacion':   'panel-vacunacion',
-    'btn-abrir-inseminacion': 'panel-inseminacion',
-    'btn-abrir-pesadas':      'panel-pesadas',
-  };
-  const CERRAR = {
-    'btn-cerrar-vacunacion':   'panel-vacunacion',
-    'btn-cerrar-inseminacion': 'panel-inseminacion',
-    'btn-cerrar-pesadas':      'panel-pesadas',
-  };
-  const IDS = Object.values(PANELES);
+  const MAPA = [
+    { btnId: 'btn-abrir-vacunacion',   panelId: 'panel-vacunacion'   },
+    { btnId: 'btn-abrir-inseminacion', panelId: 'panel-inseminacion' },
+    { btnId: 'btn-abrir-pesadas',      panelId: 'panel-pesadas'      },
+  ];
 
-  // Placeholder vacío
-  function mostrarVacio() {
-    if (!panelDerecho.querySelector('.rodeo-desktop-panel-vacio')) {
-      panelDerecho.innerHTML = `
-        <div class="rodeo-desktop-panel-vacio">
-          <span style="font-size:48px;">🐄</span>
-          <span>Seleccioná un animal o abrí un módulo</span>
-        </div>`;
-    }
+  function mostrarPanelDerecho(panelId) {
+    const panel = document.getElementById(panelId);
+    if (!panel) return;
+
+    // 1. Ocultar todos los paneles que estén en el panel derecho
+    MAPA.forEach(({ panelId: pid }) => {
+      const p = document.getElementById(pid);
+      if (p) p.classList.add('oculto');
+    });
+
+    // 2. Mover el panel al contenedor derecho
+    panelDerecho.innerHTML = '';
+    panelDerecho.appendChild(panel);
+
+    // 3. Mostrarlo
+    panel.classList.remove('oculto');
   }
 
-  // Mover panel al panel derecho ANTES de que el handler original lo muestre
-  // (capture: true → dispara antes que el listener de burbuja)
-  Object.entries(PANELES).forEach(([btnId, panelId]) => {
-    const btn = document.getElementById(btnId);
-    if (!btn) return;
-    btn.addEventListener('click', () => {
-      const panel = document.getElementById(panelId);
-      if (!panel) return;
-      // Ocultar los demás panels que estén en el panel derecho
-      IDS.forEach(id => {
-        const p = document.getElementById(id);
-        if (p && id !== panelId) p.classList.add('oculto');
-      });
-      // Mover al panel derecho si no está ya ahí
-      if (!panelDerecho.contains(panel)) {
-        panelDerecho.innerHTML = '';
-        panelDerecho.appendChild(panel);
-      }
-      // El handler original (burbuja) quitará 'oculto' — ya está en el lugar correcto
-    }, true); // ← capture phase
-  });
+  // Sobreescribir los listeners de los botones DESPUÉS de que los initializers originales corrieron
+  // Usamos un setTimeout(0) para estar seguros de correr al final del call stack
+  setTimeout(() => {
+    MAPA.forEach(({ btnId, panelId }) => {
+      const btn = document.getElementById(btnId);
+      if (!btn) return;
 
-  // Interceptar cierres para volver al placeholder
-  Object.entries(CERRAR).forEach(([btnId, panelId]) => {
-    const btn = document.getElementById(btnId);
-    if (!btn) return;
-    btn.addEventListener('click', () => {
-      // Pequeño delay para que el handler original corra primero
-      setTimeout(mostrarVacio, 50);
+      // Guardar referencia al handler original clonando el botón y re-ejecutando
+      // Estrategia: clonar btn (elimina todos los listeners), mover panel, luego simular click en el clon invisible
+      const btnClon = btn.cloneNode(true); // clon sin listeners
+      btn.parentNode.replaceChild(btnClon, btn);
+
+      // El clon también hereda estilos/texto, pero ahora le ponemos el nuevo handler
+      btnClon.addEventListener('click', () => {
+        mostrarPanelDerecho(panelId);
+        // Disparar el evento 'desktop-panel-open' que los initializers originales escuchan
+        // Como los initializers ya no escuchan nada (clonamos el btn), re-ejecutamos manualmente
+        // la lógica de apertura equivalente a través del evento change/carga
+        const evt = new CustomEvent('desktop-abrir-panel', { detail: { panelId } });
+        document.dispatchEvent(evt);
+      });
     });
-  });
 
-  // Re-evaluar en resize (devolver paneles si se pasa a mobile)
-  window.addEventListener('resize', () => {
-    if (!esDesktop()) {
-      IDS.forEach(id => {
-        const p = document.getElementById(id);
-        if (p && panelDerecho.contains(p)) {
-          const cols = document.querySelector('.rodeo-desktop-cols');
-          if (cols) cols.parentNode.insertBefore(p, cols);
-          p.classList.add('oculto');
+    // Escuchar los eventos de apertura y ejecutar la lógica async correspondiente
+    document.addEventListener('desktop-abrir-panel', async (e) => {
+      const { panelId } = e.detail;
+      try {
+        if (panelId === 'panel-vacunacion') {
+          await cargarVacunas();
+          await cargarInseminaciones();
+          renderizarPanelVacunacion();
         }
+        if (panelId === 'panel-inseminacion') {
+          const hoy = new Date().toISOString().split('T')[0];
+          const fi = document.getElementById('ins-panel-fecha');
+          if (fi) { fi.value = hoy; fi.dispatchEvent(new Event('change')); }
+          await cargarInseminaciones();
+        }
+        // panel-pesadas no necesita lógica async de apertura
+      } catch(err) {
+        console.warn('[desktop-panel]', err);
+      }
+    });
+
+    // Interceptar cierres: al cerrar, volver al placeholder
+    ['btn-cerrar-vacunacion','btn-cerrar-inseminacion','btn-cerrar-pesadas'].forEach(btnId => {
+      const btn = document.getElementById(btnId);
+      if (!btn) return;
+      btn.addEventListener('click', () => {
+        setTimeout(() => {
+          const hayAbierto = MAPA.some(({ panelId }) => {
+            const p = document.getElementById(panelId);
+            return p && panelDerecho.contains(p) && !p.classList.contains('oculto');
+          });
+          if (!hayAbierto) {
+            panelDerecho.innerHTML = `
+              <div class="rodeo-desktop-panel-vacio">
+                <span style="font-size:48px;">🐄</span>
+                <span>Seleccioná un animal o abrí un módulo</span>
+              </div>`;
+          }
+        }, 80);
       });
-    }
-  });
+    });
+
+  }, 0); // setTimeout(0) → corre después de todos los initializers
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
