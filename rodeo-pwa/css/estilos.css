@@ -1,56 +1,64 @@
-/* ═══════════════════════════════════════════════════════════════════
-   estilos.css — RodeoApp — Stitch redesign
-   ═══════════════════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   estilos.css â€” RodeoApp â€” Stitch redesign
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 /* Fuentes cargadas via <link> en index.html con preconnect para mejor rendimiento */
-/* Google Fonts: Inter (400,600,700) + Manrope (700,800) — cargadas en el <head> */
+/* Google Fonts: Inter (400,600,700) + Manrope (700,800) â€” cargadas en el <head> */
 
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* ── Paleta principal ─────────────────────────────────────────────── */
-  --verde-oscuro:  #1a5c30;    /* primario — botones, tabs activos, texto */
-  --verde-header:  #0f5228;    /* header y sidebar (verde más oscuro) */
+  /* â”€â”€ Paleta principal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  --verde-oscuro:  #1a5c30;    /* primario â€” botones, tabs activos, texto */
+  --verde-header:  #0f5228;    /* header y sidebar (verde mÃ¡s oscuro) */
   --verde-medio:   #2e7d52;    /* hover, chips activos */
   --verde-suave:   #e8f5e9;    /* fondos soft */
-  --tierra:        #7c5c1e;    /* acento cálido */
+  --tierra:        #7c5c1e;    /* acento cÃ¡lido */
   --tierra-claro:  hsl(25, 40%, 96%);
 
-  /* ── Semánticos ─────────────────────────────────────────────────── */
+  /* â”€â”€ SemÃ¡nticos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   --amarillo:      hsl(38, 92%, 50%);
   --rojo:          #dc2626;
   --azul:          hsl(217, 72%, 48%);
+  /* ── Aliases (variables referenciadas en CSS pero no definidas) ── */
+  --verde:             #16a34a;    /* verde vibrante estados positivos */
+  --verde-ui:          #1a5c30;    /* alias verde-oscuro para botones UI */
+  --verde-claro:       #dcfce7;    /* fondo chips estado sano */
+  --azul-bt:           hsl(217, 72%, 48%); /* color boton Bluetooth */
+  --gris:              #6b7a6e;    /* alias texto-secundario para nav/labels */
+  --texto-principal:   #1a5c30;    /* alias de --texto para compatibilidad */
 
-  /* ── Backgrounds ────────────────────────────────────────────────── */
+
+  /* â”€â”€ Backgrounds â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   --bg-app:        #f4f6f4;    /* fondo general */
   --bg-card:       #ffffff;    /* cards */
   --blanco:        #FFFFFF;
 
-  /* ── Texto ──────────────────────────────────────────────────────── */
+  /* â”€â”€ Texto â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   --texto:         #1a5c30;    /* texto principal */
   --texto-secundario: #6b7a6e; /* texto secundario */
   --gris-claro:    #f3f4f6;    /* fondos suaves */
   --gris-borde:    rgba(60,60,67,.12);
 
-  /* ── Bordes ─────────────────────────────────────────────────────── */
+  /* â”€â”€ Bordes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   --borde:         #e5e7eb;
 
-  /* ── Radios ─────────────────────────────────────────────────────── */
+  /* â”€â”€ Radios â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   --radio:         12px;
   --radio-grande:  18px;
   --radio-xl:      20px;       /* cards */
   --radio-chip:    99px;       /* pill chips */
   --radio-input:   14px;       /* inputs */
 
-  /* ── Sombras Stitch ──────────────────────────────────────── */
+  /* â”€â”€ Sombras Stitch â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   --sombra-card:   0 2px 12px rgba(0,0,0,0.07);
   --sombra-header: 0 1px 4px rgba(0,0,0,0.10);
   --sombra-nav:    0 -2px 12px rgba(0,0,0,0.07);
   --sombra:        0 2px 12px rgba(0,0,0,0.07);
   --sombra-alta:   0 8px 32px rgba(0,0,0,.14);
 
-  /* ── Tipografía ───────────────────────────────────────────── */
+  /* â”€â”€ TipografÃ­a â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   --alto-boton: 52px;
   --alto-input: 50px;
   --font-grande: 17px;
@@ -77,9 +85,9 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ─── HEADER ──────────────────────────────────────────────────────── */
+/* â”€â”€â”€ HEADER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .header {
-  background: rgba(26, 92, 48, 0.80);
+  background: rgba(15, 82, 40, 0.95); /* [D5] mayor opacidad para legibilidad al sol */
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   color: var(--blanco);
@@ -123,7 +131,7 @@ body {
   gap: 8px;
 }
 
-/* ─── BADGES DE ESTADO ────────────────────────────────────────────── */
+/* â”€â”€â”€ BADGES DE ESTADO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .estado-red {
   font-size: 12px;
   font-weight: 700;
@@ -142,9 +150,13 @@ body {
   background: rgba(255,255,255,0.15);
   color: var(--blanco);
 }
-.estado-bt.conectado   { background: #22c55e; color: #fff; }
-.estado-bt.buscando    { background: var(--amarillo); color: #1a1a1a; }
-.estado-bt.error       { background: var(--rojo); color: #fff; }
+.estado-bt.conectado    { background: #22c55e; color: #fff; }
+.estado-bt.buscando     { background: var(--amarillo); color: #1a1a1a; }
+.estado-bt.error        { background: var(--rojo); color: #fff; }
+/* [D7] estado desconectado — texto visible sobre fondo oscuro del header */
+.estado-bt.desconectado { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.70); border: 1px solid rgba(255,255,255,0.15); }
+
+
 
 .operador-badge {
   font-size: 12px;
@@ -155,7 +167,7 @@ body {
   font-weight: 600;
 }
 
-/* ─── MAIN ────────────────────────────────────────────────────────── */
+/* â”€â”€â”€ MAIN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .main {
   padding: 0 0 16px;
   display: flex;
@@ -164,7 +176,7 @@ body {
   min-height: calc(100vh - 80px - var(--nav-height));
 }
 
-/* ─── BOTTOM NAVIGATION (iOS tab bar) ─────────────────────────────── */
+/* â”€â”€â”€ BOTTOM NAVIGATION (iOS tab bar) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .bottom-nav {
   position: fixed;
   bottom: 0;
@@ -260,12 +272,12 @@ body {
   filter: grayscale(30%) opacity(.75);
 }
 
-/* ─── TAB PANELS ──────────────────────────────────────────────────── */
+/* â”€â”€â”€ TAB PANELS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .tab-panel { display: flex; flex-direction: column; gap: 12px; background: var(--bg-app); }
 .tab-panel.oculto { display: none !important; }
 .oculto { display: none !important; }
 
-/* ─── CARD ─────────────────────────────────────────────────────────── */
+/* â”€â”€â”€ CARD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .card {
   background: var(--bg-card);
   border-radius: 20px;
@@ -284,7 +296,7 @@ body {
   margin-bottom: 12px;
 }
 
-/* ─── TAB INICIO ────────────────────────────────────────────────────── */
+/* â”€â”€â”€ TAB INICIO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .inicio-hero {
   background: linear-gradient(to bottom, #1a5c30, #2e7d52);
   border-radius: 0 0 30px 30px;
@@ -374,7 +386,7 @@ body {
   line-height: 1.4;
 }
 
-/* ─── BOTONES ─────────────────────────────────────────────────────── */
+/* â”€â”€â”€ BOTONES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .btn {
   display: block;
   width: 100%;
@@ -427,7 +439,7 @@ body {
   margin-top: 8px;
 }
 
-/* ─── INPUTS ──────────────────────────────────────────────────────── */
+/* â”€â”€â”€ INPUTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .grupo-campo { margin-bottom: 14px; }
 
 .campo-label {
@@ -523,14 +535,14 @@ body {
   margin-bottom: 4px;
 }
 
-/* ─── GRID 2 ──────────────────────────────────────────────────────── */
+/* â”€â”€â”€ GRID 2 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
 
-/* ─── HISTORIAL ───────────────────────────────────────────────────── */
+/* â”€â”€â”€ HISTORIAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .historial-titulo {
   font-size: 12px;
   font-weight: 700;
@@ -569,7 +581,7 @@ body {
   padding: 12px 0;
 }
 
-/* ─── BARRA SYNC ──────────────────────────────────────────────────── */
+/* â”€â”€â”€ BARRA SYNC â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .barra-sync {
   display: flex;
   align-items: center;
@@ -586,8 +598,12 @@ body {
   border-radius: 20px;
   white-space: nowrap;
 }
+/* [D8] ocultar badge cuando no hay pendientes */
+#contador-pendientes:empty { display: none; }
 
-/* ─── ACCORDION (Carga Manual) ────────────────────────────────────── */
+
+
+/* â”€â”€â”€ ACCORDION (Carga Manual) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .accordion {
   border: 2px solid var(--gris-borde);
   border-radius: var(--radio);
@@ -612,7 +628,7 @@ body {
   border-top: 2px solid var(--gris-borde);
 }
 
-/* ─── ANIMAL DETALLE (en Manual) ──────────────────────────────────── */
+/* â”€â”€â”€ ANIMAL DETALLE (en Manual) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .animal-detalle {
   display: flex;
   flex-wrap: wrap;
@@ -636,7 +652,7 @@ body {
   padding: 6px 16px;
 }
 
-/* ─── RODEO FILTROS ───────────────────────────────────────────────── */
+/* â”€â”€â”€ RODEO FILTROS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .rodeo-filtros {
   display: flex;
   flex-direction: column;
@@ -653,7 +669,7 @@ body {
   font-weight: 600;
 }
 
-/* ─── RODEO LISTA ─────────────────────────────────────────────────── */
+/* â”€â”€â”€ RODEO LISTA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .rodeo-item {
   background: var(--blanco);
   border-radius: var(--radio-grande);
@@ -731,7 +747,7 @@ body {
 .badge-cuarentena  { background: #fee2e2; color: #991b1b; }
 .badge-revisar     { background: var(--tierra-claro); color: var(--tierra); }
 
-/* ─── MODAL DETALLE ───────────────────────────────────────────────── */
+/* â”€â”€â”€ MODAL DETALLE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -871,14 +887,14 @@ body {
 .modal-com-fecha { font-size: 11px; color: var(--gris); font-weight: 700; margin-bottom: 3px; }
 .modal-com-texto { font-size: 15px; color: var(--texto); line-height: 1.4; }
 
-/* ─── DIVIDER ─────────────────────────────────────────────────────── */
+/* â”€â”€â”€ DIVIDER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .divider {
   height: 1px;
   background: var(--gris-claro);
   margin: 8px 0;
 }
 
-/* ─── TOAST ───────────────────────────────────────────────────────── */
+/* â”€â”€â”€ TOAST â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .toast {
   position: fixed;
   bottom: calc(var(--nav-height) + 16px);
@@ -907,7 +923,7 @@ body {
 .toast-error       { background: rgba(183,28,28,.92); }
 .toast-info        { background: rgba(13,71,161,.92); }
 
-/* ─── PANTALLA DE LOGIN ───────────────────────────────────────────── */
+/* â”€â”€â”€ PANTALLA DE LOGIN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 #login-overlay {
   position: fixed;
   inset: 0;
@@ -948,7 +964,7 @@ body {
   to   { opacity: 0; transform: scale(1.04); }
 }
 
-/* Glass card — bottom sheet estilo Stitch */
+/* Glass card â€” bottom sheet estilo Stitch */
 .login-card {
   background: rgba(255,255,255,0.03);
   -webkit-backdrop-filter: blur(20px);
@@ -992,7 +1008,7 @@ body {
   margin-bottom: 20px;
 }
 
-/* Botones de usuario — Stitch user-btn style */
+/* Botones de usuario â€” Stitch user-btn style */
 .login-btn-nombre {
   background: rgba(26,92,48,0.20);
   border: 1px solid rgba(26,92,48,0.30);
@@ -1060,10 +1076,10 @@ body {
 /* Badge de rol en el header */
 .operador-badge[data-rol="admin"]    { background: rgba(255,255,255,0.25); }
 .operador-badge[data-rol="operario"] { background: rgba(255,193,7,0.3); }
-.operador-badge[data-rol="admin"]::after    { content: ' ★'; font-size: 10px; }
-.operador-badge[data-rol="operario"]::after { content: ' ✦'; font-size: 10px; }
+.operador-badge[data-rol="admin"]::after    { content: ' â˜…'; font-size: 10px; }
+.operador-badge[data-rol="operario"]::after { content: ' âœ¦'; font-size: 10px; }
 
-/* ─── LOGIN STITCH PRO — nuevos selectores ────────────────────────── */
+/* â”€â”€â”€ LOGIN STITCH PRO â€” nuevos selectores â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 /* Contenedor full-screen con fondo oscuro */
 .login-screen {
@@ -1076,7 +1092,7 @@ body {
   overflow: hidden;
 }
 
-/* Hero image — fondo con foto de vaca */
+/* Hero image â€” fondo con foto de vaca */
 .login-hero-bg {
   position: absolute;
   inset: 0;
@@ -1107,7 +1123,7 @@ body {
   background: rgba(19,31,23,0.20);
 }
 
-/* Contenido principal — se posiciona hacia abajo */
+/* Contenido principal â€” se posiciona hacia abajo */
 .login-content {
   position: relative;
   z-index: 1;
@@ -1122,7 +1138,7 @@ body {
   width: 100%;
 }
 
-/* Animación fade-in */
+/* AnimaciÃ³n fade-in */
 .animate-fade-in {
   animation: fadeIn 0.8s ease-out forwards;
 }
@@ -1149,7 +1165,7 @@ body {
   margin: 0;
 }
 
-/* Glass card — bottom sheet */
+/* Glass card â€” bottom sheet */
 .login-glass-card {
   width: 100%;
   background: rgba(255,255,255,0.03);
@@ -1169,7 +1185,7 @@ body {
   font-family: 'Manrope', sans-serif;
 }
 
-/* Grid dinámico de usuarios — adapta a cualquier cantidad */
+/* Grid dinÃ¡mico de usuarios â€” adapta a cualquier cantidad */
 .login-usuarios-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1227,14 +1243,14 @@ body {
   flex-direction: column;
   gap: 12px;
 }
-/* .login-input ya existe — reutiliza, solo se sobreescribe width */
+/* .login-input ya existe â€” reutiliza, solo se sobreescribe width */
 .login-glass-card .login-input {
   width: 100%;
   flex: none;
   height: 56px;
   box-sizing: border-box;
 }
-/* .login-btn-entrar ya existe — reutiliza */
+/* .login-btn-entrar ya existe â€” reutiliza */
 .login-glass-card .login-btn-entrar {
   width: 100%;
   height: 56px;
@@ -1287,7 +1303,7 @@ body {
   color: var(--rojo);
 }
 
-/* Botón redondo de grabación */
+/* BotÃ³n redondo de grabaciÃ³n */
 .btn-rec {
   width: 140px;
   height: 140px;
@@ -1404,7 +1420,7 @@ body {
   border-radius: 8px;
 }
 
-/* ─── FOTOS ───────────────────────────────────────────────────── */
+/* â”€â”€â”€ FOTOS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .foto-botones {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1453,7 +1469,7 @@ body {
   flex-direction: column;
 }
 
-/* Grilla de fotos — 3 columnas */
+/* Grilla de fotos â€” 3 columnas */
 .foto-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1498,7 +1514,7 @@ body {
   line-height: 1;
 }
 
-/* Botón eliminar en preview */
+/* BotÃ³n eliminar en preview */
 .foto-thumb-del {
   position: absolute;
   top: 4px;
@@ -1567,7 +1583,7 @@ body {
   white-space: nowrap;
 }
 
-/* ─── VIDEO PLAYER ─────────────────────────────────────────────── */
+/* â”€â”€â”€ VIDEO PLAYER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .video-player {
   width: 100%;
   border-radius: var(--radio);
@@ -1624,7 +1640,7 @@ body {
   white-space: nowrap;
 }
 
-/* ─── PUSH NOTIFICATION BANNER ────────────────────────────────── */
+/* â”€â”€â”€ PUSH NOTIFICATION BANNER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 #push-banner {
   position: fixed;
   bottom: calc(var(--nav-height) + 12px);
@@ -1713,7 +1729,7 @@ body {
   #input-peso     { font-size: 24px; }
 }
 
-/* ─── CALENDARIO DE HISTORIAL ──────────────────────────────────── */
+/* â”€â”€â”€ CALENDARIO DE HISTORIAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .cal-nav {
   display: flex;
   align-items: center;
@@ -1816,7 +1832,7 @@ body {
 }
 .cal-hoy .cal-dot { background: rgba(255,255,255,0.7); }
 
-/* Panel de detalle del día */
+/* Panel de detalle del dÃ­a */
 .cal-detalle {
   background: var(--gris-claro);
   border-radius: var(--radio);
@@ -1851,7 +1867,7 @@ body {
   justify-content: center;
 }
 
-/* ─── FEED DE ACTIVIDAD ─────────────────────────────────────────── */
+/* â”€â”€â”€ FEED DE ACTIVIDAD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .feed-item {
   border-left: 3px solid var(--gris-borde);
   padding: 8px 0 8px 12px;
@@ -1964,29 +1980,29 @@ body {
 .rodeo-of-stats{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .rodeo-stat-total{font-size:15px;font-weight:700;color:var(--texto)}
 .rodeo-stat-chip{background:var(--verde-suave);color:var(--verde-oscuro);border-radius:20px;padding:3px 10px;font-size:13px;font-weight:600}
-/* Animal card — Stitch bento style */
+/* Animal card â€” Stitch bento style */
 .rodeo-of-item{background:#ffffff;border-radius:20px;padding:16px;margin:6px 12px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 12px rgba(0,0,0,0.07);border:1px solid rgba(229,231,235,0.50);transition:transform 0.1s;-webkit-user-select:none;user-select:none}
 .rodeo-of-item:active{transform:scale(0.98)}
 .rodeo-of-ids{flex:1;min-width:0}
-/* Número grande — caravan */
+/* NÃºmero grande â€” caravan */
 .rodeo-of-boton{display:block;font-size:22px;font-weight:800;color:#1a5c30;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rodeo-of-caravana{display:block;font-size:12px;color:var(--texto-secundario);font-weight:500;margin-top:1px}
 .rodeo-of-info{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
-/* Badges tipo — Stitch spec */
+/* Badges tipo â€” Stitch spec */
 .rodeo-of-tipo,.rodeo-of-estado{padding:3px 10px;border-radius:6px;font-size:12px;font-weight:700}
 /* Tipo V */
 .rodeo-tipo-v{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
 /* Tipo VQ */
 .rodeo-tipo-vq,.rodeo-tipo-tn{background:#faf5ff;color:#7e22ce;border:1px solid #e9d5ff}
-/* Tipo V1 (Vacía 1) */
+/* Tipo V1 (VacÃ­a 1) */
 .rodeo-tipo-v1{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
 /* Tipo VA */
 .rodeo-tipo-va{background:#e8f5e9;color:#1a5c30;border:1px solid rgba(46,125,82,0.20)}
-/* Tipo T, TH, TM — tierra/naranja */
+/* Tipo T, TH, TM â€” tierra/naranja */
 .rodeo-tipo-t,.rodeo-tipo-th,.rodeo-tipo-tm{background:#fff7ed;color:#c2410c;border:1px solid #fed7aa}
-/* Estado Preñada */
+/* Estado PreÃ±ada */
 .rodeo-estado-p{background:#e8f5e9;color:#1a5c30;border-radius:12px;padding:12px 16px}
-/* Estado Vacía */
+/* Estado VacÃ­a */
 .rodeo-estado-v{background:#fff7ed;color:#c2410c;border-radius:12px;padding:12px 16px}
 /* Estado D (descarte) */
 .rodeo-estado-d{background:#fce4ec;color:#c62828;border-radius:12px;padding:12px 16px}
@@ -1997,14 +2013,14 @@ body {
 .rodeo-of-badge{padding:2px 7px;border-radius:20px;font-size:11px;font-weight:600;background:#e8f5e9;color:#1a5c30;border:1px solid rgba(46,125,82,0.20)}
 .rodeo-badge-no{background:#f9fafb;color:#6b7a6e;border:1px solid #e5e7eb}
 .rodeo-of-fecha{font-size:11px;color:var(--texto-secundario);white-space:nowrap}
-/* Botón editar — 48x48 Stitch */
+/* BotÃ³n editar â€” 48x48 Stitch */
 .rodeo-of-btn-editar{background:none;border:2px solid #e8f5e9;border-radius:14px;color:var(--verde-oscuro);font-size:16px;padding:0;width:48px;height:48px;cursor:pointer;flex-shrink:0;font-family:inherit;display:flex;align-items:center;justify-content:center}
 .rodeo-edit-seccion{margin-bottom:14px}
 .rodeo-edit-opciones{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .rodeo-edit-chip{padding:6px 14px;border-radius:20px;border:1.5px solid #ddd;background:#f9f9f9;color:var(--texto);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
 .rodeo-edit-chip.activo{background:var(--verde-oscuro);border-color:var(--verde-oscuro);color:#fff}
 
-/* Card tappable — efecto táctil */
+/* Card tappable â€” efecto tÃ¡ctil */
 .rodeo-of-item-tap {
   cursor: pointer;
   transition: background 0.12s, transform 0.1s;
@@ -2016,7 +2032,7 @@ body {
   transform: scale(0.985);
 }
 
-/* Chevron › para operarios */
+/* Chevron â€º para operarios */
 .rodeo-of-chevron {
   font-size: 22px;
   color: var(--gris);
@@ -2025,9 +2041,9 @@ body {
   line-height: 1;
 }
 
-/* ════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    MODAL DETALLE ANIMAL (solo lectura)
-   ════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .detalle-card {
   background: var(--blanco);
   border-radius: 14px;
@@ -2089,9 +2105,9 @@ body {
 }
 
 
-/* ════════════════════════════════════════════════════
-   LIGHTBOX — ver imagen completa
-   ════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   LIGHTBOX â€” ver imagen completa
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .lightbox-overlay {
   position: fixed;
   inset: 0;
@@ -2141,9 +2157,9 @@ body {
   box-shadow: 0 4px 16px rgba(0,0,0,0.25);
 }
 
-/* ════════════════════════════════════════════════════
-   CHIPS DE FILTRO — Rodeo por categoría
-   ════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   CHIPS DE FILTRO â€” Rodeo por categorÃ­a
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .rodeo-filtros-chips {
   display: flex;
   flex-wrap: wrap;
@@ -2173,9 +2189,9 @@ body {
 }
 .rodeo-filtro-chip.activo b { color: #fff; }
 
-/* ════════════════════════════════════════════════════
-   BOTÓN FLOTANTE + (agregar animal)
-   ════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   BOTÃ“N FLOTANTE + (agregar animal)
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .btn-flotante-agregar {
   position: fixed;
   bottom: 90px;
@@ -2203,11 +2219,11 @@ body {
 }
 .btn-flotante-agregar:active { transform: scale(0.95); }
 
-/* ════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    VIDEO PLAYER en el feed
-   ════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-/* Card contenedora del video — contiene el player */
+/* Card contenedora del video â€” contiene el player */
 .feed-item.feed-video {
   padding-bottom: 0;        /* el video ocupa el borde inferior */
   overflow: hidden;
@@ -2230,12 +2246,12 @@ body {
   background: #000;
   display: block;
   max-height: 340px;
-  object-fit: contain;      /* no distorsiona proporción */
+  object-fit: contain;      /* no distorsiona proporciÃ³n */
 }
 
-/* ════════════════════════════════════════════
-   TAB VIDEOS — lista y player
-   ════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   TAB VIDEOS â€” lista y player
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .video-item {
   background: var(--blanco);
   border-radius: var(--radio-grande);
@@ -2299,9 +2315,9 @@ body {
   white-space: nowrap;
 }
 
-/* ════════════════════════════════════════════
-   BOTÓN BORRAR MEDIA (solo admins)
-   ════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   BOTÃ“N BORRAR MEDIA (solo admins)
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .feed-item-header {
   position: relative;
 }
@@ -2331,9 +2347,9 @@ body {
   background: #fecaca;
 }
 
-/* ════════════════════════════════════════════════════
-   DETALLE ANIMAL — Bottom Sheet
-   ════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   DETALLE ANIMAL â€” Bottom Sheet
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .det-seccion-titulo {
   font-size: 11px;
   font-weight: 700;
@@ -2396,7 +2412,7 @@ body {
   margin-top: 1px;
 }
 
-/* Histórico */
+/* HistÃ³rico */
 .det-hist-fila {
   display: flex;
   justify-content: space-between;
@@ -2409,7 +2425,7 @@ body {
 .det-hist-fila .det-label  { text-transform: none; font-size: 12px; }
 .det-hist-fila .det-valor  { font-size: 13px; color: var(--verde-oscuro); }
 
-/* Tarjeta de animal clickeable — efecto tap */
+/* Tarjeta de animal clickeable â€” efecto tap */
 .rodeo-of-item-tap {
   cursor: pointer;
   transition: background 0.12s, transform 0.1s;
@@ -2420,16 +2436,16 @@ body {
   transform: scale(0.985);
 }
 
-/* Chevron para operarios (sin botón editar) */
+/* Chevron para operarios (sin botÃ³n editar) */
 .rodeo-of-chevron {
   font-size: 20px;
   color: var(--gris);
   flex-shrink: 0;
 }
 
-/* ════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    CHIPS DE VACUNAS
-   ════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .vac-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -2447,7 +2463,7 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Chips de vacunas — Stitch */
+/* Chips de vacunas â€” Stitch */
 .vac-chip.vac-pendiente {
   background: #f9fafb;
   border: 1px solid #e5e7eb;
@@ -2489,7 +2505,7 @@ body {
   font-weight: 500;
 }
 
-/* Acción "+ Registrar nueva" debajo de la fecha en chips aplicados */
+/* AcciÃ³n "+ Registrar nueva" debajo de la fecha en chips aplicados */
 .vac-accion {
   font-size: 10px;
   font-weight: 600;
@@ -2498,9 +2514,9 @@ body {
   margin-top: 1px;
 }
 
-/* ══════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    AGENDA / TAREAS
-══════════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 .agenda-header {
   display: flex;
@@ -2681,11 +2697,11 @@ body {
   opacity: .8;
 }
 
-/* ══════════════════════════════════════════════════════
-   MEJORAS APPLE REDESIGN — completado
-══════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   MEJORAS APPLE REDESIGN â€” completado
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-/* Recorrida items — aspecto iOS */
+/* Recorrida items â€” aspecto iOS */
 .recorrida-item {
   background: var(--bg-card);
   border-radius: var(--radio-grande);
@@ -2729,7 +2745,7 @@ body {
   background: var(--gris-claro);
 }
 
-/* Estado de sincronización en cards */
+/* Estado de sincronizaciÃ³n en cards */
 .sync-badge {
   display: inline-flex;
   align-items: center;
@@ -2744,7 +2760,7 @@ body {
 .sync-badge.sync-ok    { background: #e8f5e9; color: #2e7d32; }
 .sync-badge.sync-local { background: #fff3e0; color: #e65100; }
 
-/* Rodeo stats de inicio — iOS style */
+/* Rodeo stats de inicio â€” iOS style */
 .rodeo-inicio-stats {
   display: flex;
   gap: 8px;
@@ -2798,7 +2814,7 @@ body {
   font-weight: 700;
 }
 
-/* Botón Update SW — iOS style */
+/* BotÃ³n Update SW â€” iOS style */
 .btn-update-sw {
   width: 100%;
   background: var(--azul);
@@ -2818,7 +2834,7 @@ body {
   50%       { opacity: 0.82; }
 }
 
-/* Agenda — vacío state */
+/* Agenda â€” vacÃ­o state */
 .agenda-vacio {
   text-align: center;
   padding: 48px 24px;
@@ -2852,7 +2868,7 @@ body {
   color: #fff !important;
 }
 
-/* Feed item — sin actividad */
+/* Feed item â€” sin actividad */
 .feed-vacio {
   text-align: center;
   padding: 24px 0;
@@ -2869,7 +2885,7 @@ html { scroll-behavior: smooth; }
   padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
 }
 
-/* Animación global fadeIn — Stitch */
+/* AnimaciÃ³n global fadeIn â€” Stitch */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -2893,9 +2909,9 @@ html { scroll-behavior: smooth; }
   .recorrida-item { background: #1e261e; }
 }
 
-/* ══════════════════════════════════════════════════════════════
-   PANEL DE FILTROS AVANZADOS — Rodeo
-══════════════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   PANEL DE FILTROS AVANZADOS â€” Rodeo
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 /* Barra superior: total + botones */
 .rodeo-filtros-top {
@@ -2912,7 +2928,7 @@ html { scroll-behavior: smooth; }
   flex-shrink: 0;
 }
 
-/* Botón "⚙ Filtros" */
+/* BotÃ³n "âš™ Filtros" */
 .rodeo-btn-filtros {
   display: inline-flex;
   align-items: center;
@@ -2936,7 +2952,7 @@ html { scroll-behavior: smooth; }
 }
 .rodeo-btn-filtros:active { opacity: .8; }
 
-/* Badge numérico de filtros activos */
+/* Badge numÃ©rico de filtros activos */
 .filtros-badge {
   background: #ff3b30;
   color: #fff;
@@ -2949,7 +2965,7 @@ html { scroll-behavior: smooth; }
   line-height: 1.4;
 }
 
-/* Botón "✕ Limpiar" */
+/* BotÃ³n "âœ• Limpiar" */
 .rodeo-btn-limpiar {
   display: inline-flex;
   align-items: center;
@@ -2988,10 +3004,10 @@ html { scroll-behavior: smooth; }
   background: var(--borde);
 }
 
-/* Sección individual */
+/* SecciÃ³n individual */
 .filtro-seccion {}
 
-/* Header colapsable de sección */
+/* Header colapsable de secciÃ³n */
 .filtro-seccion-header {
   display: flex;
   align-items: center;
@@ -3018,7 +3034,7 @@ html { scroll-behavior: smooth; }
   line-height: 1;
 }
 
-/* Cuerpo de sección (chips) */
+/* Cuerpo de secciÃ³n (chips) */
 .filtro-seccion-body {
   padding: 10px 14px 14px;
   background: #fafbfa;
@@ -3063,7 +3079,7 @@ html { scroll-behavior: smooth; }
 }
 .filtro-chip.activo b { color: #fff; }
 
-/* Row toggle SÍ/NO vacunas */
+/* Row toggle SÃ/NO vacunas */
 .filtro-toggle-row {
   display: flex;
   align-items: center;
@@ -3079,7 +3095,7 @@ html { scroll-behavior: smooth; }
   letter-spacing: .4px;
 }
 
-/* Botones toggle SÍ / NO */
+/* Botones toggle SÃ / NO */
 .filtro-toggle-btns {
   display: flex;
   border-radius: 10px;
@@ -3121,11 +3137,11 @@ html { scroll-behavior: smooth; }
   .rodeo-btn-filtros      { background: #1e261e; border-color: #2a362a; color: #f0f0f0; }
 }
 
-/* ══════════════════════════════════════════════════
-   STITCH DESIGN SYSTEM — Componentes por tab
-══════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   STITCH DESIGN SYSTEM â€” Componentes por tab
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-/* ─── Helpers globales ───────────────────────── */
+/* â”€â”€â”€ Helpers globales â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .card-stitch {
   background: #ffffff;
   border-radius: 20px;
@@ -3160,7 +3176,7 @@ html { scroll-behavior: smooth; }
   color: #111827;
 }
 
-/* ─── Botón primario ─────────────────────────── */
+/* â”€â”€â”€ BotÃ³n primario â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .btn-stitch-primario {
   width: 100%;
   height: 52px;
@@ -3199,7 +3215,7 @@ html { scroll-behavior: smooth; }
 }
 .btn-stitch-secundario:active { background: #f9fafb; }
 
-/* ─── BASTÓN ───────────────────────────────── */
+/* â”€â”€â”€ BASTÃ“N â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .baston-caravana-display {
   background: #f9fafb;
   border: 1px solid #f3f4f6;
@@ -3233,7 +3249,7 @@ html { scroll-behavior: smooth; }
   box-sizing: border-box;
 }
 
-/* ─── BASTÓN: Manga card rediseñada ──────────────────────────────────────── */
+/* â”€â”€â”€ BASTÃ“N: Manga card rediseÃ±ada â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .manga-card { display: flex; flex-direction: column; gap: 18px; }
 
 .manga-peso-wrap { display: flex; flex-direction: column; gap: 4px; }
@@ -3276,14 +3292,14 @@ html { scroll-behavior: smooth; }
 }
 .manga-chip:active { transform: scale(.95); opacity: .8; }
 
-/* Chip activo — categoría/color */
+/* Chip activo â€” categorÃ­a/color */
 .manga-chip.activo {
   background: #1a5c30;
   border-color: #1a5c30;
   color: #fff;
 }
 
-/* Chip de vacuna activo — azul */
+/* Chip de vacuna activo â€” azul */
 .manga-chip-vac.activo {
   background: #1d4ed8;
   border-color: #1d4ed8;
@@ -3321,7 +3337,7 @@ html { scroll-behavior: smooth; }
 }
 .btn-guardar-grande:active { transform: scale(0.97); background: #2e7d52; }
 
-/* ─── RODEO filtros stitch ─────────────────────── */
+/* â”€â”€â”€ RODEO filtros stitch â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .filtros-stitch-card {
   background: #ffffff;
   border-radius: 20px;
@@ -3375,7 +3391,7 @@ html { scroll-behavior: smooth; }
   pointer-events: none;
 }
 
-/* ─── RECORRIDA ────────────────────────────── */
+/* â”€â”€â”€ RECORRIDA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .rec-card-principal {
   text-align: center;
   position: relative;
@@ -3591,7 +3607,7 @@ html { scroll-behavior: smooth; }
   font-variant-numeric: tabular-nums;
 }
 
-/* ─── INICIO ───────────────────────────────── */
+/* â”€â”€â”€ INICIO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .stat-icono-stitch {
   width: 32px;
   height: 32px;
@@ -3648,6 +3664,47 @@ html { scroll-behavior: smooth; }
 .rodeo-breakdown-item {
   display: flex;
   justify-content: space-between;
+  /* ── BASTÓN DESKTOP: 2 columnas (BLE+caravana izq, formulario der) ── */
+  .baston-desktop-cols {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 24px;
+    align-items: start;
+    width: 100%;
+  }
+
+  .baston-col-ble {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: sticky;
+    top: 84px;
+  }
+
+  .baston-col-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* ── Cards en desktop: quitar márgenes laterales ──────────────────── */
+  .card {
+    margin: 0 !important;
+  }
+
+  /* ── PUSH BANNER: no tapa el contenido ───────────────────────────── */
+  .push-banner {
+    position: relative !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: auto !important;
+    width: 100% !important;
+    border-radius: 16px !important;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.10) !important;
+  }
+
+  /* ══════════════ AGENDA DESKTOP – dos columnas ══════════════════════ */
   align-items: center;
   border-radius: 12px;
   padding: 12px 16px;
@@ -3665,7 +3722,7 @@ html { scroll-behavior: smooth; }
   font-variant-numeric: tabular-nums;
 }
 
-/* ─── INICIO: Indicadores de población por tipo ─────────────────────────────── */
+/* â”€â”€â”€ INICIO: Indicadores de poblaciÃ³n por tipo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .inicio-poblacion-wrap {
   margin-bottom: 16px;
@@ -3689,7 +3746,7 @@ html { scroll-behavior: smooth; }
   line-height: 1.1;
 }
 
-/* Grid 2 columnas — como la imagen */
+/* Grid 2 columnas â€” como la imagen */
 .inicio-tipos-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -3722,7 +3779,7 @@ html { scroll-behavior: smooth; }
   line-height: 1;
 }
 
-/* ─── VACUNACION ──────────────────────────────────────────────────────────── */
+/* â”€â”€â”€ VACUNACION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .vac-btn-acceso {
   flex: 1;
@@ -3810,7 +3867,7 @@ html { scroll-behavior: smooth; }
 .vac-alerta-amarillo{ background: #fffde7; color: #f57f17; border: 1px solid #fff9c4; }
 .vac-alerta-icono   { font-size: 20px; flex-shrink: 0; }
 
-/* ─── INICIO: Panel de Avisos y Alertas ──────────────────────────────────── */
+/* â”€â”€â”€ INICIO: Panel de Avisos y Alertas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 /* Skeleton de carga */
 .inicio-alerta-skeleton {
@@ -3819,7 +3876,7 @@ html { scroll-behavior: smooth; }
   padding: 8px 4px;
 }
 
-/* Card de alerta en Inicio — igual que vac-alerta-card pero sin margen */
+/* Card de alerta en Inicio â€” igual que vac-alerta-card pero sin margen */
 .inicio-alerta-item {
   border-radius: 12px;
   padding: 10px 14px;
@@ -4067,6 +4124,20 @@ html { scroll-behavior: smooth; }
 .vac-badge-obligatoria { background: #ffebee; color: #b71c1c; }
 .vac-badge-recomendada { background: #fff3e0; color: #e65100; }
 
+@media (min-width: 1024px) {
+  body {
+    display: flex;
+    flex-direction: row;
+    min-height: 100vh;
+    width: 100vw;
+    max-width: none;
+    margin: 0;
+    padding-bottom: 0;
+    background: #f1f5f0;
+    overflow-x: hidden;
+  }
+}
+
 /* PDF download button */
 .vac-btn-pdf {
   height: 36px;
@@ -4090,7 +4161,7 @@ html { scroll-behavior: smooth; }
   color: #fff;
 }
 
-/* ─── INSEMINACION / GESTACION ────────────────────────────────────────────── */
+/* â”€â”€â”€ INSEMINACION / GESTACION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .vac-btn-ins {
   height: 36px;
@@ -4156,6 +4227,14 @@ html { scroll-behavior: smooth; }
   padding: 3px 8px;
 }
 
+/* ── Cards más anchas en desktop ─────────────────────────────────────────────────── */
+  .card {
+    border-radius: 16px;
+    max-width: none;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
 /* Calculadora de parto en el modal */
 .vac-ins-calc {
   background: #e8f5e9;
@@ -4208,7 +4287,7 @@ html { scroll-behavior: smooth; }
 .vac-ins-vacuna-nombre { font-weight: 600; color: #111827; }
 .vac-ins-vacuna-fecha  { color: #2e7d52; font-weight: 700; }
 
-/* ─── VACUNACION MASIVA ──────────────────────────────────────────────────── */
+/* ── VACUNACION MASIVA ────────────────────────────────────────────────────────── */
 
 .vac-btn-masiva {
   height: 32px;
@@ -4319,6 +4398,52 @@ html { scroll-behavior: smooth; }
   color: #1a5c30;
   text-align: center;
 }
+
+/* ══════════════ INICIO DESKTOP – dos columnas ═══════════════════════ */
+  #tab-inicio {
+    gap: 24px;
+  }
+
+  /* Stats en fila horizontal */
+  #card-rodeo-stats .card-titulo {
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+
+  #rodeo-stats-inicio {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  /* Grid de dos columnas para inicio: columna principal + columna lateral */
+  .inicio-desktop-cols {
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    gap: 24px;
+    align-items: start;
+    width: 100%;
+  }
+
+  /* Hero de inicio más compacto y ancho completo */
+  .inicio-hero {
+    padding: 28px 36px;
+    border-radius: 20px;
+  }
+
+  /* Tipos de animales en grid de 4 columnas en desktop */
+  .inicio-tipos-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+
+  /* Stats del día en fila */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
 
 /* --- RASPADO PREPUCIAL (Toros) -------------------------------------------- */
 
@@ -4488,7 +4613,7 @@ html { scroll-behavior: smooth; }
   line-height: 1.4;
 }
 
-/* ─── 3 MÓDULOS: VACUNACIÓN · INSEMINACIÓN · PESADAS ─────────────────────── */
+/* â”€â”€â”€ 3 MÃ“DULOS: VACUNACIÃ“N Â· INSEMINACIÃ“N Â· PESADAS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 /* Tabs del panel de Pesadas */
 .peso-tab {
@@ -4561,7 +4686,7 @@ html { scroll-behavior: smooth; }
   margin: 0;
 }
 
-/* Sugerencias de búsqueda en pesada grupal */
+/* Sugerencias de bÃºsqueda en pesada grupal */
 .peso-grup-sugerencia {
   display: flex;
   align-items: center;
@@ -4625,7 +4750,7 @@ html { scroll-behavior: smooth; }
   text-align: center; padding: 16px 0; margin: 0;
 }
 
-/* Card de animal seleccionado (inseminación) */
+/* Card de animal seleccionado (inseminaciÃ³n) */
 .ins-animal-card {
   display: flex;
   align-items: center;
@@ -4638,9 +4763,9 @@ html { scroll-behavior: smooth; }
 .ins-animal-card strong { font-size: 16px; font-weight: 800; color: #1d4ed8; }
 .ins-animal-card span   { font-size: 13px; color: #1e40af; }
 
-/* ─── BLE BASTÓN EN PESADAS ──────────────────────────────────────────────── */
+/* â”€â”€â”€ BLE BASTÃ“N EN PESADAS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
-/* Botón conectar bastón dentro del panel de Pesadas */
+/* BotÃ³n conectar bastÃ³n dentro del panel de Pesadas */
 .peso-ble-btn {
   height: 34px;
   padding: 0 14px;
@@ -4670,7 +4795,7 @@ html { scroll-behavior: smooth; }
   border-color: #7c5c1e;
 }
 
-/* Animación de pulso para el indicador de escaneo */
+/* AnimaciÃ³n de pulso para el indicador de escaneo */
 @keyframes pulse {
   0%   { opacity: 1; transform: scale(1); }
   50%  { opacity: 0.5; transform: scale(1.2); }
@@ -4686,7 +4811,7 @@ html { scroll-behavior: smooth; }
   100% { background: #fff7ed; transform: scale(1); }
 }
 
-/* ─── Desktop wrapper classes — neutras en mobile (compatible con Safari/iOS) ── */
+/* â”€â”€â”€ Desktop wrapper classes â€” neutras en mobile (compatible con Safari/iOS) â”€â”€ */
 .rodeo-desktop-cols {
   display: block;
 }
@@ -4700,7 +4825,7 @@ html { scroll-behavior: smooth; }
   display: none; /* solo en desktop */
 }
 .rodeo-panel-placeholder {
-  display: none; /* solo en desktop, cuando ningún panel está abierto */
+  display: none; /* solo en desktop, cuando ningÃºn panel estÃ¡ abierto */
 }
 .inicio-desktop-cols,
 .agenda-desktop-cols,
@@ -4709,23 +4834,25 @@ html { scroll-behavior: smooth; }
   display: block;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   LAYOUT DESKTOP (≥ 1024px)
-   El layout móvil NO cambia. Todo lo de abajo es exclusivo para
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   LAYOUT DESKTOP (â‰¥ 1024px)
+   El layout mÃ³vil NO cambia. Todo lo de abajo es exclusivo para
    pantallas grandes (iPad horizontal, laptop, desktop).
-═══════════════════════════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 @media (min-width: 1024px) {
 
-  /* ── Body y estructura general ───────────────────────────────── */
+  /* â”€â”€ Body y estructura general â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   body {
     display: flex;
     flex-direction: row;
     min-height: 100vh;
     background: #f1f5f0;
+    max-width: none;     /* ← CRÍTICO: anula el max-width:480px mobile */
+    padding-bottom: 0;  /* sin padding-bottom para nav en desktop */
   }
 
 
-  /* ── Sidebar de navegación izquierdo ─────────────────────────── */
+  /* â”€â”€ Sidebar de navegaciÃ³n izquierdo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .bottom-nav {
     position: fixed;
     left: 0;
@@ -4751,7 +4878,7 @@ html { scroll-behavior: smooth; }
 
   /* Logo / branding en el sidebar */
   .bottom-nav::before {
-    content: '🐄 RodeoApp';
+    content: 'ðŸ„ RodeoApp';
     position: absolute;
     top: 0;
     left: 0;
@@ -4813,7 +4940,7 @@ html { scroll-behavior: smooth; }
     filter: none;
   }
 
-  /* ── Header ─────────────────────────────────────────────────── */
+  /* â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .header {
     position: fixed;
     top: 0;
@@ -4838,7 +4965,7 @@ html { scroll-behavior: smooth; }
     flex: 1;
   }
 
-  /* ── Main content — desplazado del sidebar y header ─────────── */
+  /* â”€â”€ Main content â€” desplazado del sidebar y header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .main {
     margin-left: 200px;
     margin-top: 64px;
@@ -4850,19 +4977,22 @@ html { scroll-behavior: smooth; }
     gap: 20px;
   }
 
-  /* ── Tab panels ─────────────────────────────────────────────── */
+  /* ── Tab panels ───────────────────────────────────────────────────────────── */
   .tab-panel {
-    gap: 20px;
+    gap: 24px;
+    width: 100%;
+    min-width: 0;
+    align-self: stretch;
   }
 
-  /* ── Cards más anchas en desktop ─────────────────────────────── */
+  /* ── Cards más anchas en desktop ──────────────────────────────────────────── */
   .card {
     border-radius: 16px;
   }
 
-  /* ═══════════ RODEO DESKTOP — lista fija a la IZQUIERDA ══════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â• RODEO DESKTOP â€” lista fija a la IZQUIERDA â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   /*
-   * Lista de animales: FIJA a la izquierda (después del sidebar)
+   * Lista de animales: FIJA a la izquierda (despuÃ©s del sidebar)
    * Paneles (Sanidad/Ins/Pesadas): se abren a la DERECHA en el espacio libre
    */
 
@@ -4882,10 +5012,10 @@ html { scroll-behavior: smooth; }
     display: block;
   }
 
-  /* Lista de animales: FIJA a la izquierda, después del sidebar */
+  /* Lista de animales: FIJA a la izquierda, despuÃ©s del sidebar */
   .rodeo-desktop-lista {
     position: fixed !important;
-    left: 200px;   /* inmediatamente después del sidebar */
+    left: 200px;   /* inmediatamente despuÃ©s del sidebar */
     top: 84px;     /* debajo del header fijo */
     bottom: 24px;
     width: 420px;
@@ -4899,7 +5029,7 @@ html { scroll-behavior: smooth; }
     flex-direction: column;
   }
 
-  /* Header verde de la lista — sticky dentro de la lista */
+  /* Header verde de la lista â€” sticky dentro de la lista */
   .rodeo-desktop-lista-header {
     background: #0f5228;
     color: #fff;
@@ -4942,7 +5072,7 @@ html { scroll-behavior: smooth; }
     to   { opacity: 1; transform: translateX(0); }
   }
 
-  /* Placeholder visible cuando ningún panel está abierto */
+  /* Placeholder visible cuando ningÃºn panel estÃ¡ abierto */
   .rodeo-panel-placeholder {
     display: flex;
     flex-direction: column;
@@ -4955,13 +5085,13 @@ html { scroll-behavior: smooth; }
     padding: 20px;
   }
 
-  /* Ocultar placeholder cuando un panel está abierto — :has() */
+  /* Ocultar placeholder cuando un panel estÃ¡ abierto â€” :has() */
   .rodeo-desktop-panel-col:has(.vac-panel:not(.oculto)) .rodeo-panel-placeholder {
     display: none;
   }
 
 
-  /* ═══════════ INICIO DESKTOP — dos columnas ═════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â• INICIO DESKTOP â€” dos columnas â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   #tab-inicio {
     gap: 20px;
   }
@@ -4981,18 +5111,36 @@ html { scroll-behavior: smooth; }
   /* Grid de dos columnas para inicio */
   .inicio-desktop-cols {
     display: grid;
-    grid-template-columns: 1fr 380px;
-    gap: 20px;
+    grid-template-columns: 1fr 400px;
+    gap: 24px;
     align-items: start;
+    width: 100%;
   }
 
-  /* Hero de inicio más compacto */
+  /* Columnas internas de inicio */
+  .inicio-col-main,
+  .inicio-col-side {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .inicio-col-side {
+    position: sticky;
+    top: 84px;
+    max-height: calc(100vh - 96px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-bottom: 8px;
+  }
+
+  /* Hero de inicio más amplio en desktop */
   .inicio-hero {
-    padding: 24px 28px;
-    border-radius: 16px;
+    padding: 28px 32px;
+    border-radius: 20px;
   }
 
-  /* ═══════════ AGENDA DESKTOP — dos columnas ═════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â• AGENDA DESKTOP â€” dos columnas â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   .agenda-desktop-cols {
     display: grid;
     grid-template-columns: 380px 1fr;
@@ -5023,9 +5171,9 @@ html { scroll-behavior: smooth; }
     overflow-y: auto;
   }
 
-  /* ── Misc desktop ─────────────────────────────────────────────── */
+  /* â”€â”€ Misc desktop â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
-  /* Modales más centrados y no full-screen */
+  /* Modales mÃ¡s centrados y no full-screen */
   .vac-modal-card {
     max-width: 560px;
     border-radius: 20px;
@@ -5037,7 +5185,7 @@ html { scroll-behavior: smooth; }
     display: flex;
   }
 
-  /* Scrollbars más lindos en desktop */
+  /* Scrollbars mÃ¡s lindos en desktop */
   .rodeo-desktop-lista::-webkit-scrollbar,
   .rodeo-desktop-panel::-webkit-scrollbar,
   .agenda-desktop-lista::-webkit-scrollbar,
@@ -5052,7 +5200,7 @@ html { scroll-behavior: smooth; }
     border-radius: 3px;
   }
 
-  /* ── Todos los tabs: cards usan ancho completo en desktop ───────── */
+  /* â”€â”€ Todos los tabs: cards usan ancho completo en desktop â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .card {
     margin: 0;
     width: 100%;
@@ -5065,14 +5213,14 @@ html { scroll-behavior: smooth; }
 
 } /* fin @media (min-width: 1024px) */
 
-/* ═══════════════════════════════════════════════════════════════════
-   PANELES DESKTOP — position:fixed cuando están abiertos (≥1024px)
-   Los paneles (Sanidad/Inseminación/Pesadas) se posicionan sobre la
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   PANELES DESKTOP â€” position:fixed cuando estÃ¡n abiertos (â‰¥1024px)
+   Los paneles (Sanidad/InseminaciÃ³n/Pesadas) se posicionan sobre la
    columna derecha del layout de dos columnas. Sin mover el DOM.
-═══════════════════════════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 @media (min-width: 1024px) {
 
-  /* Cuando un panel está abierto: aparece fijo sobre la columna derecha */
+  /* Cuando un panel estÃ¡ abierto: aparece fijo sobre la columna derecha */
   /* sidebar(200) + padding(28) + lista(420) + gap(20) = 668px desde izquierda */
   #panel-vacunacion:not(.oculto),
   #panel-inseminacion:not(.oculto),
@@ -5080,14 +5228,14 @@ html { scroll-behavior: smooth; }
     position: fixed !important;
     left: 668px;
     right: 20px;
-    top: 84px;   /* header fijo (64px) + pequeño margen */
+    top: 84px;   /* header fijo (64px) + pequeÃ±o margen */
     bottom: 20px;
     z-index: 300;
     border-radius: 16px !important;
     box-shadow: 0 8px 32px rgba(0,0,0,0.18) !important;
     overflow-y: auto;
     padding-bottom: 20px;
-    /* Animación de entrada */
+    /* AnimaciÃ³n de entrada */
     animation: panelSlideIn 0.2s ease;
   }
 
@@ -5104,11 +5252,54 @@ html { scroll-behavior: smooth; }
     display: none;
   }
 
-  /* Fondo semi-transparente detrás del panel (click para cerrar) */
+  /* Fondo semi-transparente detrÃ¡s del panel (click para cerrar) */
   #panel-vacunacion:not(.oculto)::before,
   #panel-inseminacion:not(.oculto)::before,
   #panel-pesadas:not(.oculto)::before {
-    display: none; /* sin overlay — el panel derecho es visible detrás */
+    display: none; /* sin overlay â€” el panel derecho es visible detrÃ¡s */
   }
 
 } /* fin paneles desktop */
+
+/* BASTON DESKTOP - dos columnas (agregado por audit script) */
+@media (min-width: 1024px) {
+  .baston-desktop-cols {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 24px;
+    align-items: start;
+    width: 100%;
+  }
+  .baston-col-ble {
+    position: sticky;
+    top: 88px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .baston-col-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  /* RECORRIDA DESKTOP - dos columnas */
+  .recorrida-desktop-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+    width: 100%;
+  }
+  .recorrida-col-grabadora {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: sticky;
+    top: 88px;
+  }
+  .recorrida-col-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+}

@@ -92,7 +92,10 @@ export async function sincronizarPendientes() {
     const pendientes = await obtenerPendientesSync();
     console.log(`[Sync] Sincronizando ${pendientes.length} registros pendientes...`);
 
-    for (const item of pendientes) {
+    // Ignorar registros con demasiados intentos fallidos (evitar loops infinitos)
+    const sinExcederLimite = pendientes.filter(item => (item.intentos || 0) < 5);
+
+    for (const item of sinExcederLimite) {
       try {
         const payload = JSON.parse(item.payload);
         const respuesta = await _enviarAlServidor(item.tabla, payload);
@@ -101,10 +104,11 @@ export async function sincronizarPendientes() {
           await marcarComoSincronizado(item.tabla, item.registro_uuid, item.id);
           exitosos++;
         } else if (respuesta.conflicto) {
-          // Marcar como conflicto para revisión manual
+          // Marcar como conflicto para revisión manual y eliminar de la cola
           await db[item.tabla]
             .where('uuid').equals(item.registro_uuid)
             .modify({ sincronizado: 2 }); // 2 = conflicto
+          await db.sync_queue.delete(item.id); // no reintentar: el servidor ya lo procesó
           fallidos++;
         }
       } catch (error) {

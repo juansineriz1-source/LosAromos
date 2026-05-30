@@ -215,10 +215,12 @@ export async function contarPendientes() {
  * Obtiene el historial de pesajes de un animal por su caravana.
  */
 export async function historialAnimal(caravana) {
-  return db.registros_manga
+  // .reverse() en Dexie invierte el cursor del índice primario, no el campo de sortBy.
+  // La forma correcta es obtener el array y luego invertirlo.
+  const registros = await db.registros_manga
     .where('caravana').equals(caravana)
-    .reverse()
     .sortBy('timestamp_local');
+  return registros.reverse(); // más reciente primero
 }
 
 export default db;

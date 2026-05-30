@@ -31,13 +31,12 @@ core.clientsClaim();
 precaching.precacheAndRoute([
   { url: '/', revision: '1' },
   { url: '/index.html', revision: '1' },
-  { url: '/css/estilos.css', revision: '1' },
-  { url: '/js/app.js', revision: '1' },
-  { url: '/js/db.js', revision: '1' },
-  { url: '/js/bluetooth.js', revision: '1' },
-  { url: '/js/sync.js', revision: '1' },
+  { url: '/estilos.css', revision: '1' },   // raíz, no /css/
+  { url: '/app.js', revision: '1' },        // raíz, no /js/
+  { url: '/db.js', revision: '1' },
+  { url: '/bluetooth.js', revision: '1' },
+  { url: '/sync.js', revision: '1' },
   { url: '/manifest.json', revision: '1' },
-  // Dexie desde CDN (se cachea en primera visita)
 ]);
 
 // ─── Estrategia Cache First para assets estáticos ──────────────────────────

@@ -1,5 +1,5 @@
 # CONTEXTO TÉCNICO — RodeoApp Los Aromos
-**Última actualización:** 2026-05-28 (auditoría .agent_skills + fixes db.js + layout desktop)
+**Última actualización:** 2026-05-30 (auditoría desktop layout + CSS variables + documentación Mermaid)
 
 **Repo:** https://github.com/juansineriz1-source/LosAromos  
 **Cuenta GitHub:** juansineriz1-source  
@@ -453,7 +453,10 @@ Reproducción: <video> con src=/api/media-proxy?key=video/...
 | **`historialAnimal` devolvía orden incorrecto** | **`.reverse().sortBy()` en Dexie — sortBy ignora cursor direction** | **`.toArray().sort()` manual (db.js)** |
 | **Fecha de registro manga con día equivocado** | **`new Date().toISOString()` devuelve UTC → en Argentina noche = día siguiente** | **`toLocaleDateString('en-CA', {timeZone:'America/Argentina/Buenos_Aires'})`** |
 | **`pesos-modulo.js`, `fotos-animal.js`, `agenda.js` no precacheados** | **Faltaban en la lista del SW** | **Agregados a `precaching.precacheAndRoute` en sw.js rev 70** |
-| **Datos del rodeo en blanco cuando offline** | **`/api/*` sin estrategia de caché en SW** | **`NetworkFirst` para `/api/*` (excepto `/api/sincronizar`) en sw.js** |
+| **Datos del rodeo en blanco cuando offline** | **`/api/*` sin estrategia de caché en SW** | **`NetworkFirst` para `/api/*` (excepto `/api/sincronizar`) en sw.js rev 70** |
+| **Tab bastón/recorrida en BLANCO en desktop** | **`body { max-width:480px }` mobile no sobreescrito en desktop media query** | **Agregado `max-width: none` + `padding-bottom: 0` a `body` en `@media (min-width:1024px)`** |
+| **Variable CSS `--texto-principal` no definida** | **Faltaba en la lista de aliases de `:root`** | **Agregada `--texto-principal: #1a5c30` en bloque de aliases** |
+| **Tab recorrida sin layout desktop 2col** | **No tenía wrapper `recorrida-desktop-cols` en HTML** | **Agregado wrapper + columnas CSS `1fr 1fr` en media query desktop** |
 
 ---
 
@@ -544,7 +547,7 @@ if (!window.jspdf) {
 }
 ```
 
-### Service Worker — revision 70
+### Service Worker — revision 71
 - **Archivos precacheados completos:** todos los módulos JS incluyendo `pesos-modulo.js`, `fotos-animal.js`, `agenda.js`, `rodeo-chips.css`.
 - **NetworkFirst para `/api/*`:** rodeo, vacunas y pesos ahora muestran datos cacheados cuando offline (timeout 8s, caché 24h).
 
@@ -574,6 +577,7 @@ if (!window.jspdf) {
 | `596910b` | Fix layout desktop: lista fija izquierda (200px sidebar + 420px lista) |
 | `ac0c36e` | Emoji toro 🐂 en lista Rodeo (T=🐂, TM=🐃, resto=🐄) + cards ancho completo desktop |
 | `9ae2882` | **Auditoría .agent_skills:** fuentes no-blocking + Dexie defer + jsPDF on-demand + fix db.js (historialAnimal + TZ Argentina) + SW rev70 (precache completo + NetworkFirst /api/*) |
+| `[próximo]` | **Auditoría 2026-05-30:** body max-width:none desktop + --texto-principal + recorrida 2cols + SW rev71 |
 
 ---
 

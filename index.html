@@ -8,10 +8,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="description" content="Registro ganadero offline para manga">
   <title>RodeoApp</title>
-  <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="/css/estilos.css">
-  <!-- Dexie.js desde CDN — se cachea en primera visita -->
-  <script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js"></script>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="estilos.css">
+  <!-- Dexie.js se importa via ESM en db.js (sin script tag para evitar conflicto con módulos) -->
 </head>
 <body>
 
@@ -146,7 +145,7 @@
         💾 GUARDAR
       </button>
 
-      <div style="height: 10px;"></div>
+      <div class="btn-gap"></div>
 
       <button class="btn btn-secundario" id="btn-limpiar">
         🔄 Limpiar / Siguiente animal
@@ -162,7 +161,7 @@
         </button>
         <span id="contador-pendientes"></span>
       </div>
-      <p style="font-size: 12px; color: #6b7280; margin-top: 8px; text-align: center;">
+      <p class="texto-ayuda">
         Los datos se guardan localmente y se envían automáticamente cuando vuelve la señal.
       </p>
     </section>
@@ -170,7 +169,7 @@
   </main>
 
   <!-- ═══════════════════════ SCRIPTS ══════════════════════════════ -->
-  <script type="module" src="/js/app.js"></script>
+  <script type="module" src="app.js"></script>
 
 </body>
 </html>

@@ -267,7 +267,7 @@ function poblarSelects() {
 async function actualizarContadorPendientes() {
   const { total } = await contarPendientes();
   $('contador-pendientes').textContent = total > 0 ? `${total} pendiente${total !== 1 ? 's' : ''}` : '';
-  $('btn-sync').style.display = total > 0 ? 'block' : 'block'; // siempre visible
+  $('btn-sync').style.display = total > 0 ? 'block' : 'none'; // ocultar si no hay pendientes
 }
 
 function limpiarFormulario() {

@@ -193,3 +193,7 @@ const hora  = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: 
 | 2026-05-28 | Fecha de registro manga con día equivocado (noche ARG) | `toISOString()` = UTC → corregido a TZ Argentina |
 | 2026-05-28 | 3 módulos JS faltaban en precache SW | Agregados `pesos-modulo.js`, `fotos-animal.js`, `agenda.js`, `rodeo-chips.css` al precache |
 | 2026-05-28 | Datos del rodeo en blanco offline | `/api/*` sin estrategia de caché en SW → agregado `NetworkFirst` (8s timeout, 24h caché) |
+| 2026-05-30 | Tab bastón y otros tabs en BLANCO en desktop | `body { max-width:480px }` mobile nunca se sobreescribía en `@media (min-width:1024px)` → agregado `max-width: none` + `padding-bottom: 0` al body en el media query |
+| 2026-05-30 | Variables CSS faltantes en producción (`--texto-principal`, `--verde`, etc.) | Variables alias ya existían localmente; `--texto-principal` faltaba → agregada en `:root` |
+| 2026-05-30 | Recorrida tab sin layout desktop | No tenía wrapper `recorrida-desktop-cols` en HTML → agregados wrappers + CSS grid `1fr 1fr` |
+| 2026-05-30 | CSS `baston-desktop-cols` anidado erróneamente dentro de `.rodeo-breakdown-item {}` | Se detectó nesting CSS inválido en línea ~3668. El bloque correcto ahora está en el media query `@media (min-width:1024px)` al final del archivo |

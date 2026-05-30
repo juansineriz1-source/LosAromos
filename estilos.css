@@ -1,62 +1,104 @@
 /* ═══════════════════════════════════════════════════════════════════
-   estilos.css — RodeoApp
+   estilos.css — RodeoApp v2
    Diseñado para: uso en la manga con guantes, sol directo, pantallas sucias.
    Principios: botones enormes, contraste alto, tipografía legible a distancia.
+
+   DESIGN REVIEW FIXES (gstack-style):
+   [1] Tipografía: Inter (Google Fonts) en lugar de system-ui genérico
+   [2] Paleta: verde más vibrante y tierra más cálido con mejor contraste
+   [3] Header: gradiente sutil en lugar de color plano
+   [4] Cards: sombra mejorada con color, separación visual más clara
+   [5] Botón GUARDAR: más prominente, con animación de pulso cuando listo
+   [6] Estado BT desconectado: era invisible (texto blanco sobre blanco)
+   [7] Dark mode: corregido (var(--texto) dentro de @media no funciona)
+   [8] Historial: mejor visual por ítem, colores de estado en chips
+   [9] Contador pendientes: badge animado cuando hay > 0
+   [10] Select: flecha personalizada que se ve en Android
    ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── Fuente ─────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
 
 /* ─── Reset y variables ─────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --verde: #1a7a3a;
-  --verde-oscuro: #0f5228;
-  --verde-claro: #e8f5e9;
-  --tierra: #8B5E3C;
-  --tierra-claro: #f5efe8;
-  --amarillo: #f59e0b;
-  --rojo: #dc2626;
-  --azul: #1d4ed8;
-  --azul-bt: #1a56db;
-  --gris: #6b7280;
-  --gris-claro: #f3f4f6;
-  --texto: #111827;
-  --blanco: #ffffff;
+  /* Paleta principal — más vibrante que antes */
+  --verde:        #16a34a;   /* verde primario — mejorado en saturación */
+  --verde-oscuro: #14532d;   /* header */
+  --verde-medio:  #166534;   /* hover states */
+  --verde-claro:  #dcfce7;
+  --verde-glow:   rgba(22, 163, 74, 0.25);
 
-  --radio: 12px;
-  --radio-grande: 20px;
-  --sombra: 0 4px 12px rgba(0,0,0,0.15);
+  --tierra:       #92400e;   /* marrón tierra — más oscuro = más legible */
+  --tierra-medio: #b45309;
+  --tierra-claro: #fef3c7;
+
+  --amarillo:     #d97706;
+  --rojo:         #dc2626;
+  --rojo-claro:   #fee2e2;
+  --azul:         #1d4ed8;
+  --azul-bt:      #2563eb;
+  --azul-glow:    rgba(37, 99, 235, 0.2);
+
+  --gris-100: #f3f4f6;
+  --gris-200: #e5e7eb;
+  --gris-400: #9ca3af;
+  --gris-600: #4b5563;
+  --gris-900: #111827;
+
+  --texto:   #111827;
+  --blanco:  #ffffff;
+  --fondo:   #f0f4ef;   /* [2] fondo ligeramente verde en vez de #e8ede6 */
+
+  /* Sombras con color */
+  --sombra-sm:  0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+  --sombra:     0 4px 16px rgba(0,0,0,0.10), 0 2px 4px rgba(0,0,0,0.06);
+  --sombra-lg:  0 10px 30px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.08);
+  --sombra-verde: 0 4px 16px rgba(22, 163, 74, 0.30);
+
+  --radio:       12px;
+  --radio-grande: 18px;
+  --radio-xl:    24px;
 
   /* Tamaños para uso con guantes */
-  --alto-boton: 64px;
-  --alto-input: 60px;
+  --alto-boton:  64px;
+  --alto-input:  60px;
+  --font-base:   16px;
   --font-grande: 20px;
   --font-enorme: 28px;
 }
 
-html { font-size: 16px; -webkit-tap-highlight-color: transparent; }
+/* ─── Base ──────────────────────────────────────────────────────── */
+html {
+  font-size: 16px;
+  -webkit-tap-highlight-color: transparent;
+  scroll-behavior: smooth;
+}
 
 body {
-  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
-  background: #e8ede6;
+  font-family: 'Inter', -apple-system, 'Segoe UI', system-ui, sans-serif; /* [1] */
+  background: var(--fondo);                                               /* [2] */
   color: var(--texto);
   min-height: 100vh;
   max-width: 480px;
   margin: 0 auto;
-  padding-bottom: 2rem;
+  padding-bottom: 2.5rem;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* ─── Header ────────────────────────────────────────────────────── */
 .header {
-  background: var(--verde-oscuro);
+  background: linear-gradient(135deg, var(--verde-oscuro) 0%, #1a6b3a 100%); /* [3] */
   color: var(--blanco);
-  padding: 12px 16px;
+  padding: 14px 16px;
   position: sticky;
   top: 0;
   z-index: 100;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  box-shadow: var(--sombra);
+  gap: 10px;
+  box-shadow: 0 4px 20px rgba(20, 83, 45, 0.4);
 }
 
 .header-top {
@@ -67,13 +109,17 @@ body {
 
 .app-titulo {
   font-size: 22px;
-  font-weight: 700;
+  font-weight: 900;          /* [1] Inter 900 es más impactante que 700 */
   letter-spacing: -0.5px;
+  line-height: 1.1;
 }
 
 .app-subtitulo {
-  font-size: 12px;
-  opacity: 0.7;
+  font-size: 11px;
+  font-weight: 500;
+  opacity: 0.65;
+  letter-spacing: 0.3px;
+  margin-top: 2px;
 }
 
 .header-info {
@@ -85,62 +131,84 @@ body {
 
 /* ─── Indicadores de estado ─────────────────────────────────────── */
 .estado-red {
-  font-size: 13px;
-  font-weight: 600;
-  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 11px;
   border-radius: 20px;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  letter-spacing: 0.2px;
+  transition: background 0.3s, color 0.3s;
 }
-.estado-red.online { background: #dcfce7; color: #166534; }
-.estado-red.offline { background: #fee2e2; color: #991b1b; }
-.estado-red.sincronizando { background: #fef3c7; color: #92400e; }
-.estado-red.advertencia { background: #fef3c7; color: #92400e; }
 
+.estado-red.online      { background: #bbf7d0; color: #14532d; }
+.estado-red.offline     { background: #fecaca; color: #7f1d1d; }
+.estado-red.sincronizando { background: #fde68a; color: #78350f; animation: pulso-badge 1s infinite; }
+.estado-red.advertencia { background: #fde68a; color: #78350f; }
+
+/* [6] Fix: .desconectado tenía texto blanco invisible sobre fondo translúcido */
 .estado-bt {
-  font-size: 13px;
-  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 11px;
   border-radius: 20px;
-  background: rgba(255,255,255,0.15);
-  color: var(--blanco);
+  letter-spacing: 0.2px;
+  transition: all 0.3s;
 }
-.estado-bt.conectado { background: #22c55e; color: #fff; }
-.estado-bt.buscando { background: var(--amarillo); color: #1a1a1a; }
-.estado-bt.error { background: var(--rojo); color: #fff; }
+.estado-bt.desconectado { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.75); border: 1px solid rgba(255,255,255,0.2); }
+.estado-bt.conectado    { background: #22c55e; color: #fff; box-shadow: 0 2px 8px rgba(34,197,94,0.4); }
+.estado-bt.buscando     { background: #fbbf24; color: #1a1a1a; animation: pulso-badge 0.8s infinite; }
+.estado-bt.reconectando { background: #fbbf24; color: #1a1a1a; animation: pulso-badge 0.8s infinite; }
+.estado-bt.error        { background: var(--rojo); color: #fff; }
+
+@keyframes pulso-badge {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.65; }
+}
 
 .operador-badge {
   font-size: 12px;
-  background: rgba(255,255,255,0.2);
-  padding: 4px 10px;
+  font-weight: 600;
+  background: rgba(255,255,255,0.18);
+  padding: 5px 11px;
   border-radius: 20px;
   color: var(--blanco);
+  border: 1px solid rgba(255,255,255,0.15);
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ─── Contenedor principal ──────────────────────────────────────── */
 .main {
-  padding: 12px;
+  padding: 14px 12px;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-/* ─── Tarjetas / Secciones ──────────────────────────────────────── */
+/* ─── Cards ─────────────────────────────────────────────────────── */
 .card {
   background: var(--blanco);
-  border-radius: var(--radio-grande);
-  padding: 16px;
+  border-radius: var(--radio-grande);   /* [4] */
+  padding: 18px 16px;
   box-shadow: var(--sombra);
+  border: 1px solid rgba(0,0,0,0.04);   /* [4] borde sutil que da profundidad */
+  transition: box-shadow 0.2s;
 }
 
 .card-titulo {
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--gris);
-  margin-bottom: 12px;
+  letter-spacing: 0.8px;                /* [1] más separación = más legible */
+  color: var(--gris-400);
+  margin-bottom: 14px;
 }
 
-/* ─── Botones (GRANDES para uso con guantes) ────────────────────── */
+/* ─── Botones ────────────────────────────────────────────────────── */
 .btn {
   display: block;
   width: 100%;
@@ -148,40 +216,77 @@ body {
   padding: 12px 20px;
   border: none;
   border-radius: var(--radio);
+  font-family: inherit;
   font-size: var(--font-grande);
   font-weight: 700;
   cursor: pointer;
   text-align: center;
-  transition: transform 0.1s, opacity 0.1s;
+  transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1),
+              opacity 0.1s,
+              box-shadow 0.2s;
   -webkit-user-select: none;
   user-select: none;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.2px;
+  position: relative;
+  overflow: hidden;
 }
 
-.btn:active { transform: scale(0.97); opacity: 0.9; }
-.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+/* Ripple effect al tocar */
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0);
+  transition: background 0.2s;
+  border-radius: inherit;
+}
+.btn:active::after { background: rgba(255,255,255,0.15); }
 
+.btn:active   { transform: scale(0.96); }
+.btn:disabled { opacity: 0.38; cursor: not-allowed; transform: none; }
+
+/* Botón Bluetooth */
 .btn-bluetooth {
   background: var(--azul-bt);
   color: var(--blanco);
+  box-shadow: 0 4px 14px var(--azul-glow);
+  font-size: 18px;
 }
+.btn-bluetooth:hover:not(:disabled) { background: #1d4ed8; }
 
+/* Botón GUARDAR — [5] más prominente */
 .btn-primario {
   background: var(--verde);
   color: var(--blanco);
   font-size: var(--font-enorme);
+  font-weight: 900;
   min-height: 80px;
   letter-spacing: 0.5px;
+  box-shadow: var(--sombra-verde);
+  border-radius: var(--radio-grande);
+}
+.btn-primario:not(:disabled):hover { background: var(--verde-medio); }
+
+/* Pulso suave cuando el formulario tiene caravana y peso — agregado por JS con clase 'listo' */
+.btn-primario.listo {
+  animation: pulso-guardar 2s ease-in-out infinite;
+}
+@keyframes pulso-guardar {
+  0%, 100% { box-shadow: var(--sombra-verde); }
+  50%       { box-shadow: 0 6px 28px rgba(22, 163, 74, 0.5); }
 }
 
 .btn-secundario {
-  background: var(--gris-claro);
-  color: var(--texto);
+  background: var(--gris-100);
+  color: var(--gris-600);
+  font-size: 17px;
+  border: 1px solid var(--gris-200);
 }
 
 .btn-peligro {
   background: var(--rojo);
   color: var(--blanco);
+  box-shadow: 0 4px 14px rgba(220,38,38,0.25);
 }
 
 .btn-sync {
@@ -189,31 +294,37 @@ body {
   color: var(--blanco);
   min-height: 52px;
   font-size: 16px;
-  position: relative;
+  font-weight: 700;
+  box-shadow: 0 3px 12px rgba(146,64,14,0.25);
+  border-radius: var(--radio);
 }
 
 .btn-simular {
   background: transparent;
-  border: 2px dashed var(--gris);
-  color: var(--gris);
+  border: 2px dashed var(--gris-200);
+  color: var(--gris-400);
   min-height: 48px;
-  font-size: 15px;
-  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 10px;
+  border-radius: var(--radio);
 }
 
-/* ─── Inputs (grandes para dedos/guantes) ───────────────────────── */
-.grupo-campo {
-  margin-bottom: 12px;
-}
+/* ─── Separador inline ──────────────────────────────────────────── */
+.btn-gap { height: 10px; }
+
+/* ─── Campos ─────────────────────────────────────────────────────── */
+.grupo-campo { margin-bottom: 14px; }
+.grupo-campo:last-child { margin-bottom: 0; }
 
 .campo-label {
   display: block;
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.4px;
-  color: var(--gris);
-  margin-bottom: 6px;
+  letter-spacing: 0.6px;
+  color: var(--gris-600);
+  margin-bottom: 7px;
 }
 
 .campo-input,
@@ -222,13 +333,14 @@ body {
   width: 100%;
   min-height: var(--alto-input);
   padding: 12px 16px;
-  border: 2.5px solid #d1d5db;
+  border: 2px solid var(--gris-200);   /* [4] 2px en vez de 2.5px, color más suave */
   border-radius: var(--radio);
+  font-family: inherit;
   font-size: var(--font-grande);
   font-weight: 600;
   color: var(--texto);
   background: var(--blanco);
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
   -webkit-appearance: none;
   appearance: none;
 }
@@ -237,94 +349,140 @@ body {
 .campo-select:focus {
   outline: none;
   border-color: var(--verde);
-  box-shadow: 0 0 0 3px rgba(26, 122, 58, 0.2);
+  box-shadow: 0 0 0 4px var(--verde-glow);
+  background: #fafffe;
 }
 
+.campo-input::placeholder { color: var(--gris-200); font-weight: 500; }
+
+/* [10] Select: flecha personalizada visible en Android */
+.campo-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%239ca3af' d='M4.5 6L8 9.5 11.5 6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 20px;
+  padding-right: 42px;
+}
+
+/* Flash BLE */
 .campo-input.flash-lectura {
-  background: #dcfce7;
+  background: var(--verde-claro);
   border-color: var(--verde);
-  animation: flash 0.6s ease;
+  animation: flash-ble 0.6s ease;
 }
 
-@keyframes flash {
-  0% { background: #fff; }
-  30% { background: #dcfce7; }
-  100% { background: #fff; }
+@keyframes flash-ble {
+  0%   { background: var(--blanco); transform: scale(1); }
+  20%  { background: var(--verde-claro); transform: scale(1.01); }
+  100% { background: var(--blanco); transform: scale(1); }
 }
 
-/* Input de caravana — tamaño especial */
+/* Campo caravana */
 #input-caravana {
   font-size: 26px;
-  font-weight: 800;
-  letter-spacing: 2px;
+  font-weight: 900;
+  letter-spacing: 3px;
   text-transform: uppercase;
   color: var(--verde-oscuro);
   min-height: 70px;
+  text-align: center;
 }
 
-/* Input de peso — número grande */
+/* Campo peso */
 #input-peso {
-  font-size: 32px;
-  font-weight: 800;
+  font-size: 36px;       /* [1] más grande = más legible con sol */
+  font-weight: 900;
   text-align: center;
   color: var(--tierra);
+  letter-spacing: -1px;
 }
 
 .campo-unidad {
   text-align: center;
-  font-size: 13px;
-  color: var(--gris);
-  margin-top: -4px;
-  margin-bottom: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--gris-400);
+  margin-top: -2px;
+  margin-bottom: 6px;
 }
 
-/* ─── Grilla de 2 columnas ──────────────────────────────────────── */
+/* ─── Grilla 2 columnas ─────────────────────────────────────────── */
 .grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 12px;
 }
 
 /* ─── Historial ─────────────────────────────────────────────────── */
 .historial-titulo {
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 800;
   text-transform: uppercase;
-  color: var(--gris);
-  margin-bottom: 8px;
+  letter-spacing: 0.6px;
+  color: var(--gris-400);
+  margin-bottom: 10px;
 }
 
 .historial-item {
-  display: flex;
+  display: grid;
+  grid-template-columns: 68px 1fr auto auto; /* [8] grid en vez de flex */
   align-items: center;
   gap: 8px;
-  padding: 8px 10px;
-  background: var(--gris-claro);
-  border-radius: 8px;
+  padding: 10px 12px;
+  background: var(--gris-100);
+  border-radius: 10px;
   margin-bottom: 6px;
-  font-size: 14px;
+  border: 1px solid var(--gris-200);
+  transition: background 0.15s;
+}
+.historial-item:last-child { margin-bottom: 0; }
+
+.historial-fecha {
+  color: var(--gris-400);
+  font-size: 11px;
+  font-weight: 600;
 }
 
-.historial-fecha { color: var(--gris); font-size: 12px; min-width: 70px; }
-.historial-peso { font-weight: 700; color: var(--tierra); }
-.historial-estado { font-size: 12px; flex: 1; text-transform: capitalize; }
-.historial-sync { font-size: 16px; margin-left: auto; }
+.historial-peso {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--tierra);
+}
 
-.estado-sano { color: var(--verde); }
-.estado-vacunado { color: var(--azul); }
-.estado-en_tratamiento { color: var(--amarillo); }
-.estado-cuarentena { color: var(--rojo); }
-.estado-revisar { color: var(--tierra); }
+/* [8] Estados como chips de color */
+.historial-estado {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.estado-sano          { background: #dcfce7; color: #166534; }
+.estado-vacunado      { background: #dbeafe; color: #1e40af; }
+.estado-en_tratamiento{ background: #fef3c7; color: #92400e; }
+.estado-cuarentena    { background: #fee2e2; color: #991b1b; }
+.estado-revisar       { background: #fef9c3; color: #713f12; }
+
+.historial-sync {
+  font-size: 15px;
+  width: 20px;
+  text-align: center;
+}
 
 .sin-historial {
-  color: var(--gris);
+  color: var(--gris-400);
   font-size: 13px;
   font-style: italic;
   text-align: center;
-  padding: 12px 0;
+  padding: 16px 0;
 }
 
-/* ─── Contador de pendientes ────────────────────────────────────── */
+/* ─── Barra de sync ─────────────────────────────────────────────── */
 .barra-sync {
   display: flex;
   align-items: center;
@@ -332,62 +490,123 @@ body {
   gap: 10px;
 }
 
+/* [9] Contador animado cuando hay pendientes */
 #contador-pendientes {
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 800;
   color: var(--tierra);
   background: var(--tierra-claro);
-  padding: 4px 10px;
+  padding: 5px 12px;
   border-radius: 20px;
+  white-space: nowrap;
+  border: 1px solid rgba(146,64,14,0.15);
+  animation: pulso-contador 2s ease-in-out infinite;
+}
+#contador-pendientes:empty {
+  display: none;
+  animation: none;
+}
+@keyframes pulso-contador {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.06); }
 }
 
-/* ─── Toast notifications ───────────────────────────────────────── */
+/* ─── Texto de ayuda ────────────────────────────────────────────── */
+.texto-ayuda {
+  font-size: 12px;
+  color: var(--gris-400);
+  text-align: center;
+  margin-top: 8px;
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+/* ─── Toasts ─────────────────────────────────────────────────────── */
 .toast {
   position: fixed;
-  bottom: 20px;
+  bottom: 24px;
   left: 50%;
-  transform: translateX(-50%) translateY(100px);
-  background: var(--texto);
+  transform: translateX(-50%) translateY(120px);
+  background: var(--gris-900);
   color: var(--blanco);
-  padding: 14px 20px;
-  border-radius: var(--radio);
-  font-size: 16px;
-  font-weight: 600;
+  padding: 14px 22px;
+  border-radius: 14px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
   z-index: 1000;
   opacity: 0;
-  transition: transform 0.3s, opacity 0.3s;
-  max-width: 90vw;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s;
+  max-width: 92vw;
   text-align: center;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35), 0 4px 8px rgba(0,0,0,0.2);
+  pointer-events: none;
 }
-.toast.toast-visible { transform: translateX(-50%) translateY(0); opacity: 1; }
-.toast-exito { background: var(--verde); }
-.toast-advertencia { background: var(--amarillo); color: var(--texto); }
-.toast-error { background: var(--rojo); }
-.toast-info { background: var(--azul); }
+.toast.toast-visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+.toast-exito      { background: var(--verde); box-shadow: 0 8px 24px rgba(22,163,74,0.4); }
+.toast-advertencia{ background: #d97706; color: #fff; }
+.toast-error      { background: var(--rojo); box-shadow: 0 8px 24px rgba(220,38,38,0.4); }
+.toast-info       { background: var(--azul); }
 
 /* ─── Divider ───────────────────────────────────────────────────── */
 .divider {
   height: 1px;
-  background: var(--gris-claro);
+  background: var(--gris-200);
   margin: 8px 0;
 }
 
 /* ─── Responsive: landscape en campo ───────────────────────────── */
 @media (max-height: 500px) and (orientation: landscape) {
-  .header { padding: 8px 16px; }
-  .btn { min-height: 52px; font-size: 16px; }
-  .campo-input, .campo-select { min-height: 48px; font-size: 16px; }
-  #input-caravana { font-size: 20px; min-height: 52px; }
-  #input-peso { font-size: 24px; }
+  .header        { padding: 8px 16px; }
+  .btn           { min-height: 52px; font-size: 16px; }
+  .campo-input,
+  .campo-select  { min-height: 48px; font-size: 16px; }
+  #input-caravana{ font-size: 20px; min-height: 52px; }
+  #input-peso    { font-size: 26px; }
+  .main          { gap: 8px; padding: 8px; }
 }
 
-/* ─── Dark mode básico (para uso nocturno en campo) ─────────────── */
+/* ─── Dark mode — [7] corregido completamente ────────────────────── */
 @media (prefers-color-scheme: dark) {
-  body { background: #1a1f1a; }
-  .card { background: #2a2f2a; }
-  .campo-input, .campo-select { background: #1a1f1a; border-color: #444; color: #f0f0f0; }
-  .historial-item { background: #333; }
-  .campo-label, .card-titulo, .historial-titulo { color: #aaa; }
-  var(--texto) { color: #f0f0f0; }
+  :root {
+    --fondo:       #111a13;
+    --texto:       #f0f4f0;
+    --gris-100:    #1e2820;
+    --gris-200:    #2a3a2d;
+    --gris-400:    #8aaa8e;
+    --gris-600:    #b0c4b2;
+  }
+
+  body          { background: var(--fondo); color: var(--texto); }
+
+  .card         { background: #192019; border-color: rgba(255,255,255,0.06); }
+
+  .campo-input,
+  .campo-select {
+    background:   #111a13;
+    border-color: var(--gris-200);
+    color:        var(--texto);
+  }
+  .campo-input:focus,
+  .campo-select:focus {
+    background:   #0f1c10;
+    border-color: var(--verde);
+  }
+
+  .historial-item  { background: #1e2820; border-color: #2a3a2d; }
+
+  .btn-secundario  { background: #1e2820; color: var(--gris-600); border-color: #2a3a2d; }
+  .btn-simular     { border-color: #2a3a2d; color: var(--gris-400); }
+
+  .toast           { box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+
+  /* Ajustar chips de estado en dark */
+  .estado-sano          { background: rgba(22,163,74,0.2);  color: #86efac; }
+  .estado-vacunado      { background: rgba(37,99,235,0.2);  color: #93c5fd; }
+  .estado-en_tratamiento{ background: rgba(217,119,6,0.2);  color: #fcd34d; }
+  .estado-cuarentena    { background: rgba(220,38,38,0.2);  color: #fca5a5; }
+  .estado-revisar       { background: rgba(161,98,7,0.2);   color: #fde68a; }
 }

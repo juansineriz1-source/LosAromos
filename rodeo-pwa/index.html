@@ -52,112 +52,132 @@
     <!-- ──────────── TAB: INICIO ──────────── -->
     <section class="tab-panel" id="tab-inicio">
 
-      <!-- Saludo del día -->
-      <div class="inicio-hero">
-        <div class="inicio-fecha" id="inicio-fecha">—</div>
-        <div class="inicio-saludo" id="inicio-saludo">Buenos días</div>
-        <div class="inicio-operador-name" id="inicio-op-nombre">Operador</div>
-      </div>
+      <div class="inicio-desktop-cols">
 
-      <!-- 1. Stats del rodeo (desde Sheets) -->
-      <div class="card card-stitch" id="card-rodeo-stats" style="padding: 14px 16px;">
-        <div class="card-titulo">🐄 Rodeo</div>
-        <div id="rodeo-stats-inicio" style="margin-top: 8px;">
-          <p class="sin-historial" style="font-size:13px;">Cargando...</p>
-        </div>
-      </div>
+        <!-- COLUMNA IZQUIERDA: hero + rodeo stats + alertas + actividad hoy -->
+        <div class="inicio-col-main">
 
-      <!-- 2. Avisos y Alertas (vacunas vencidas + tareas próximas) -->
-      <div class="card" style="padding:14px 16px;">
-        <div class="card-titulo" style="margin-bottom:10px;">🔔 Avisos y Alertas</div>
-        <div id="inicio-alertas-container">
-          <div class="inicio-alerta-skeleton">Cargando alertas...</div>
-        </div>
-      </div>
-
-      <!-- 3. Novedades del día -->
-      <div class="card">
-        <div class="card-titulo">📝 Novedades del día</div>
-        <textarea
-          id="comentario-dia"
-          class="campo-textarea textarea-stitch"
-          placeholder="Ej: Se peló el potrero norte. Animal 3421 con cojera. Llegó el veterinario a las 10hs..."
-          rows="4"
-        ></textarea>
-        <button class="btn btn-secundario btn-guardar-stitch" id="btn-guardar-comentario" style="margin-top: 8px;">
-          💾 Guardar novedad
-        </button>
-      </div>
-
-      <!-- 4. Actividad de HOY -->
-      <div class="card">
-        <div class="card-titulo">⚡ Actividad de hoy</div>
-        <div id="feed-hoy">
-          <p class="sin-historial">Sin actividad registrada hoy</p>
-        </div>
-      </div>
-
-      <!-- 5. Historial con calendario -->
-      <div class="card">
-        <div class="card-titulo">📅 Historial de novedades</div>
-
-        <!-- Navegación del calendario -->
-        <div class="cal-nav">
-          <button class="cal-btn-nav" id="cal-prev">‹</button>
-          <span class="cal-mes-label" id="cal-mes-label">—</span>
-          <button class="cal-btn-nav" id="cal-next">›</button>
-        </div>
-
-        <!-- Grilla del calendario -->
-        <div class="cal-dias-semana">
-          <span>Dom</span><span>Lun</span><span>Mar</span>
-          <span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span>
-        </div>
-        <div class="cal-grid" id="cal-grid"></div>
-
-        <!-- Panel de detalle del día seleccionado -->
-        <div class="cal-detalle oculto" id="cal-detalle">
-          <div class="cal-detalle-header">
-            <span class="cal-detalle-fecha" id="cal-detalle-fecha">—</span>
-            <button class="cal-detalle-cerrar" id="cal-detalle-cerrar">✕</button>
+          <!-- Saludo del día -->
+          <div class="inicio-hero">
+            <div class="inicio-fecha" id="inicio-fecha">—</div>
+            <div class="inicio-saludo" id="inicio-saludo">Buenos días</div>
+            <div class="inicio-operador-name" id="inicio-op-nombre">Operador</div>
           </div>
-          <div id="cal-detalle-contenido">
-            <p class="sin-historial">Sin actividad ese día</p>
-          </div>
-        </div>
-      </div>
 
-      <!-- 6. Sync + Actualización (al fondo) -->
-      <div class="card">
-        <div class="card-titulo" style="margin-bottom:8px;">🔄 Sincronización</div>
-        <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
-          <div style="flex:1;">
-            <div style="font-size:12px;color:#9ca3af;margin-bottom:2px;">Registros locales</div>
-            <div style="font-size:13px;font-weight:700;color:#374151;">
-              <span id="stat-registros">0</span> hoy ·
-              <span id="stat-pendientes" style="color:#f97316;">0</span> por sincronizar
+          <!-- 1. Stats del rodeo (desde Sheets) -->
+          <div class="card card-stitch" id="card-rodeo-stats" style="padding: 14px 16px;">
+            <div class="card-titulo">🐄 Rodeo</div>
+            <div id="rodeo-stats-inicio" style="margin-top: 8px;">
+              <p class="sin-historial" style="font-size:13px;">Cargando...</p>
             </div>
           </div>
-          <div style="font-size:12px;color:#9ca3af;text-align:right;">
-            <div>Animales distintos</div>
-            <div style="font-size:16px;font-weight:800;color:#1a5c30;"><span id="stat-animales">0</span></div>
+
+          <!-- 2. Avisos y Alertas (vacunas vencidas + tareas próximas) -->
+          <div class="card" style="padding:14px 16px;">
+            <div class="card-titulo" style="margin-bottom:10px;">🔔 Avisos y Alertas</div>
+            <div id="inicio-alertas-container">
+              <div class="inicio-alerta-skeleton">Cargando alertas...</div>
+            </div>
           </div>
-        </div>
-        <div class="barra-sync">
-          <button class="btn btn-sync" id="btn-sync" style="flex: 1;">
-            ☁ Sincronizar ahora
-          </button>
-          <span id="contador-pendientes"></span>
-        </div>
-        <button class="btn-update-sw oculto" id="btn-update-sw">
-          🔄 Nueva versión disponible — Tocar para actualizar
-        </button>
-      </div>
+
+          <!-- 4. Actividad de HOY -->
+          <div class="card">
+            <div class="card-titulo">⚡ Actividad de hoy</div>
+            <div id="feed-hoy">
+              <p class="sin-historial">Sin actividad registrada hoy</p>
+            </div>
+          </div>
+
+        </div><!-- /inicio-col-main -->
+
+        <!-- COLUMNA DERECHA: novedades + calendario + sync -->
+        <div class="inicio-col-side">
+
+          <!-- 3. Novedades del día -->
+          <div class="card">
+            <div class="card-titulo">📝 Novedades del día</div>
+            <textarea
+              id="comentario-dia"
+              class="campo-textarea textarea-stitch"
+              placeholder="Ej: Se peló el potrero norte. Animal 3421 con cojera. Llegó el veterinario a las 10hs..."
+              rows="4"
+            ></textarea>
+            <button class="btn btn-secundario btn-guardar-stitch" id="btn-guardar-comentario" style="margin-top: 8px;">
+              💾 Guardar novedad
+            </button>
+          </div>
+
+          <!-- 5. Historial con calendario -->
+          <div class="card">
+            <div class="card-titulo">📅 Historial de novedades</div>
+
+            <!-- Navegación del calendario -->
+            <div class="cal-nav">
+              <button class="cal-btn-nav" id="cal-prev">‹</button>
+              <span class="cal-mes-label" id="cal-mes-label">—</span>
+              <button class="cal-btn-nav" id="cal-next">›</button>
+            </div>
+
+            <!-- Grilla del calendario -->
+            <div class="cal-dias-semana">
+              <span>Dom</span><span>Lun</span><span>Mar</span>
+              <span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span>
+            </div>
+            <div class="cal-grid" id="cal-grid"></div>
+
+            <!-- Panel de detalle del día seleccionado -->
+            <div class="cal-detalle oculto" id="cal-detalle">
+              <div class="cal-detalle-header">
+                <span class="cal-detalle-fecha" id="cal-detalle-fecha">—</span>
+                <button class="cal-detalle-cerrar" id="cal-detalle-cerrar">✕</button>
+              </div>
+              <div id="cal-detalle-contenido">
+                <p class="sin-historial">Sin actividad ese día</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 6. Sync + Actualización (al fondo) -->
+          <div class="card">
+            <div class="card-titulo" style="margin-bottom:8px;">🔄 Sincronización</div>
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
+              <div style="flex:1;">
+                <div style="font-size:12px;color:#9ca3af;margin-bottom:2px;">Registros locales</div>
+                <div style="font-size:13px;font-weight:700;color:#374151;">
+                  <span id="stat-registros">0</span> hoy ·
+                  <span id="stat-pendientes" style="color:#f97316;">0</span> por sincronizar
+                </div>
+              </div>
+              <div style="font-size:12px;color:#9ca3af;text-align:right;">
+                <div>Animales distintos</div>
+                <div style="font-size:16px;font-weight:800;color:#1a5c30;"><span id="stat-animales">0</span></div>
+              </div>
+            </div>
+            <div class="barra-sync">
+              <button class="btn btn-sync" id="btn-sync" style="flex: 1;">
+                ☁ Sincronizar ahora
+              </button>
+              <span id="contador-pendientes"></span>
+            </div>
+            <button class="btn-update-sw oculto" id="btn-update-sw">
+              🔄 Nueva versión disponible — Tocar para actualizar
+            </button>
+          </div>
+
+        </div><!-- /inicio-col-side -->
+
+      </div><!-- /inicio-desktop-cols -->
 
     </section><!-- /tab-inicio -->
 
     <!-- ──────────── TAB: RECORRIDA ──────────── -->
+
     <section class="tab-panel oculto" id="tab-recorrida">
+
+      <div class="recorrida-desktop-cols">
+
+        <!-- COLUMNA IZQUIERDA: Grabadora (sticky en desktop) -->
+        <div class="recorrida-col-grabadora">
 
       <!-- Grabar -->
       <div class="card card-stitch rec-card-principal recorrida-card">
@@ -208,6 +228,11 @@
           </div>
         </div>
       </div>
+
+        </div><!-- /recorrida-col-grabadora -->
+
+        <!-- COLUMNA DERECHA: Lista de recorridas + fotos + videos -->
+        <div class="recorrida-col-lista">
 
       <!-- Historial de recorridas -->
       <div class="card card-stitch">
@@ -319,137 +344,149 @@
         </div>
       </div>
 
+        </div><!-- /recorrida-col-lista -->
+
+      </div><!-- /recorrida-desktop-cols -->
+
     </section>
 
     <!-- ──────────── TAB: BASTÓN ──────────── -->
     <section class="tab-panel oculto" id="tab-baston">
 
-      <!-- Card BLE -->
-      <div class="card card-stitch">
-        <div class="card-section-header">
-          <span class="card-section-icono">🟢</span>
-          <h2 class="card-section-titulo">Bastón Lector BLE</h2>
-        </div>
-        <button class="btn btn-bluetooth btn-stitch-primario" id="btn-bluetooth">
-          📡 Conectar Bastón
-        </button>
-        <button class="btn btn-simular btn-stitch-secundario" id="btn-simular">
-          ⌨ Simular lectura (dev)
-        </button>
-      </div>
+      <div class="baston-desktop-cols">
 
-      <!-- Card Caravana -->
-      <div class="card card-stitch">
-        <div class="card-section-header">
-          <span class="card-section-icono">🏷</span>
-          <h2 class="card-section-titulo">Caravana del Animal</h2>
-        </div>
-        <div class="baston-caravana-display">
-          <label class="campo-label">Número de Caravana</label>
-          <input
-            type="text"
-            id="input-caravana"
-            class="campo-input"
-            placeholder="ESCANEAR O INGRESAR"
-            autocomplete="off"
-            autocorrect="off"
-            spellcheck="false"
-            inputmode="text"
-          >
-        </div>
-        <div class="historial-titulo">Últimos registros:</div>
-        <div id="historial">
-          <p class="sin-historial">Escaneá una caravana para ver su historial</p>
-        </div>
-      </div>
-
-      <!-- Card Datos de Manga — REDISEÑADO -->
-      <div class="card card-stitch manga-card">
-        <div class="card-section-header">
-          <span class="card-section-icono">⚖️</span>
-          <h2 class="card-section-titulo">Datos de Manga</h2>
-        </div>
-
-        <!-- PESO — grande y centrado -->
-        <div class="manga-peso-wrap">
-          <label class="campo-label" for="input-peso">Peso</label>
-          <input
-            type="number"
-            id="input-peso"
-            class="campo-input peso-stitch"
-            placeholder="0"
-            min="1" max="1500" step="0.5"
-            inputmode="decimal"
-          >
-          <div class="campo-unidad">kilogramos</div>
-        </div>
-
-        <!-- CATEGORÍA — chips visuales -->
-        <div class="manga-seccion">
-          <div class="manga-seccion-label">Categoría</div>
-          <div class="manga-chips-wrap" id="chips-categoria">
-            <!-- Generados por JS -->
+        <!-- COLUMNA IZQUIERDA: BLE (sticky en desktop) -->
+        <div class="baston-col-ble">
+          <div class="card card-stitch">
+            <div class="card-section-header">
+              <span class="card-section-icono">🟢</span>
+              <h2 class="card-section-titulo">Bastón Lector BLE</h2>
+            </div>
+            <div id="estado-bt" class="estado-bt desconectado">Bastón no conectado</div>
+            <button class="btn btn-bluetooth btn-stitch-primario" id="btn-bluetooth">
+              📡 Conectar Bastón
+            </button>
+            <button class="btn btn-simular btn-stitch-secundario" id="btn-simular">
+              ⌨ Simular lectura (dev)
+            </button>
           </div>
-          <input type="hidden" id="select-categoria" value="V">
-        </div>
 
-        <!-- COLOR — chips visuales -->
-        <div class="manga-seccion">
-          <div class="manga-seccion-label">Color</div>
-          <div class="manga-chips-wrap" id="chips-color">
-            <!-- Generados por JS -->
+          <!-- Card Caravana: visible en desktop junto al BLE -->
+          <div class="card card-stitch">
+            <div class="card-section-header">
+              <span class="card-section-icono">🏷</span>
+              <h2 class="card-section-titulo">Caravana del Animal</h2>
+            </div>
+            <div class="baston-caravana-display">
+              <label class="campo-label">Número de Caravana</label>
+              <input
+                type="text"
+                id="input-caravana"
+                class="campo-input"
+                placeholder="ESCANEAR O INGRESAR"
+                autocomplete="off"
+                autocorrect="off"
+                spellcheck="false"
+                inputmode="text"
+              >
+            </div>
+            <div class="historial-titulo">Últimos registros:</div>
+            <div id="historial">
+              <p class="sin-historial">Escaneá una caravana para ver su historial</p>
+            </div>
           </div>
-          <input type="hidden" id="input-color" value="">
-        </div>
+        </div><!-- /baston-col-ble -->
 
-        <!-- VACUNA — chips rápidos + texto libre -->
-        <div class="manga-seccion">
-          <div class="manga-seccion-label">Vacuna / Medicamento</div>
-          <div class="manga-chips-wrap manga-vac-chips" id="chips-vacuna">
-            <!-- Generados por JS -->
+        <!-- COLUMNA DERECHA: Formulario manga + acciones -->
+        <div class="baston-col-form">
+          <!-- Card Datos de Manga — REDISEÑADO -->
+          <div class="card card-stitch manga-card">
+            <div class="card-section-header">
+              <span class="card-section-icono">⚖️</span>
+              <h2 class="card-section-titulo">Datos de Manga</h2>
+            </div>
+
+            <!-- PESO — grande y centrado -->
+            <div class="manga-peso-wrap">
+              <label class="campo-label" for="input-peso">Peso</label>
+              <input
+                type="number"
+                id="input-peso"
+                class="campo-input peso-stitch"
+                placeholder="0"
+                min="1" max="1500" step="0.5"
+                inputmode="decimal"
+              >
+              <div class="campo-unidad">kilogramos</div>
+            </div>
+
+            <!-- CATEGORÍA — chips visuales -->
+            <div class="manga-seccion">
+              <div class="manga-seccion-label">Categoría</div>
+              <div class="manga-chips-wrap" id="chips-categoria">
+                <!-- Generados por JS -->
+              </div>
+              <input type="hidden" id="select-categoria" value="V">
+            </div>
+
+            <!-- COLOR — chips visuales -->
+            <div class="manga-seccion">
+              <div class="manga-seccion-label">Color</div>
+              <div class="manga-chips-wrap" id="chips-color">
+                <!-- Generados por JS -->
+              </div>
+              <input type="hidden" id="input-color" value="">
+            </div>
+
+            <!-- VACUNA — chips rápidos + texto libre -->
+            <div class="manga-seccion">
+              <div class="manga-seccion-label">Vacuna / Medicamento</div>
+              <div class="manga-chips-wrap manga-vac-chips" id="chips-vacuna">
+                <!-- Generados por JS -->
+              </div>
+              <input
+                type="text"
+                id="input-vacuna"
+                class="campo-input"
+                placeholder="Escribir otra vacuna o medicamento..."
+                autocomplete="off"
+                style="margin-top:8px;"
+              >
+            </div>
+
+            <!-- ESTADO SANITARIO -->
+            <div class="manga-seccion">
+              <div class="manga-seccion-label">Estado Sanitario</div>
+              <select id="select-estado" class="campo-select"></select>
+            </div>
+
+            <!-- RAZA (oculta en la nueva UI, pero sigue leyéndose por JS para compatibilidad) -->
+            <select id="select-raza" class="campo-select" style="display:none"></select>
+
+            <!-- OBSERVACIONES -->
+            <div class="manga-seccion">
+              <div class="manga-seccion-label">Observaciones</div>
+              <input type="text" id="input-obs" class="campo-input" placeholder="Ej: cojera leve, oreja rota...">
+            </div>
           </div>
-          <input
-            type="text"
-            id="input-vacuna"
-            class="campo-input"
-            placeholder="Escribir otra vacuna o medicamento..."
-            autocomplete="off"
-            style="margin-top:8px;"
-          >
-        </div>
 
-        <!-- ESTADO SANITARIO -->
-        <div class="manga-seccion">
-          <div class="manga-seccion-label">Estado Sanitario</div>
-          <select id="select-estado" class="campo-select"></select>
-        </div>
+          <!-- Acciones -->
+          <div class="card card-stitch">
+            <button class="btn btn-guardar-grande" id="btn-guardar">
+              💾 GUARDAR
+            </button>
+            <button class="btn btn-stitch-secundario" id="btn-limpiar">
+              🔄 Limpiar / Siguiente animal
+            </button>
+          </div>
+        </div><!-- /baston-col-form -->
 
-        <!-- RAZA (oculta en la nueva UI, pero sigue leyéndose por JS para compatibilidad) -->
-        <select id="select-raza" class="campo-select" style="display:none"></select>
-
-        <!-- OBSERVACIONES -->
-        <div class="manga-seccion">
-          <div class="manga-seccion-label">Observaciones</div>
-          <input type="text" id="input-obs" class="campo-input" placeholder="Ej: cojera leve, oreja rota...">
-        </div>
-      </div>
-
-
-      <!-- Acciones -->
-      <!-- Acciones -->
-      <div class="card card-stitch">
-        <button class="btn btn-guardar-grande" id="btn-guardar">
-          💾 GUARDAR
-        </button>
-        <button class="btn btn-stitch-secundario" id="btn-limpiar">
-          🔄 Limpiar / Siguiente animal
-        </button>
-      </div>
+      </div><!-- /baston-desktop-cols -->
 
     </section>
 
-
     <!-- ──────────── TAB: RODEO ──────────── -->
+
     <section class="tab-panel oculto" id="tab-rodeo">
 
 
