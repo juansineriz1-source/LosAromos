@@ -70,6 +70,7 @@
 html {
   font-size: 16px;
   -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden; /* evita scroll horizontal en mobile */
 }
 
 body {
@@ -83,6 +84,7 @@ body {
   position: relative;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden; /* refuerzo: sin scroll horizontal */
 }
 
 /* â”€â”€â”€ HEADER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
@@ -129,6 +131,7 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  overflow: hidden; /* badge largo no desborda el header */
 }
 
 /* â”€â”€â”€ BADGES DE ESTADO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
@@ -167,7 +170,9 @@ body {
   font-weight: 600;
   white-space: nowrap;
   flex-shrink: 0;
-  max-width: none;
+  max-width: 140px;           /* en mobile: máx 140px, después trunca con ... */
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* â”€â”€â”€ MAIN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
@@ -177,6 +182,7 @@ body {
   flex-direction: column;
   gap: 10px;
   min-height: calc(100vh - 80px - var(--nav-height));
+  overflow-x: hidden;
 }
 
 /* â”€â”€â”€ BOTTOM NAVIGATION (iOS tab bar) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
@@ -4970,6 +4976,13 @@ html { scroll-behavior: smooth; }
   .header-info {
     order: 2;
     gap: 12px;
+    overflow: visible; /* en desktop hay espacio de sobra */
+  }
+
+  /* En desktop el nombre del operador se muestra completo */
+  .operador-badge {
+    max-width: none;
+    font-size: 13px;
   }
 
   .header-top {
