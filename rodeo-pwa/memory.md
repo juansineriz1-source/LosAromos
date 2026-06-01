@@ -197,3 +197,11 @@ const hora  = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: 
 | 2026-05-30 | Variables CSS faltantes en producci√≥n (`--texto-principal`, `--verde`, etc.) | Variables alias ya exist√≠an localmente; `--texto-principal` faltaba ‚Üí agregada en `:root` |
 | 2026-05-30 | Recorrida tab sin layout desktop | No ten√≠a wrapper `recorrida-desktop-cols` en HTML ‚Üí agregados wrappers + CSS grid `1fr 1fr` |
 | 2026-05-30 | CSS `baston-desktop-cols` anidado err√≥neamente dentro de `.rodeo-breakdown-item {}` | Se detect√≥ nesting CSS inv√°lido en l√≠nea ~3668. El bloque correcto ahora est√° en el media query `@media (min-width:1024px)` al final del archivo |
+
+### BUG CRÕTICO 2026-05-30: </section> faltante rompe todos los tabs desktop
+- **Problema:** Al restructurar 	ab-inicio con inicio-desktop-cols, se olvidÛ agregar el </section> que cierra 	ab-inicio. El navegador interpreta autom·ticamente que todos los tabs siguientes (bastÛn, rodeo, recorrida, agenda) son hijos de 	ab-inicio. Como 	ab-inicio es el ˙nico hijo del .main, los otros tabs tienen offsetWidth: 0, offsetHeight: 0 y aparecen en blanco.
+- **SÌntoma:** Todos los tabs excepto Inicio aparecen completamente en blanco en desktop. El debug mostraba mainChildren.length: 1 con solo 	ab-inicio.
+- **Fix:** Agregar </section><!-- /tab-inicio --> INMEDIATAMENTE ANTES del comentario del siguiente tab.
+- **Regla:** Siempre que se restructure HTML que envuelve sections, verificar el cierre de todas las sections. Usar Select-String -Pattern "<section|</section>" para auditar.
+- **Tiempo perdido:** ~2 horas de debugging de CSS (variables, max-width, margin, flex) buscando la causa en el CSS cuando el bug era puramente HTML.
+

@@ -489,25 +489,26 @@
 
     <section class="tab-panel oculto" id="tab-rodeo">
 
-
-      <!-- 3 módulos principales -->
-      <div style="padding:12px 16px 0;display:flex;gap:8px;">
-        <button class="vac-btn-acceso" id="btn-abrir-vacunacion" style="flex:1;font-size:13px;">
-          🩺 Sanidad
-        </button>
-        <button class="vac-btn-acceso" id="btn-abrir-inseminacion" style="flex:1;font-size:13px;background:#1d4ed8;">
-          🐄 Inseminación
-        </button>
-        <button class="vac-btn-acceso" id="btn-abrir-pesadas" style="flex:1;font-size:13px;background:#7c5c1e;">
-          ⚖️ Pesadas
-        </button>
-        <button class="vac-btn-info" id="btn-info-vacunas" title="Manual de vacunas" style="flex-shrink:0;">ℹ️</button>
-      </div>
-
-      <!-- ═══════ COLUMNA IZQUIERDA: paneles Sanidad / Inseminación / Pesadas ═══════ -->
-      <!-- En desktop ocupa el lado izquierdo; en mobile se apilan arriba de la lista -->
+      <!-- ═══════ COLUMNA DERECHA: botones + paneles Sanidad / Inseminación / Pesadas ═══════ -->
+      <!-- La lista de animales es position:fixed a la izquierda; todo este bloque va a la derecha -->
       <div class="rodeo-desktop-cols">
+
+        <!-- Fila de botones de módulo: siempre visible encima del panel derecho -->
+        <div class="rodeo-modulos-row">
+          <button class="vac-btn-acceso" id="btn-abrir-vacunacion" style="flex:1;font-size:13px;">
+            🩺 Sanidad
+          </button>
+          <button class="vac-btn-acceso" id="btn-abrir-inseminacion" style="flex:1;font-size:13px;background:#1d4ed8;">
+            🐄 Inseminación
+          </button>
+          <button class="vac-btn-acceso" id="btn-abrir-pesadas" style="flex:1;font-size:13px;background:#7c5c1e;">
+            ⚖️ Pesadas
+          </button>
+          <button class="vac-btn-info" id="btn-info-vacunas" title="Manual de vacunas" style="flex-shrink:0;">ℹ️</button>
+        </div>
+
         <div class="rodeo-desktop-panel-col" id="rodeo-desktop-panel-col">
+
 
           <!-- Placeholder visible solo en desktop cuando ningún panel está abierto -->
           <div class="rodeo-panel-placeholder" id="rodeo-panel-placeholder">

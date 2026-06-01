@@ -165,6 +165,9 @@ body {
   border-radius: 20px;
   color: var(--blanco);
   font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+  max-width: none;
 }
 
 /* â”€â”€â”€ MAIN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
@@ -3798,6 +3801,15 @@ html { scroll-behavior: smooth; }
   gap: 6px;
   transition: transform .1s;
 }
+
+/* Fila de botones de módulo rodeo (mobile: igual que antes) */
+.rodeo-modulos-row {
+  display: flex;
+  gap: 8px;
+  padding: 12px 12px 4px;
+  align-items: stretch;
+}
+
 .vac-btn-acceso:active { transform: scale(0.97); }
 
 .vac-btn-info {
@@ -4878,7 +4890,7 @@ html { scroll-behavior: smooth; }
 
   /* Logo / branding en el sidebar */
   .bottom-nav::before {
-    content: 'ðŸ„ RodeoApp';
+    content: 'RodeoApp';
     position: absolute;
     top: 0;
     left: 0;
@@ -4996,20 +5008,38 @@ html { scroll-behavior: smooth; }
    * Paneles (Sanidad/Ins/Pesadas): se abren a la DERECHA en el espacio libre
    */
 
-  /* Botones (Sanidad/Ins/Pesadas): desplazados a la derecha de la lista */
-  #tab-rodeo > div:first-child {
-    padding-left: 444px; /* 420px lista + 24px gap */
-  }
-
-  /* Contenedor rodeo-desktop-cols: deja espacio a la izquierda para la lista */
+  /* Contenedor rodeo-desktop-cols: columna derecha — lista fixed ocupa la izquierda */
   .rodeo-desktop-cols {
     display: block;
-    padding-left: 444px; /* 420px lista + 24px gap */
+    padding-left: 444px; /* 200px sidebar + 420px lista + 24px gap − 200px (el main ya empieza en 200) */
+    min-height: calc(100vh - 88px);
+  }
+
+  /* Fila de botones de módulo — siempre visible encima del panel */
+  .rodeo-modulos-row {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+    padding: 16px 20px 12px;
+  }
+
+  .rodeo-modulos-row .vac-btn-acceso {
+    flex: 1;
+    font-size: 13px;
+    padding: 10px 0;
+    border-radius: 10px;
+    font-weight: 700;
+  }
+
+  .rodeo-modulos-row .vac-btn-info {
+    flex-shrink: 0;
+    border-radius: 10px;
   }
 
   /* Columna de paneles: flujo normal, a la derecha de la lista */
   .rodeo-desktop-panel-col {
     display: block;
+    padding: 0 20px 20px;
   }
 
   /* Lista de animales: FIJA a la izquierda, despuÃ©s del sidebar */
